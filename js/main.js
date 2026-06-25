@@ -5,6 +5,12 @@ let searchHistoryData =
         )
     ) || [];
 
+tempIcon =
+    profile.icon || null;
+
+tempHeader =
+    profile.header || null;
+    
 let editingPost = null;
 
 let profileMode = "posts";
@@ -330,6 +336,12 @@ editId.value =
 editBio.value =
     profile.bio || "";
  console.log("プロフィール編集押された");
+
+ tempIcon =
+    profile.icon || null;
+
+tempHeader =
+    profile.header || null;
         editProfileModal.style.display =
             "block";
     }
@@ -351,6 +363,12 @@ saveProfileButton.addEventListener(
 
         profile.bio =
             editBio.value;
+
+        profile.icon =
+    tempIcon;
+
+profile.header =
+    tempHeader;
 
         profiles[currentAccount] =
             profile;
@@ -1950,6 +1968,8 @@ cropCancelButton.addEventListener(
     }
 );
 
+
+
 cropConfirmButton.addEventListener(
     "click",
     () => {
@@ -1962,51 +1982,35 @@ cropConfirmButton.addEventListener(
                 "image/png"
             );
 
-        const currentProfile =
-            profiles[currentAccount] || {};
-
         if (
             cropTarget === "icon"
         ) {
 
-            editIconPreview.src =
+            tempIcon =
                 croppedImage;
 
-            profiles[currentAccount] = {
-
-                ...currentProfile,
-
-                icon:
-                    croppedImage
-            };
+            editIconPreview.src =
+                croppedImage;
         }
 
         if (
             cropTarget === "header"
         ) {
 
-            editHeaderPreview.src =
+            tempHeader =
                 croppedImage;
 
-            profiles[currentAccount] = {
-
-                ...currentProfile,
-
-                header:
-                    croppedImage
-            };
+            editHeaderPreview.src =
+                croppedImage;
         }
 
-saveProfiles();
+        cropper.destroy();
 
-cropModal.style.display =
-    "none";
-
-cropper.destroy();
-cropper = null;
-cropImage.src = "";
+        cropModal.style.display =
+            "none";
     }
 );
+
 
 imageModal.addEventListener(
     "click",
