@@ -1264,3 +1264,35 @@ top: -0px;
     font-size:13px;
 
 }
+
+.comment-info{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.comment-name{
+
+    font-weight:bold;
+
+}
+
+.comment-id{
+
+    color:gray;
+
+    font-size:13px;
+
+}
+
+.comment-time{
+
+    color:gray;
+
+    font-size:13px;
+
+}

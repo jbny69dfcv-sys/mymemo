@@ -2299,34 +2299,53 @@ function renderComments() {
             "comment";
 
         commentDiv.innerHTML =
-            `
-            <div class="comment-header">
+`
+<div class="comment-header">
 
-                <img
-                    class="comment-icon"
-                    src="${
-                        profile.icon ||
-                        "https://via.placeholder.com/40"
-                    }"
-                >
+    <img
+        class="comment-icon"
+        src="${
+            profile.icon ||
+            "https://via.placeholder.com/40"
+        }"
+    >
 
-                <b>
-                    ${
-                        profile.name ||
-                        comment.account
-                    }
-                </b>
+    <div class="comment-info">
 
-            </div>
+        <span class="comment-name">
+            ${
+                profile.name ||
+                comment.account
+            }
+        </span>
 
-            <div class="comment-text">
+        <span class="comment-id">
+            @${
+                profile.id ||
+                "userid"
+            }
+        </span>
 
-                ${
-                    comment.text
-                }
+        <span class="comment-time">
+            ${
+                formatTime(
+                    comment.time
+                )
+            }
+        </span>
 
-            </div>
-            `;
+    </div>
+
+</div>
+
+<div class="comment-text">
+
+    ${
+        comment.text
+    }
+
+</div>
+`;
 
         commentList.appendChild(
             commentDiv
