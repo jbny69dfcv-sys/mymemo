@@ -2330,7 +2330,7 @@ function renderDetailComments() {
     }
 
     currentDetailPost.comments.forEach(
-        comment => {
+        (comment, index) => {
 
             const profile =
                 profiles[
@@ -2345,7 +2345,8 @@ function renderDetailComments() {
             div.className =
                 "detail-comment";
 
-div.innerHTML = `
+            div.innerHTML =
+`
 <img
     class="comment-icon"
     src="${
@@ -2359,21 +2360,63 @@ div.innerHTML = `
     <div class="comment-top">
 
         <span class="comment-name">
-            ${profile.name || comment.account}
+            ${
+                profile.name ||
+                comment.account
+            }
         </span>
 
         <span class="comment-id">
-            @${profile.id || "userid"}
+            @${
+                profile.id ||
+                "userid"
+            }
         </span>
 
         <span class="comment-time">
-            ${formatTime(comment.time)}
+            ${
+                formatTime(
+                    comment.time
+                )
+            }
         </span>
+
+        ${
+            comment.account === currentAccount
+            ?
+
+`
+<div class="comment-buttons">
+
+<button
+    class="edit-comment"
+    data-index="${index}"
+>
+✏️
+</button>
+
+<button
+    class="delete-comment"
+    data-index="${index}"
+>
+✕
+</button>
+
+</div>
+`
+
+            :
+
+            ""
+
+        }
 
     </div>
 
     <div class="comment-text">
-        ${comment.text}
+        ${
+            comment.text
+        }
     </div>
 
 </div>
