@@ -5,12 +5,10 @@ let searchHistoryData =
         )
     ) || [];
 
-tempIcon =
-    profile.icon || null;
+let tempIcon = null;
 
-tempHeader =
-    profile.header || null;
-    
+let tempHeader = null;
+
 let editingPost = null;
 
 let profileMode = "posts";
@@ -558,10 +556,10 @@ postImageUpload.addEventListener(
     "change",
     () => {
 
-  const files =
-    [...postImageUpload.files];
+const file =
+    postImageUpload.files[0];
 
-        if (!file) return;
+if (!file) return;
 
         const reader =
             new FileReader();
@@ -1726,57 +1724,56 @@ modalPostButton.addEventListener(
             let loaded =
                 0;
 
-           files.forEach(
+ files.forEach(
     (file, index) => {
 
-                    const reader =
-                        new FileReader();
+        const reader =
+            new FileReader();
 
-                    reader.onload =
-                        () => {
+        reader.onload =
+            () => {
 
-                            newPost.images[index] =
-    reader.result;
+                newPost.images[index] =
+                    reader.result;
 
-                            loaded++;
+                loaded++;
 
-                            if (
-                                loaded ===
-                                files.length
-                            ) {
+                if (
+                    loaded ===
+                    files.length
+                ) {
 
-                                posts.push(
-                                    newPost
-                                );
-
-                                savePostToDB(
-                                    newPost
-                                );
-
-                                modalPostInput.value =
-                                    "";
-
-                                postImageUpload.value =
-                                    "";
-
-                                document.querySelector(
-                                    ".preview-container"
-                                ).style.display =
-                                    "none";
-
-                                postModal.style.display =
-                                    "none";
-                            }
-
-                        };
-
-                    reader.readAsDataURL(
-                        file
+                    posts.push(
+                        newPost
                     );
 
-                }
-            );
+                    savePostToDB(
+                        newPost
+                    );
 
+                    modalPostInput.value =
+                        "";
+
+                    postImageUpload.value =
+                        "";
+
+                    document.querySelector(
+                        ".preview-container"
+                    ).style.display =
+                        "none";
+
+                    postModal.style.display =
+                        "none";
+                }
+
+            };
+
+        reader.readAsDataURL(
+            file
+        );
+
+    }
+);
         } else {
 
             const newPost = {
@@ -2493,7 +2490,31 @@ function searchPosts(
 
     }
 
- searchInput.addEventListener(
+
+    const result =
+        posts.filter(
+            post =>
+                post.text
+                    .toLowerCase()
+                    .includes(
+                        keyword.toLowerCase()
+                    )
+        );
+
+    result.forEach(
+        post => {
+
+            addPostToTimeline(
+                post,
+                searchResults
+            );
+
+        }
+    );
+
+}
+
+searchInput.addEventListener(
     "keydown",
     event => {
 
@@ -2545,29 +2566,6 @@ function searchPosts(
 
     }
 );
-
-    const result =
-        posts.filter(
-            post =>
-                post.text
-                    .toLowerCase()
-                    .includes(
-                        keyword.toLowerCase()
-                    )
-        );
-
-    result.forEach(
-        post => {
-
-            addPostToTimeline(
-                post,
-                searchResults
-            );
-
-        }
-    );
-
-}
 
 searchInput.addEventListener(
     "input",
