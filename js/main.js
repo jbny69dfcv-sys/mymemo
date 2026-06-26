@@ -2233,7 +2233,7 @@ function renderComments() {
         commentDiv.className =
             "comment";
 
-        commentDiv.innerHTML =
+commentDiv.innerHTML =
 `
 <div class="comment-header">
 
