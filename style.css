@@ -1194,3 +1194,57 @@ top: -0px;
     font-size: 13px;
 
 }
+
+.post-comments {
+
+    border-top: 1px solid #ddd;
+
+}
+
+.post-comment {
+
+    display: flex;
+
+    gap: 12px;
+
+    padding: 14px 20px;
+
+    border-top: 1px solid #eee;
+
+}
+
+.post-comment:first-child {
+
+    border-top: none;
+
+}
+
+.comment-body {
+
+    flex: 1;
+
+}
+
+.comment-name {
+
+    font-weight: bold;
+
+    margin-bottom: 4px;
+
+}
+
+.comment-text {
+
+    white-space: pre-wrap;
+
+    margin-bottom: 6px;
+
+}
+
+.comment-time {
+
+    color: gray;
+
+    font-size: 13px;
+
+}
