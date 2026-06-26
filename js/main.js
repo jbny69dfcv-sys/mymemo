@@ -2319,65 +2319,64 @@ function renderDetailComments() {
         return;
     }
 
-    for (
-        const comment of
-        currentDetailPost.comments
-    ) {
+    currentDetailPost.comments.forEach(
+        comment => {
 
-        const profile =
-            profiles[
-                comment.account
-            ] || {};
+            const profile =
+                profiles[
+                    comment.account
+                ] || {};
 
-        const div =
-            document.createElement(
-                "div"
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                "detail-comment";
+
+            div.innerHTML =
+                `
+                <img
+                    class="comment-icon"
+                    src="${
+                        profile.icon ||
+                        "https://via.placeholder.com/40"
+                    }"
+                >
+
+                <div class="comment-body">
+
+                    <div class="comment-name">
+                        ${
+                            profile.name ||
+                            comment.account
+                        }
+                    </div>
+
+                    <div class="comment-text">
+                        ${
+                            comment.text
+                        }
+                    </div>
+
+                    <div class="comment-time">
+                        ${
+                            formatTime(
+                                comment.time
+                            )
+                        }
+                    </div>
+
+                </div>
+                `;
+
+            detailComments.appendChild(
+                div
             );
 
-        div.className =
-            "detail-comment";
-
-        div.innerHTML =
-            `
-            <img
-                class="comment-icon"
-                src="${
-                    profile.icon ||
-                    "https://via.placeholder.com/40"
-                }"
-            >
-
-            <div>
-
-                <b>
-                    ${
-                        profile.name ||
-                        comment.account
-                    }
-                </b>
-
-                <div>
-                    ${
-                        comment.text
-                    }
-                </div>
-
-                <small>
-                    ${
-                        formatTime(
-                            comment.time
-                        )
-                    }
-                </small>
-
-            </div>
-            `;
-
-        detailComments.appendChild(
-            div
-        );
-
-    }
+        }
+    );
 
 }
 

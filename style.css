@@ -1143,3 +1143,54 @@ top: -0px;
 
 }
 
+.detail-comments-box {
+
+    border-top: 1px solid #ddd;
+
+    margin-top: 20px;
+
+    padding-top: 15px;
+
+}
+
+.detail-comment {
+
+    display: flex;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    border-bottom: 1px solid #eee;
+
+}
+
+.comment-body {
+
+    flex: 1;
+
+}
+
+.comment-name {
+
+    font-weight: bold;
+
+    margin-bottom: 5px;
+
+}
+
+.comment-text {
+
+    margin-bottom: 5px;
+
+    white-space: pre-wrap;
+
+}
+
+.comment-time {
+
+    color: gray;
+
+    font-size: 13px;
+
+}
