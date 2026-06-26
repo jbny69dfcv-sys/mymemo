@@ -2414,26 +2414,37 @@ function renderDetailComments() {
 
                 <div class="comment-body">
 
-                    <div class="comment-name">
-                        ${
-                            profile.name ||
-                            comment.account
-                        }
-                    </div>
+<div class="comment-header">
 
-                    <div class="comment-text">
-                        ${
-                            comment.text
-                        }
-                    </div>
+<span class="comment-name">
+${
+    profile.name ||
+    comment.account
+}
+</span>
 
-                    <div class="comment-time">
-                        ${
-                            formatTime(
-                                comment.time
-                            )
-                        }
-                    </div>
+<span class="comment-id">
+@${
+    profile.id ||
+    "userid"
+}
+</span>
+
+<span class="comment-time">
+${
+    formatTime(
+        comment.time
+    )
+}
+</span>
+
+</div>
+
+<div class="comment-text">
+${
+    comment.text
+}
+</div>
 
                 </div>
                 `;

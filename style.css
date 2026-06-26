@@ -1201,15 +1201,13 @@ top: -0px;
 
 }
 
-.post-comment {
+.post-comment{
 
-    display: flex;
+    display:flex;
 
-    gap: 12px;
+    gap:12px;
 
-    padding: 14px 20px;
-
-    border-top: 1px solid #eee;
+    padding:18px 24px;
 
 }
 
@@ -1225,26 +1223,48 @@ top: -0px;
 
 }
 
-.comment-name {
+.comment-header{
 
-    font-weight: bold;
+    display:flex;
 
-    margin-bottom: 4px;
+    align-items:center;
 
-}
+    gap:8px;
 
-.comment-text {
+    margin-bottom:6px;
 
-    white-space: pre-wrap;
-
-    margin-bottom: 6px;
+    flex-wrap:wrap;
 
 }
 
-.comment-time {
+.comment-name{
 
-    color: gray;
+    font-weight:bold;
 
-    font-size: 13px;
+}
+
+.comment-id{
+
+    color:gray;
+
+    font-size:14px;
+
+}
+
+.comment-text{
+
+    white-space:pre-wrap;
+
+    margin-left:2px;
+
+}
+
+.comment-time{
+
+    color:gray;
+
+    font-size:13px;
+
+    margin-left:auto;
 
 }
