@@ -1353,3 +1353,53 @@ top: -0px;
     word-break:break-word;
 
 }
+
+.comment-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+}
+
+.comment-user{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.comment-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.comment-name{
+
+    font-weight:bold;
+
+}
+
+.comment-id{
+
+    color:#777;
+
+    font-size:13px;
+
+}
+
+.comment-time{
+
+    color:#777;
+
+    font-size:13px;
+
+}
