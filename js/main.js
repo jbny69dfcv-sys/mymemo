@@ -1014,6 +1014,73 @@ postData.image
 ""
 }
         </div>
+
+${
+    postData.comments &&
+    postData.comments.length > 0
+
+    ?
+
+`
+<div class="post-comments">
+
+${postData.comments.map(comment => {
+
+    const profile =
+        profiles[
+            comment.account
+        ] || {};
+
+    return `
+
+<div class="post-comment">
+
+<img
+    class="comment-icon"
+    src="${
+        profile.icon ||
+        "https://via.placeholder.com/40"
+    }"
+>
+
+<div class="comment-body">
+
+<div class="comment-name">
+${
+    profile.name ||
+    comment.account
+}
+</div>
+
+<div class="comment-text">
+${
+    comment.text
+}
+</div>
+
+<div class="comment-time">
+${
+    formatTime(
+        comment.time
+    )
+}
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}).join("")}
+
+</div>
+`
+
+:
+
+""
+}
     `;
 
 const pinButton =
