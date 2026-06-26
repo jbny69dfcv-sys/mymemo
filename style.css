@@ -1224,75 +1224,39 @@ top: -0px;
 }
 
 .comment-header{
-
     display:flex;
-
-    align-items:center;
-
+    align-items:flex-start;
     gap:8px;
-
-    flex-wrap:nowrap;
-
-}
-
-.comment-name{
-
-    font-weight:bold;
-
-}
-
-.comment-id{
-
-    color:gray;
-
-    font-size:14px;
-
-}
-
-.comment-text{
-
-    white-space:pre-wrap;
-
-    margin-left:2px;
-
-}
-
-.comment-time{
-
-    color:gray;
-
-    font-size:13px;
-
 }
 
 .comment-info{
-
     display:flex;
+    flex-direction:column;
+    flex:1;
+}
 
+.comment-top{
+    display:flex;
     align-items:center;
-
     gap:8px;
-
+    margin-bottom:4px;
 }
 
 .comment-name{
-
     font-weight:bold;
-
 }
 
 .comment-id{
-
     color:gray;
-
     font-size:13px;
-
 }
 
 .comment-time{
-
     color:gray;
-
     font-size:13px;
+}
 
+.comment-text{
+    white-space:pre-wrap;
+    margin-left:2px;
 }

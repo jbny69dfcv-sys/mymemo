@@ -1015,72 +1015,7 @@ postData.image
 }
         </div>
 
-${
-    postData.comments &&
-    postData.comments.length > 0
 
-    ?
-
-`
-<div class="post-comments">
-
-${postData.comments.map(comment => {
-
-    const profile =
-        profiles[
-            comment.account
-        ] || {};
-
-    return `
-
-<div class="post-comment">
-
-<img
-    class="comment-icon"
-    src="${
-        profile.icon ||
-        "https://via.placeholder.com/40"
-    }"
->
-
-<div class="comment-body">
-
-<div class="comment-name">
-${
-    profile.name ||
-    comment.account
-}
-</div>
-
-<div class="comment-text">
-${
-    comment.text
-}
-</div>
-
-<div class="comment-time">
-${
-    formatTime(
-        comment.time
-    )
-}
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}).join("")}
-
-</div>
-`
-
-:
-
-""
-}
     `;
 
 const pinButton =
@@ -2312,27 +2247,21 @@ function renderComments() {
 
     <div class="comment-info">
 
-        <span class="comment-name">
-            ${
-                profile.name ||
-                comment.account
-            }
-        </span>
+        <div class="comment-top">
 
-        <span class="comment-id">
-            @${
-                profile.id ||
-                "userid"
-            }
-        </span>
+            <b>
+                ${profile.name || comment.account}
+            </b>
 
-        <span class="comment-time">
-            ${
-                formatTime(
-                    comment.time
-                )
-            }
-        </span>
+            <span class="comment-time">
+                ${formatTime(comment.time)}
+            </span>
+
+        </div>
+
+        <div class="comment-text">
+            ${comment.text}
+        </div>
 
     </div>
 
@@ -2435,27 +2364,31 @@ function renderDetailComments() {
 
 <div class="comment-header">
 
-<span class="comment-name">
-${
-    profile.name ||
-    comment.account
-}
-</span>
+    <img class="comment-icon" ...>
 
-<span class="comment-id">
-@${
-    profile.id ||
-    "userid"
-}
-</span>
+    <div class="comment-info">
 
-<span class="comment-time">
-${
-    formatTime(
-        comment.time
-    )
-}
-</span>
+        <div class="comment-top">
+
+            <span class="comment-name">
+                ${profile.name || comment.account}
+            </span>
+
+            <span class="comment-id">
+                @${profile.id || "userid"}
+            </span>
+
+            <span class="comment-time">
+                ${formatTime(comment.time)}
+            </span>
+
+        </div>
+
+        <div class="comment-text">
+            ${comment.text}
+        </div>
+
+    </div>
 
 </div>
 
