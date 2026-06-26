@@ -1231,9 +1231,7 @@ top: -0px;
 
     gap:8px;
 
-    margin-bottom:6px;
-
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
 
 }
 
