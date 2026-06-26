@@ -2233,8 +2233,7 @@ function renderComments() {
         commentDiv.className =
             "comment";
 
-commentDiv.innerHTML =
-`
+ commentDiv.innerHTML = `
 <div class="comment-header">
 
     <img
@@ -2249,9 +2248,13 @@ commentDiv.innerHTML =
 
         <div class="comment-top">
 
-            <b>
+            <span class="comment-name">
                 ${profile.name || comment.account}
-            </b>
+            </span>
+
+            <span class="comment-id">
+                @${profile.id || "userid"}
+            </span>
 
             <span class="comment-time">
                 ${formatTime(comment.time)}
@@ -2264,14 +2267,6 @@ commentDiv.innerHTML =
         </div>
 
     </div>
-
-</div>
-
-<div class="comment-text">
-
-    ${
-        comment.text
-    }
 
 </div>
 `;
@@ -2362,35 +2357,7 @@ function renderDetailComments() {
 
                 <div class="comment-body">
 
-<div class="comment-header">
 
-    <img class="comment-icon" ...>
-
-    <div class="comment-info">
-
-        <div class="comment-top">
-
-            <span class="comment-name">
-                ${profile.name || comment.account}
-            </span>
-
-            <span class="comment-id">
-                @${profile.id || "userid"}
-            </span>
-
-            <span class="comment-time">
-                ${formatTime(comment.time)}
-            </span>
-
-        </div>
-
-        <div class="comment-text">
-            ${comment.text}
-        </div>
-
-    </div>
-
-</div>
 
 <div class="comment-text">
 ${
