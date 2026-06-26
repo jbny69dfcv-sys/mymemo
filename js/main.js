@@ -1015,6 +1015,113 @@ postData.image
 }
         </div>
 
+        ${
+    postData.comments &&
+    postData.comments.length > 0
+    ?
+
+`
+<div class="post-comments">
+
+${postData.comments.map((comment, index) => {
+
+    const profile =
+        profiles[
+            comment.account
+        ] || {};
+
+    return `
+
+<div class="post-comment">
+
+    <img
+        class="comment-icon"
+        src="${
+            profile.icon ||
+            "https://via.placeholder.com/40"
+        }"
+    >
+
+    <div class="comment-body">
+
+        <div class="comment-top">
+
+            <span class="comment-name">
+                ${
+                    profile.name ||
+                    comment.account
+                }
+            </span>
+
+            <span class="comment-id">
+                @${
+                    profile.id ||
+                    "userid"
+                }
+            </span>
+
+            <span class="comment-time">
+                ${
+                    formatTime(
+                        comment.time
+                    )
+                }
+            </span>
+
+            ${
+                comment.account === currentAccount
+                ?
+
+`
+<div class="comment-buttons">
+
+<button
+    class="edit-comment"
+    data-index="${index}"
+>
+✏️
+</button>
+
+<button
+    class="delete-comment"
+    data-index="${index}"
+>
+✕
+</button>
+
+</div>
+`
+
+                :
+
+                ""
+
+            }
+
+        </div>
+
+        <div class="comment-text">
+            ${
+                comment.text
+            }
+        </div>
+
+    </div>
+
+</div>
+
+`;
+
+}).join("")}
+
+</div>
+`
+
+    :
+
+    ""
+
+}
 
     `;
 

@@ -1235,13 +1235,6 @@ top: -0px;
     flex:1;
 }
 
-.comment-top{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-bottom:4px;
-}
-
 .comment-name{
     font-weight:bold;
 }
@@ -1302,6 +1295,8 @@ top: -0px;
     align-items:center;
 
     gap:8px;
+
+    margin-bottom:6px;
 
 }
 
