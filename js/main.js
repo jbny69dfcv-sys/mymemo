@@ -1034,76 +1034,40 @@ ${postData.comments.map((comment, index) => {
 
 <div class="post-comment">
 
-    <img
-        class="comment-icon"
-        src="${
-            profile.icon ||
-            "https://via.placeholder.com/40"
-        }"
-    >
+    <img class="comment-icon">
 
     <div class="comment-body">
 
-        <div class="comment-top">
+        <div class="comment-header">
 
-            <span class="comment-name">
-                ${
-                    profile.name ||
-                    comment.account
-                }
-            </span>
+            <div class="comment-user">
 
-            <span class="comment-id">
-                @${
-                    profile.id ||
-                    "userid"
-                }
-            </span>
+                <div class="comment-name">
+                    名前
+                </div>
 
-            <span class="comment-time">
-                ${
-                    formatTime(
-                        comment.time
-                    )
-                }
-            </span>
+                <div class="comment-id">
+                    @ID
+                </div>
 
-            ${
-                comment.account === currentAccount
-                ?
+            </div>
 
-`
-<div class="comment-buttons">
+            <div class="comment-right">
 
-<button
-    class="edit-comment"
-    data-index="${index}"
->
-✏️
-</button>
+                <span class="comment-time">
+                    20:30
+                </span>
 
-<button
-    class="delete-comment"
-    data-index="${index}"
->
-✕
-</button>
+                <button>✏️</button>
 
-</div>
-`
+                <button>✕</button>
 
-                :
-
-                ""
-
-            }
+            </div>
 
         </div>
 
         <div class="comment-text">
-            ${
-                comment.text
-            }
+            コメント本文
         </div>
 
     </div>
