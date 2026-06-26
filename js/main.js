@@ -2345,28 +2345,39 @@ function renderDetailComments() {
             div.className =
                 "detail-comment";
 
-            div.innerHTML =
-                `
-                <img
-                    class="comment-icon"
-                    src="${
-                        profile.icon ||
-                        "https://via.placeholder.com/40"
-                    }"
-                >
+div.innerHTML = `
+<img
+    class="comment-icon"
+    src="${
+        profile.icon ||
+        "https://via.placeholder.com/40"
+    }"
+>
 
-                <div class="comment-body">
+<div class="comment-body">
 
+    <div class="comment-top">
 
+        <span class="comment-name">
+            ${profile.name || comment.account}
+        </span>
 
-<div class="comment-text">
-${
-    comment.text
-}
+        <span class="comment-id">
+            @${profile.id || "userid"}
+        </span>
+
+        <span class="comment-time">
+            ${formatTime(comment.time)}
+        </span>
+
+    </div>
+
+    <div class="comment-text">
+        ${comment.text}
+    </div>
+
 </div>
-
-                </div>
-                `;
+`;
 
             detailComments.appendChild(
                 div
