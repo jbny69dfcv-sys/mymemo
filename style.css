@@ -1159,3 +1159,7 @@ top: -0px;
     cursor:pointer;
     font-size:15px;
 }
+
+.comment-user{
+    flex:1;
+}
