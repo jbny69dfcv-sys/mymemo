@@ -1201,3 +1201,35 @@ top: -0px;
     padding: 10px;
     border-top: 1px solid #ddd;
 }
+
+.detail-page{
+
+    display:flex;
+
+    flex-direction:column;
+
+    height:100vh;
+
+}
+
+.detail-comments-box{
+
+    flex:1;
+
+    overflow-y:auto;
+
+}
+
+.detail-comment-input{
+
+    display:flex;
+
+    gap:10px;
+
+    padding:15px;
+
+    background:white;
+
+    border-top:1px solid #ddd;
+
+}
