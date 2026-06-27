@@ -1188,3 +1188,12 @@ top: -0px;
 .comment-user {
     flex: 1 !important;
 }
+
+#commentInput {
+    width: 100%;
+    min-height: 100px; /* 好きな大きさに調整 */
+    font-size: 16px;
+    padding: 12px;
+    box-sizing: border-box;
+    resize: vertical;
+}
