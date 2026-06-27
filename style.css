@@ -1233,3 +1233,17 @@ top: -0px;
     border-top:1px solid #ddd;
 
 }
+
+#detailCommentInput{
+
+    flex:1;
+
+    height:45px;
+
+}
+
+#detailCommentButton{
+
+    flex-shrink:0;
+
+}
