@@ -2470,27 +2470,23 @@ function renderDetailComments() {
 
     <div class="comment-top">
 
-        <span class="comment-name">
-            ${
-                profile.name ||
-                comment.account
-            }
-        </span>
+        <div class="comment-user">
 
-        <span class="comment-id">
-            @${
-                profile.id ||
-                "userid"
-            }
-        </span>
+            <span class="comment-name">
+                ${
+                    profile.name ||
+                    comment.account
+                }
+            </span>
 
-        <span class="comment-time">
-            ${
-                formatTime(
-                    comment.time
-                )
-            }
-        </span>
+            <span class="comment-id">
+                @${
+                    profile.id ||
+                    "userid"
+                }
+            </span>
+
+        </div>
 
         ${
             comment.account === currentAccount
@@ -2522,6 +2518,14 @@ function renderDetailComments() {
 
         }
 
+    </div>
+
+    <div class="comment-time">
+        ${
+            formatTime(
+                comment.time
+            )
+        }
     </div>
 
     <div class="comment-text">

@@ -1239,10 +1239,6 @@ top: -0px;
     font-weight:bold;
 }
 
-.comment-id{
-    color:gray;
-    font-size:13px;
-}
 
 .comment-time{
     color:gray;
@@ -1292,11 +1288,9 @@ top: -0px;
 
     display:flex;
 
-    align-items:center;
+    justify-content:space-between;
 
-    gap:8px;
-
-    margin-bottom:6px;
+    align-items:flex-start;
 
 }
 
@@ -1306,13 +1300,6 @@ top: -0px;
 
 }
 
-.comment-id{
-
-    color:#777;
-
-    font-size:13px;
-
-}
 
 .comment-time{
 
@@ -1401,5 +1388,15 @@ top: -0px;
     color:#777;
 
     font-size:13px;
+
+}
+
+.comment-user{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
 
 }
