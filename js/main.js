@@ -72,41 +72,6 @@ likesTab.addEventListener(
     }
 );
 
-postsTab.addEventListener(
-    "click",
-    () => {
-
-        profileMode = "posts";
-
-        postsTab.classList.add(
-            "active"
-        );
-
-        likesTab.classList.remove(
-            "active"
-        );
-
-        renderProfilePosts();
-    }
-);
-
-likesTab.addEventListener(
-    "click",
-    () => {
-
-        profileMode = "likes";
-
-        likesTab.classList.add(
-            "active"
-        );
-
-        postsTab.classList.remove(
-            "active"
-        );
-
-        renderProfilePosts();
-    }
-);
 
 const searchInput =
     document.getElementById(
