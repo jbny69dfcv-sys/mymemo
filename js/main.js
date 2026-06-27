@@ -2330,86 +2330,42 @@ function renderDetailComments() {
 `
 <img
     class="comment-icon"
-    src="${
-        profile.icon ||
-        "https://via.placeholder.com/40"
-    }"
+    src="${profile.icon || "https://via.placeholder.com/40"}"
 >
 
 <div class="comment-body">
 
     <div class="comment-header">
 
-  <div class="comment-user">
+        <div>
+            <span class="comment-name">
+                ${profile.name || comment.account}
+            </span>
 
-    <span class="comment-name">
-        ${
-            profile.name ||
-            comment.account
-        }
-    </span>
+            <span class="comment-id">
+                @${profile.id || "userid"}
+            </span>
 
-    <span class="comment-id">
-        @${
-            profile.id ||
-            "userid"
-        }
-    </span>
-
-    <div class="comment-time">
-        ${
-            formatTime(
-                comment.time
-            )
-        }
-    </div>
-
-</div>
-                ${
-                    formatTime(
-                        comment.time
-                    )
-                }
+            <div class="comment-time">
+                ${formatTime(comment.time)}
             </div>
-
         </div>
 
         ${
             comment.account === currentAccount
-            ?
-
-`
-<div class="comment-buttons">
-
-<button
-    class="edit-comment"
-    data-index="${index}"
->
-✏️
-</button>
-
-<button
-    class="delete-comment"
-    data-index="${index}"
->
-✕
-</button>
-
-</div>
-`
-
-            :
-
-            ""
-
+            ? `
+            <div class="comment-buttons">
+                <button class="edit-comment" data-index="${index}">✏️</button>
+                <button class="delete-comment" data-index="${index}">✕</button>
+            </div>
+            `
+            : ""
         }
 
     </div>
 
     <div class="comment-text">
-        ${
-            comment.text
-        }
+        ${comment.text}
     </div>
 
 </div>
