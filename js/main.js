@@ -1282,16 +1282,6 @@ if (video) {
     );
 }
 
-likeButton.addEventListener(
-    "click",
-    (event) => {
-
-        event.stopPropagation();
-
-        // いいね処理
-    }
-);
-
     container.appendChild(post);
 }
 
