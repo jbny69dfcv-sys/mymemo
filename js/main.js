@@ -2357,31 +2357,25 @@ div.innerHTML = `
         }"
     >
 
-    <div class="comment-body">
+<div class="comment-top">
 
-        <div class="comment-top">
+    <span class="comment-name">
+        ${
+            profile.name ||
+            comment.account
+        }
+    </span>
 
-            <div class="comment-user">
+    <span class="comment-id">
+        @${
+            profile.id ||
+            "userid"
+        }
+    </span>
 
-                <span class="comment-name">
-                    ${
-                        profile.name ||
-                        comment.account
-                    }
-                </span>
-
-                <span class="comment-id">
-                    @${
-                        profile.id ||
-                        "userid"
-                    }
-                </span>
-
-            </div>
-
-            ${
-                comment.account === currentAccount
-                ?
+    ${
+        comment.account === currentAccount
+        ?
 
 `
 <div class="comment-buttons">
@@ -2403,26 +2397,27 @@ div.innerHTML = `
 </div>
 `
 
-                :
+        :
 
-                ""
+        ""
 
-            }
+    }
 
-        </div>
+</div>
 
-        <div class="comment-time">
-            ${
-                formatTime(comment.time)
-            }
-        </div>
+<div class="comment-time">
+    ${
+        formatTime(
+            comment.time
+        )
+    }
+</div>
 
-        <div class="comment-text">
-            ${
-                comment.text
-            }
-        </div>
-
+<div class="comment-text">
+    ${
+        comment.text
+    }
+</div>
     </div>
 
 </div>
