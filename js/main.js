@@ -2346,41 +2346,42 @@ function renderDetailComments() {
             div.className =
                 "detail-comment";
 
-            div.innerHTML =
-`
-<img
-    class="comment-icon"
-    src="${
-        profile.icon ||
-        "https://via.placeholder.com/40"
-    }"
->
+div.innerHTML = `
+<div class="detail-comment-card">
 
-<div class="comment-body">
+    <img
+        class="comment-icon"
+        src="${
+            profile.icon ||
+            "https://via.placeholder.com/40"
+        }"
+    >
 
-    <div class="comment-top">
+    <div class="comment-body">
 
-        <div class="comment-user">
+        <div class="comment-top">
 
-            <span class="comment-name">
-                ${
-                    profile.name ||
-                    comment.account
-                }
-            </span>
+            <div class="comment-user">
 
-            <span class="comment-id">
-                @${
-                    profile.id ||
-                    "userid"
-                }
-            </span>
+                <span class="comment-name">
+                    ${
+                        profile.name ||
+                        comment.account
+                    }
+                </span>
 
-        </div>
+                <span class="comment-id">
+                    @${
+                        profile.id ||
+                        "userid"
+                    }
+                </span>
 
-        ${
-            comment.account === currentAccount
-            ?
+            </div>
+
+            ${
+                comment.account === currentAccount
+                ?
 
 `
 <div class="comment-buttons">
@@ -2402,26 +2403,26 @@ function renderDetailComments() {
 </div>
 `
 
-            :
+                :
 
-            ""
+                ""
 
-        }
+            }
 
-    </div>
+        </div>
 
-    <div class="comment-time">
-        ${
-            formatTime(
-                comment.time
-            )
-        }
-    </div>
+        <div class="comment-time">
+            ${
+                formatTime(comment.time)
+            }
+        </div>
 
-    <div class="comment-text">
-        ${
-            comment.text
-        }
+        <div class="comment-text">
+            ${
+                comment.text
+            }
+        </div>
+
     </div>
 
 </div>

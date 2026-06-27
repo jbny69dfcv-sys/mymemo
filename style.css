@@ -1400,3 +1400,15 @@ top: -0px;
     gap:8px;
 
 }
+
+.detail-comment-card{
+
+    display:flex;
+
+    gap:12px;
+
+    padding:16px 20px;
+
+    border-bottom:1px solid #e5e5e5;
+
+}
