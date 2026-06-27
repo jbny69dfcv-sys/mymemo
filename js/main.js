@@ -2385,27 +2385,31 @@ function renderDetailComments() {
 
     <div class="comment-header">
 
-        <div>
+  <div class="comment-user">
 
-            <div>
+    <span class="comment-name">
+        ${
+            profile.name ||
+            comment.account
+        }
+    </span>
 
-                <span class="comment-name">
-                    ${
-                        profile.name ||
-                        comment.account
-                    }
-                </span>
+    <span class="comment-id">
+        @${
+            profile.id ||
+            "userid"
+        }
+    </span>
 
-                <span class="comment-id">
-                    @${
-                        profile.id ||
-                        "userid"
-                    }
-                </span>
+    <div class="comment-time">
+        ${
+            formatTime(
+                comment.time
+            )
+        }
+    </div>
 
-            </div>
-
-            <div class="comment-time">
+</div>
                 ${
                     formatTime(
                         comment.time
