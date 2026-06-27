@@ -2357,7 +2357,9 @@ div.innerHTML = `
         }"
     >
 
-<div class="comment-top">
+    <div class="comment-body">
+
+        <div class="comment-top">
 
     <span class="comment-name">
         ${
