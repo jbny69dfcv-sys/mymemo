@@ -1444,3 +1444,85 @@ top: -0px;
     margin-bottom:6px;
 
 }
+
+.post-comments{
+
+    border-top:1px solid #ddd;
+
+}
+
+.post-comment{
+
+    display:flex;
+
+    gap:12px;
+
+    padding:16px 20px;
+
+    border-top:1px solid #eee;
+
+}
+
+.post-comment:first-child{
+
+    border-top:none;
+
+}
+
+.comment-body{
+
+    flex:1;
+
+}
+
+.comment-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+}
+
+.comment-name{
+
+    font-weight:bold;
+
+}
+
+.comment-id{
+
+    color:#777;
+
+    font-size:13px;
+
+    margin-left:6px;
+
+}
+
+.comment-time{
+
+    color:#777;
+
+    font-size:13px;
+
+    margin-top:3px;
+
+}
+
+.comment-text{
+
+    margin-top:10px;
+
+    white-space:pre-wrap;
+
+}
+
+.comment-buttons{
+
+    display:flex;
+
+    gap:6px;
+
+}

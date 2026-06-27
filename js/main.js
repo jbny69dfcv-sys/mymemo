@@ -2321,14 +2321,39 @@ backFromDetailButton.addEventListener(
 
 function renderDetailComments() {
 
-    detailComments.innerHTML = "";
+    const oldComments =
+        detailPost.querySelector(
+            ".post-comments"
+        );
+
+    if (oldComments) {
+        oldComments.remove();
+    }
 
     if (
         !currentDetailPost ||
-        !currentDetailPost.comments
+        !currentDetailPost.comments ||
+        currentDetailPost.comments.length === 0
     ) {
         return;
     }
+
+    const postCard =
+        detailPost.querySelector(
+            ".post"
+        );
+
+    if (!postCard) {
+        return;
+    }
+
+    const commentBox =
+        document.createElement(
+            "div"
+        );
+
+    commentBox.className =
+        "post-comments";
 
     currentDetailPost.comments.forEach(
         (comment, index) => {
@@ -2344,40 +2369,55 @@ function renderDetailComments() {
                 );
 
             div.className =
-                "detail-comment";
+                "post-comment";
 
-div.innerHTML = `
-<div class="detail-comment-card">
+            div.innerHTML =
+`
+<img
+    class="comment-icon"
+    src="${
+        profile.icon ||
+        "https://via.placeholder.com/40"
+    }"
+>
 
-    <img
-        class="comment-icon"
-        src="${
-            profile.icon ||
-            "https://via.placeholder.com/40"
-        }"
-    >
+<div class="comment-body">
 
-    <div class="comment-body">
+    <div class="comment-header">
 
-        <div class="comment-top">
+        <div>
 
-    <span class="comment-name">
+            <div>
+
+                <span class="comment-name">
+                    ${
+                        profile.name ||
+                        comment.account
+                    }
+                </span>
+
+                <span class="comment-id">
+                    @${
+                        profile.id ||
+                        "userid"
+                    }
+                </span>
+
+            </div>
+
+            <div class="comment-time">
+                ${
+                    formatTime(
+                        comment.time
+                    )
+                }
+            </div>
+
+        </div>
+
         ${
-            profile.name ||
-            comment.account
-        }
-    </span>
-
-    <span class="comment-id">
-        @${
-            profile.id ||
-            "userid"
-        }
-    </span>
-
-    ${
-        comment.account === currentAccount
-        ?
+            comment.account === currentAccount
+            ?
 
 `
 <div class="comment-buttons">
@@ -2399,41 +2439,35 @@ div.innerHTML = `
 </div>
 `
 
-        :
+            :
 
-        ""
+            ""
 
-    }
+        }
 
-</div>
+    </div>
 
-<div class="comment-time">
-    ${
-        formatTime(
-            comment.time
-        )
-    }
-</div>
-
-<div class="comment-text">
-    ${
-        comment.text
-    }
-</div>
+    <div class="comment-text">
+        ${
+            comment.text
+        }
     </div>
 
 </div>
 `;
 
-            detailComments.appendChild(
+            commentBox.appendChild(
                 div
             );
 
         }
     );
 
-}
+    postCard.appendChild(
+        commentBox
+    );
 
+}
 function renderSearchHistory() {
 
     searchHistory.innerHTML =
