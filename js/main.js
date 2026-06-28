@@ -872,28 +872,33 @@ addButton.addEventListener(
         accounts.push(name);
         localStorage.setItem("accounts", JSON.stringify(accounts));
 
-        // 【ここが重要！】新しいアカウント用の「部屋（HTML）」を動的に作成してコンテナに追加する
+        // 2枚目の綺麗なデザインと全く同じ構造の「部屋」を新しく追加します
         const container = document.getElementById("profileContainer");
         if (container) {
             const newRoom = document.createElement("div");
             newRoom.className = "single-profile";
             
-            // 既存の1個目の部屋と同じ構造のHTMLを流し込む
+            // 元々のHTMLと完全に一致させた構造です
             newRoom.innerHTML = `
-                <img class="header-image" src="" alt="ヘッダー">
-                <div class="profile-header-container">
-                    <img class="profile-icon" src="https://via.placeholder.com/60" alt="アイコン">
-                    <button class="edit-profile-btn" id="editHeaderButton">プロフィールを設定</button>
+                <div class="profile-header">
+                    <img class="header-image" src="" id="headerImage">
+                    <button id="editHeaderButton">✏️</button>
                 </div>
-                <div class="profile-info-text">
-                    <h2>${name}</h2>
-                    <p class="profile-user-id">@userid</p>
-                    <p class="profile-bio-text">プロフィール未設定</p>
-                    <p class="profile-post-count">投稿数 0</p>
+                <div class="profile-info">
+                    <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
+                    <h2 id="profileName">${name}</h2>
+                    <p id="profileId">@userid</p>
+                    <p id="profileBio">プロフィール未設定</p>
+                    <p id="postCount">投稿数 0</p>
+                    <button id="deleteAccountButton">アカウント削除</button>
+                    <div class="follow-counts">
+                        <span id="followingCount">0</span> フォロー
+                        <span id="followerCount">0</span> フォロワー
+                    </div>
                 </div>
                 <div class="profile-tabs">
                     <div class="profile-tab active" id="postsTab">投稿</div>
-                    <div class="profile-tab" id="likesTab">いいね</div>
+                    <div class="profile-tab" id="likesTab">スキ</div>
                 </div>
                 <div class="timeline" id="profileTimeline"></div>
             `;
@@ -903,7 +908,7 @@ addButton.addEventListener(
         // アカウント一覧を更新
         renderAccounts();
         
-        // すべての部屋（新しく作った部屋も含む）にデータを配る
+        // 新しい部屋にデータを正しく配る
         showProfile();
     }
 );
