@@ -1261,24 +1261,22 @@ top: -0px;
     width: 100%; /* 横幅いっぱいに広げる */
 }
 
-/* プロフィール全体を包むコンテナ（元々あるものに追記、または新規） */
-#profilePage {
-    transition: opacity 0.3s ease; /* パッと変わるのを防ぐ保険 */
+/* 最初は速く、後半スッと止まる心地いいスライド（プロフィール用） */
+@keyframes slideFromRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
 
-/* 右から左へヒュイっと入ってくるアニメーション */
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+@keyframes slideFromLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
 
-/* アニメーションを適用するクラス */
-.slide-in-right {
-    animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+/* アニメーション用のクラス */
+.slide-from-right {
+    animation: slideFromRight 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.slide-from-left {
+    animation: slideFromLeft 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }

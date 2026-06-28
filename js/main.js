@@ -804,6 +804,9 @@ if (
     showProfile();
 
 } else {
+    // どっちのアカウントからどっちに変えるかの位置（インデックス）を取得
+    const currentIndex = accounts.indexOf(currentAccount);
+    const targetIndex = accounts.indexOf(account);
 
     currentAccount =
         account;
@@ -820,8 +823,22 @@ if (
         profilePage.style.display !==
         "none"
     ) {
+        // すでに付いているアニメーションクラスを一度全部外してリセット
+        profilePage.classList.remove("slide-from-right", "slide-from-left");
 
-        showProfile();
+        // ほんの一瞬だけ待ってから、スライドしながら画面を更新する
+        setTimeout(() => {
+            showProfile();
+
+            // 今より「右側」のアカウントを選んだら、右から左へヒュイっ
+            if (targetIndex > currentIndex) {
+                profilePage.classList.add("slide-from-right");
+            } 
+            // 今より「左側」のアカウントを選んだら、左から右へヒュイっ
+            else {
+                profilePage.classList.add("slide-from-left");
+            }
+        }, 10);
     }
 }
     }
