@@ -270,8 +270,10 @@ cancelProfileButton.addEventListener(
 );
  
  
+// ✨ 条件を厳しくして、コメントの✏️に反応しないように修正
 document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("edit-profile-btn") || e.target.id === "editHeaderButton" || e.target.innerText === "✏️") {
+    // クラス名「edit-profile-btn」か「edit-header-button」を持っているときだけプロフィール編集を開く
+    if (e.target.classList.contains("edit-profile-btn") || e.target.classList.contains("edit-header-button") || e.target.id === "editHeaderButton") {
         e.stopPropagation();
 
         const profile = profiles[currentAccount] || {};
@@ -1164,27 +1166,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// ✨ 条件を厳しくして、コメントの✏️に反応しないように修正
 document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("deleteAccountButton") || e.target.id === "deleteAccountButton") {
-        const index = e.target.getAttribute("data-index");
+    // クラス名「edit-profile-btn」か「edit-header-button」を持っているときだけプロフィール編集を開く
+    if (e.target.classList.contains("edit-profile-btn") || e.target.classList.contains("edit-header-button") || e.target.id === "editHeaderButton") {
+        e.stopPropagation();
+
+        const profile = profiles[currentAccount] || {};
+
+        const previewHeader = document.getElementById("editHeaderPreview");
+        const previewIcon = document.getElementById("editIconPreview");
+        const inputName = document.getElementById("editName");
+        const inputId = document.getElementById("editId");
+        const inputBio = document.getElementById("editBio");
+        const modal = document.getElementById("editProfileModal");
+
+        if (previewHeader) previewHeader.src = profile.header || "";
+        if (previewIcon) previewIcon.src = profile.icon || "https://via.placeholder.com/60";
+        if (inputName) inputName.value = profile.name || currentAccount;
+        if (inputId) inputId.value = profile.id || "";
+        if (inputBio) inputBio.value = profile.bio || "";
+
+        console.log("プロフィール編集押された（選択中アカウント:" + currentAccount + "）");
+
+        tempIcon = profile.icon || null;
+        tempHeader = profile.header || null;
         
-        const confirmDelete = confirm("本当にこのアカウントを削除しますか？");
-        if (!confirmDelete) return;
-
-        let savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
-        
-        if (index !== null && savedAccounts[index]) {
-            savedAccounts.splice(index, 1);
-            localStorage.setItem("accounts", JSON.stringify(savedAccounts));
-            accounts = savedAccounts;
-
-            localStorage.setItem("currentAccountIndex", 0);
-
-            initializeProfileRooms();
-            if (typeof renderAccounts === "function") renderAccounts();
-            if (typeof showProfile === "function") showProfile();
-            
-            location.reload(); 
+        if (modal) {
+            modal.style.display = "block";
         }
     }
 });
@@ -2114,17 +2123,52 @@ function renderDetailComments() {
 </div>
 `;
 
+// 🔄 renderDetailComments() 関数の後半（commentBox.appendChild(div); のすぐ後ろ）を以下のように書き換えてください
+
             commentBox.appendChild(
                 div
             );
-
         }
     );
+
+    // ✨【ここを追加！】新しく作られたコメントの編集・削除ボタンに仕事を覚えさせる
+    const editBtns = commentBox.querySelectorAll(".edit-comment");
+    editBtns.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation(); // プロフィールに飛ぶのを防止
+            const index = btn.getAttribute("data-index");
+            const comment = currentDetailPost.comments[index];
+            
+            const newText = prompt("コメントを編集します:", comment.text);
+            if (newText === null || newText.trim() === "") return;
+            
+            comment.text = newText;
+            savePostToDB(currentDetailPost);
+            renderDetailComments();
+            renderTimeline();
+            renderProfilePosts();
+        });
+    });
+
+    const deleteBtns = commentBox.querySelectorAll(".delete-comment");
+    deleteBtns.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation(); // プロフィールに飛ぶのを防止
+            if (!confirm("このコメントを削除しますか？")) return;
+            
+            const index = btn.getAttribute("data-index");
+            currentDetailPost.comments.splice(index, 1);
+            
+            savePostToDB(currentDetailPost);
+            renderDetailComments();
+            renderTimeline();
+            renderProfilePosts();
+        });
+    });
 
     postCard.appendChild(
         commentBox
     );
-
 }
 
 プロフィールを保存しました
