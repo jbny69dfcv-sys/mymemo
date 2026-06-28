@@ -2328,46 +2328,32 @@ function renderDetailComments() {
 
 }
 
-// コメントの✕ボタン（delete-comment）がクリックされた時の処理
+// どの部屋の「プロフィールを設定」ボタンを押しても、現在のアカウントを編集できるようにする
 document.addEventListener("click", (e) => {
-    const deleteButton = e.target.closest(".delete-comment");
-    
-    // クリックされたのがコメントの✕ボタン、かつ現在開いている詳細投稿データが存在する場合
-    if (deleteButton && currentDetailPost) {
+    // クリックされた要素が「プロフィールを設定」ボタン（edit-profile-btn クラス、または id が editHeaderButton のもの）かチェック
+    if (e.target.classList.contains("edit-profile-btn") || e.target.id === "editHeaderButton") {
         e.stopPropagation();
 
-        // ボタンの data-index から、何番目のコメントかを取得
-        const commentIndex = parseInt(deleteButton.dataset.index);
+        // 現在表示しているアカウントのデータを取得
+        const profile = profiles[currentAccount] || {};
 
-        if (confirm("このコメントを削除してもよろしいですか？")) {
-            const transaction = db.transaction(["posts"], "readwrite");
-            const store = transaction.objectStore("posts");
-            
-            // ① 現在開いている詳細投稿の最新データをIndexedDBから取得
-            const getRequest = store.get(currentDetailPost.id);
+        // プレビュー画像に現在のデータをセット
+        editHeaderPreview.src = profile.header || "";
+        editIconPreview.src = profile.icon || "https://via.placeholder.com/60";
 
-            getRequest.onsuccess = () => {
-                const postData = getRequest.result;
-                if (postData && postData.comments) {
-                    
-                    // ② コメント配列から、クリックされた番号のコメントを削除
-                    postData.comments.splice(commentIndex, 1);
+        // 入力欄に現在のデータをセット
+        editName.value = profile.name || currentAccount;
+        editId.value = profile.id || "";
+        editBio.value = profile.bio || "";
 
-                    // ③ データベースへ上書き保存
-                    const updateRequest = store.put(postData);
+        console.log("プロフィール編集押された（選択中アカウント: " + currentAccount + "）");
 
-                    // ④ 保存が完全に完了したら画面を更新する
-                    updateRequest.onsuccess = () => {
-                        // グローバルな変数側のコメントデータも同期させる
-                        currentDetailPost.comments = postData.comments;
-                        
-                        // タイムラインと、詳細画面のコメント一覧を再描画
-                        loadPosts(); 
-                        renderDetailComments();
-                    };
-                }
-            };
-        }
+        // 一時保存用変数にデータをキープ
+        tempIcon = profile.icon || null;
+        tempHeader = profile.header || null;
+        
+        // 編集画面（モーダル）を開く
+        editProfileModal.style.display = "block";
     }
 });
 function renderSearchHistory() {
