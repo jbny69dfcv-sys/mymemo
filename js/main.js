@@ -801,18 +801,18 @@ accountDiv.addEventListener("click", () => {
         currentAccount = account;
         localStorage.setItem("currentAccount", currentAccount);
 
-        // 1. 【最優先】何よりも先に、まず1ミリ秒でも早く画面をスライドさせる！
+        renderAccounts();
+        renderTimeline();
+
+        // 1. まず元の処理を呼び出して、いつも通りプロフィール画面を最新に更新する
+        showProfile(); 
+
+        // 2. その上で、横並びのステージをスライドさせる！
         const container = document.getElementById("profileContainer");
         if (container && profilePage.style.display !== "none") {
+            // X（Twitter）方式でスライド！
             container.style.transform = `translateX(-${targetIndex * 100}%)`;
         }
-
-        // 2. 【後回し】画面が動き出した「すぐ後」に、重い処理を裏で実行する
-        setTimeout(() => {
-            renderAccounts();
-            renderTimeline();
-            showProfile(); 
-        }, 10); // 0.01秒だけズラすことで、スライドの滑り出しが爆速になります！
     }
 });
         accountsContainer.appendChild(
