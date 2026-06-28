@@ -61,94 +61,87 @@
 
     <div id="timeline"></div>
 
+<!-- 変更前と変わらない部分 -->
     <div id="profilePage" style="display:none;">
 
         <button id="backButton">
             ← タイムライン
         </button>
 
- <div class="profile-header">
+        <!-- ★ココを追加：動かす中身を全部包む箱の始まり -->
+        <div id="profileContent">
 
-    <img
-        id="headerImage"
-        class="header-image"
-        src=""
-    >
+             <div class="profile-header">
+                <img
+                    id="headerImage"
+                    class="header-image"
+                    src=""
+                >
+                <button
+                    id="editHeaderButton"
+                    class="edit-header-button"
+                >
+                    ✏️
+                </button>
+            </div>
 
-    <button
-        id="editHeaderButton"
-        class="edit-header-button"
-    >
-        ✏️
-    </button>
+            <div class="profile-info">
+                <img
+                    id="profileIcon"
+                    class="profile-icon"
+                    src=""
+                >
 
-</div>
+                <h2 id="profileName"></h2>
+                <p id="profileId"></p>
+                <p id="profileBio"></p>
+                <p id="postCount"></p>
+                <button id="deleteAccountButton">
+                    アカウント削除
+                </button>
+                
+                <div class="follow-stats">
+                    <span id="followingCount">0 フォロー中</span>
+                    <span id="followerCount">0 フォロワー</span>
+                </div>
+                   
+                <input
+                    type="file"
+                    id="headerUpload"
+                    accept="image/*"
+                    style="display:none;"
+                >
 
-        <div class="profile-info">
+                <input
+                    type="file"
+                    id="iconUpload"
+                    accept="image/*"
+                    style="display:none;"
+                >
 
-            <img
-                id="profileIcon"
-                class="profile-icon"
-                src=""
-            >
+                <div class="profile-tabs">
+                    <button
+                        id="postsTab"
+                        class="profile-tab active"
+                    >
+                        投稿
+                    </button>
+                    <button
+                        id="likesTab"
+                        class="profile-tab"
+                    >
+                        スキ
+                    </button>
+                </div>
 
-            <h2 id="profileName"></h2>
-            <p id="profileId"></p>
-            <p id="profileBio"></p>
-            <p id="postCount"></p>
-            <button id="deleteAccountButton">
-    アカウント削除
-</button>
-<div class="follow-stats">
+                <div id="profileTimeline"></div>
+                
+            </div> <!-- .profile-info の閉じタグ -->
 
-    <span id="followingCount">
-        0 フォロー中
-    </span>
+        </div> <!-- ★ココを追加：profileContent の閉じタグ -->
 
-    <span id="followerCount">
-        0 フォロワー
-    </span>
-
-</div>
-       
-<input
-    type="file"
-    id="headerUpload"
-    accept="image/*"
-    style="display:none;"
->
-
-          <input
-    type="file"
-    id="iconUpload"
-    accept="image/*"
-    style="display:none;"
->
-
- <div class="profile-tabs">
-
-    <button
-        id="postsTab"
-        class="profile-tab active"
-    >
-        投稿
-    </button>
-
-    <button
-        id="likesTab"
-        class="profile-tab"
-    >
-        スキ
-    </button>
-
-</div>
-
-<div id="profileTimeline"></div>
-    
-
-        </div>
-
-    </div>
+    </div> <!-- profilePage の閉じタグ -->
+    <!-- ここから下は変更なし -->
 
 <div
     id="postDetailPage"

@@ -808,37 +808,63 @@ if (
     const currentIndex = accounts.indexOf(currentAccount);
     const targetIndex = accounts.indexOf(account);
 
-    currentAccount =
-        account;
+    // HTMLに新しく作った「動かすための箱」を取得
+    const profileContent = document.getElementById("profileContent");
 
-    localStorage.setItem(
-        "currentAccount",
-        currentAccount
-    );
+    if (profilePage.style.display !== "none" && profileContent) {
+        
+        // 1. 今の画面（古いプロフィール）をコピーして残像を作る
+        const oldContent = profileContent.cloneNode(true);
+        
+        // 残像が今の位置にピッタリ重なるように設定
+        oldContent.style.position = "absolute";
+        oldContent.style.top = profileContent.offsetTop + "px";
+        oldContent.style.left = "0";
+        oldContent.style.width = "100%";
+        oldContent.style.pointerEvents = "none"; // 誤操作防止
+        oldContent.style.transition = "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
+        
+        // 残像を画面に追加
+        profileContent.parentNode.appendChild(oldContent);
 
-    renderAccounts();
-    renderTimeline();
+        // 2. データを新しいアカウントに更新する
+        currentAccount = account;
+        localStorage.setItem("currentAccount", currentAccount);
+        renderAccounts();
+        renderTimeline();
+        showProfile(); // ここで本物の箱の中身が一瞬で新しくなる
 
-    if (
-        profilePage.style.display !==
-        "none"
-    ) {
-        // すでに付いているアニメーションクラスを一度全部外してリセット
-        profilePage.classList.remove("slide-from-right", "slide-from-left");
+        // 3. アニメーションの向きの準備
+        const isNext = targetIndex > currentIndex;
+        
+        // 新しい箱のスタート位置を画面外（右か左）にセット
+        profileContent.style.transition = "none";
+        profileContent.style.transform = isNext ? "translateX(100%)" : "translateX(-100%)";
 
-        // ほんの一瞬だけ待ってから、スライドしながら画面を更新する
+        // 4. ほんの一瞬待ってからスライド開始！（ここで押し出す動きになります）
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                profileContent.style.transition = "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
+                
+                // 新しい箱は元の位置(0)へ、残像は画面外へヒュイッ！
+                profileContent.style.transform = "translateX(0)";
+                oldContent.style.transform = isNext ? "translateX(-100%)" : "translateX(100%)";
+            });
+        });
+
+        // 5. アニメーションが終わったら残像を消す
         setTimeout(() => {
-            showProfile();
+            if (oldContent.parentNode) oldContent.remove();
+            profileContent.style.transition = "";
+            profileContent.style.transform = "";
+        }, 400); // 0.4秒後に削除
 
-            // 今より「右側」のアカウントを選んだら、右から左へヒュイっ
-            if (targetIndex > currentIndex) {
-                profilePage.classList.add("slide-from-right");
-            } 
-            // 今より「左側」のアカウントを選んだら、左から右へヒュイっ
-            else {
-                profilePage.classList.add("slide-from-left");
-            }
-        }, 10);
+    } else {
+        // プロフィール画面を開いていない時は、普通にデータだけ切り替える
+        currentAccount = account;
+        localStorage.setItem("currentAccount", currentAccount);
+        renderAccounts();
+        renderTimeline();
     }
 }
     }
