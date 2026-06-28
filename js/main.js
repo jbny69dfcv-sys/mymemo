@@ -1309,6 +1309,23 @@ const sortedPosts =
 }
 function showProfile() {
 
+    // ▼ 【ココを追加】アカウントの数だけ、横並びの部屋（.single-profile）を自動で量産する
+    const container = document.getElementById("profileContainer");
+    if (container) {
+        // 元々あった1個分の部屋（HTMLに書いたやつ）を取得
+        const template = container.querySelector(".single-profile");
+        
+        // アカウントの数に対して、部屋が足りなかったら自動でコピーして増やす
+        while (container.children.length < accounts.length) {
+            const clone = template.cloneNode(true);
+            container.appendChild(clone);
+        }
+    }
+    // ▲ 【追加ここまで】▲
+
+    // --- ここから下は、元々 showProfile() の中にあったコードのままでOK ---
+    // 例: const profile = profiles[currentAccount]; ... など
+
     const profile =
         profiles[currentAccount] || {};
 
