@@ -1252,7 +1252,7 @@ top: -0px;
     margin-top: 8px;
     white-space: pre-wrap;
     word-break: break-word;
-    font-size: 10px;
+    font-size: 5px;
     
     /* 親要素のFlexboxの影響を打ち消して左端に寄せる */
     align-self: flex-start; 
