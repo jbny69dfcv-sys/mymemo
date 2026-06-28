@@ -1100,54 +1100,46 @@ function renderTimeline() {
 }
 
 function renderProfilePosts() {
-    // 1. 現在選択されているアカウントのプロフィール部屋を正しく取得
+    // 1. 現在選択されているアカウントのプロフィール部屋（DOM要素）を正しく取得
     const targetIndex = accounts.indexOf(currentAccount);
     const rooms = document.querySelectorAll(".single-profile");
     const currentRoom = rooms[targetIndex];
     
     if (!currentRoom) return;
-    const profileTimeline = currentRoom.querySelector(".timeline");
+    const profileTimeline = currentRoom.querySelector(".timeline") || currentRoom.querySelector("#profileTimeline");
     if (!profileTimeline) return;
 
     profileTimeline.innerHTML = ""; // タイムラインを一旦クリア
 
-    // 2. ローカルストレージなどから最新の投稿データを取得（※変数名が異なる場合は既存のデータソースに合わせてください）
-    const allPosts = JSON.parse(localStorage.getItem("posts")) || [];
-
-    // 3. 現在のモード（「投稿」か「スキ」か）に合わせて表示する投稿を絞り込む
-    let displayPosts = [];
+    // 2. 現在のアカウントに関連する投稿、またはスキした投稿を正確にフィルター
+    let targetPosts = [];
 
     if (profileMode === "likes") {
-        // 【スキ モード】自分がハート（いいね）を押した投稿だけをフィルター
-        // ※ post.likedBy や post.likes など、アプリのいいね保持形式に合わせて調整してください
-        displayPosts = allPosts.filter(post => {
-            return post.likedUsers && post.likedUsers.includes(currentAccount);
-        });
+        // 【スキ モード】post.likedBy 配列に自分（currentAccount）が含まれている投稿を絞り込む
+        targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
     } else {
-        // 【投稿 モード】そのアカウントが自分で投稿したものだけをフィルター
-        displayPosts = allPosts.filter(post => post.account === currentAccount);
+        // 【投稿 モード】そのアカウントが自分で投稿したものだけを絞り込む
+        targetPosts = posts.filter(post => post.account === currentAccount);
     }
 
-    // 4. 絞り込んだ投稿を画面に描画する
-    if (displayPosts.length === 0) {
+    // 3. ピン留め（pinned）を最優先にし、次に時間の新しい順（降順）に並び替える
+    const sortedPosts = [...targetPosts].sort((a, b) => {
+        if ((a.pinned || false) !== (b.pinned || false)) {
+            return (b.pinned || false) - (a.pinned || false);
+        }
+        return b.time - a.time;
+    });
+
+    // 4. 投稿が1件もない場合の表示
+    if (sortedPosts.length === 0) {
         profileTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">${profileMode === "likes" ? "スキした投稿はありません" : "投稿はありません"}</div>`;
         return;
     }
 
-    // 💡 ここから下は、既存の「投稿をHTMLに変換して追加する処理」をそのまま合流させてください
-    displayPosts.forEach(post => {
-        const postDiv = document.createElement("div");
-        postDiv.className = "post";
-        // （※ あなたのコードにある、投稿の見た目を作るHTMLをここに入れます）
-        postDiv.innerHTML = `
-            <div class="post-header">
-                <img src="${post.icon}" class="post-icon">
-                <span class="post-name">${post.name}</span>
-            </div>
-            <div class="post-content">${post.content}</div>
-        `;
-        profileTimeline.appendChild(postDiv);
-    });
+    // 5. 元々定義されている綺麗なタイムラインカード生成関数（addPostToTimeline）を使って安全に描画
+    for (const post of sortedPosts) {
+        addPostToTimeline(post, profileTimeline);
+    }
 }
 
 // ✨【修正】ページ読み込み時は、最後に選んでいたアカウントの状態で「メインタイムライン」を開く
