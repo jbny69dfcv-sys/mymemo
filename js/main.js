@@ -158,7 +158,6 @@ const iconUpload =
 const headerUpload =
     document.getElementById("headerUpload");
 
-// ✨ 画面のどこにあるモーダルかを直接指定できるようにします（これに置き換え）
 const editProfileModal = document.getElementById("editProfileModal");
 const editHeaderPreview =
     document.getElementById(
@@ -271,16 +270,12 @@ cancelProfileButton.addEventListener(
 );
  
  
-// ✨ どの部屋の編集ボタンを押しても、変数エラーにならずにモーダルを確実に開く処理
 document.addEventListener("click", (e) => {
-    // クリックされたボタンが「✏️」ボタン（クラス名やID、テキストで判定）の場合
     if (e.target.classList.contains("edit-profile-btn") || e.target.id === "editHeaderButton" || e.target.innerText === "✏️") {
         e.stopPropagation();
 
-        // 現在選択中のアカウントデータを取得
         const profile = profiles[currentAccount] || {};
 
-        // 各プレビューや入力欄の要素を、その場で新しく取得してセットする
         const previewHeader = document.getElementById("editHeaderPreview");
         const previewIcon = document.getElementById("editIconPreview");
         const inputName = document.getElementById("editName");
@@ -299,7 +294,6 @@ document.addEventListener("click", (e) => {
         tempIcon = profile.icon || null;
         tempHeader = profile.header || null;
         
-        // 編集画面（モーダル）を開く
         if (modal) {
             modal.style.display = "block";
         }
@@ -560,15 +554,12 @@ removePostImageButton.addEventListener(
         removePostImageButton.style.display =
             "none";
 
-        // ===== 編集 =====
         if (editingPost) {
             editingPost.text = text;
 
             const files = [...postImageUpload.files];
 
-            // 共通の終了処理（リセット・画面更新）を関数化
             const finalizeEdit = () => {
-                // メモリ上のposts配列内にある、編集対象の投稿も最新の状態に更新する
                 const postIndex = posts.findIndex(p => p.id === editingPost.id);
                 if (postIndex !== -1) {
                     posts[postIndex] = editingPost;
@@ -576,11 +567,9 @@ removePostImageButton.addEventListener(
 
                 savePostToDB(editingPost);
 
-                // 画面を再描画して最新の状態を反映させる
                 renderTimeline();
                 renderProfilePosts();
 
-                // フォームをリセットしてモーダルを閉じる
                 modalPostInput.value = "";
                 postImageUpload.value = "";
                 postImagePreview.src = "";
@@ -591,16 +580,13 @@ removePostImageButton.addEventListener(
             };
 
             if (files.length > 0) {
-                // ① 新しい画像が選択された場合
                 const reader = new FileReader();
                 reader.onload = () => {
                     editingPost.image = reader.result;
-                    // 画像の読み込みが終わったら共通処理を実行
                     finalizeEdit();
                 };
                 reader.readAsDataURL(files[0]);
             } else {
-                // ② 画像が新しく選択されなかった場合（テキストのみ変更、または既存画像を維持）
                 finalizeEdit();
             }
 
@@ -715,17 +701,18 @@ function savePosts() {
     );
 }
 
-// プロフィール保存ボタンの処理（function saveProfile() { ... } を丸ごと貼り替え）
+function saveProfiles() {
+    localStorage.setItem("profiles", JSON.stringify(profiles));
+}
+
 function saveProfile() {
     if (!currentAccount) return;
 
-    // 入力された値を取得
     const name = document.getElementById("editName").value;
     const bio = document.getElementById("editBio").value;
     const header = document.getElementById("editHeader").value;
     const icon = document.getElementById("editIcon").value;
 
-    // 現在のアカウントのデータを更新
     profiles[currentAccount] = {
         name: name,
         bio: bio,
@@ -733,17 +720,12 @@ function saveProfile() {
         icon: icon
     };
 
-    // ローカルストレージに保存
-    localStorage.setItem("twit_profiles", JSON.stringify(profiles));
+    localStorage.setItem("profiles", JSON.stringify(profiles));
 
-    // モーダルを閉じる
     const modal = document.getElementById("profileModal");
     if (modal) modal.style.display = "none";
 
-    // 【重要】すべての部屋の表示を最新データに更新する！
     showProfile();
-    
-    // ヘッダーのアイコン一覧なども連動して更新する
     renderAccounts();
     renderTimeline();
 }
@@ -814,44 +796,27 @@ function renderAccounts() {
                 }"
             >
         `;
-accountDiv.addEventListener("click", () => {
-    // 1. すでに選択中のアカウントを「もう1回」押した場合
-    if (currentAccount === account) {
-        if (profilePage.style.display !== "none") return; 
+        accountDiv.addEventListener("click", () => {
+            const targetIndex = accounts.indexOf(account);
+            currentAccount = account;
+            localStorage.setItem("currentAccount", currentAccount);
+            
+            // ✨【追加】最後に選んだアカウントの並び順（インデックス）もセットで保存する
+            localStorage.setItem("currentAccountIndex", targetIndex);
 
-        // 普通にプロフィールを開く
-        showProfile();
-        
-        const container = document.getElementById("profileContainer");
-        const targetIndex = accounts.indexOf(account);
-        if (container) {
-            container.style.transition = "none";
-            container.style.transform = `translateX(-${targetIndex * 100}%)`;
-        }
-    } 
-    // 2. 今とは「別のアカウント」を押した場合
-    else {
-        const targetIndex = accounts.indexOf(account);
-        currentAccount = account;
-        localStorage.setItem("currentAccount", currentAccount);
-        renderAccounts();
-        renderTimeline();
+            renderAccounts();
+            renderTimeline();
 
-        // もしプロフィール画面を開いているなら、X方式で大画面スライド！
-        if (profilePage.style.display !== "none") {
-            // 全部屋のプロフィールデータを最新に更新する
-            showProfile(); 
+            if (profilePage.style.display !== "none") {
+                showProfile(); 
 
-            const container = document.getElementById("profileContainer");
-            if (container) {
-                // 【修正ポイント】余計な innerHTML のコピー処理を完全に削除しました！
-                // X（Twitter）と同じ滑らかさで、それぞれの部屋へスイーッとスライドさせるだけ！
-                container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
-                container.style.transform = `translateX(-${targetIndex * 100}%)`;
+                const container = document.getElementById("profileContainer");
+                if (container) {
+                    container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+                    container.style.transform = `translateX(-${targetIndex * 100}%)`;
+                }
             }
-        }
-    }
-});
+        });
         accountsContainer.appendChild(
             accountDiv
         );
@@ -866,63 +831,21 @@ accountDiv.addEventListener("click", () => {
     addButton.textContent =
         "＋";
 
-// アカウント追加ボタンの処理（今度こそ完全にIDを再現した修正版！）
-addButton.addEventListener("click", () => {
-    const name = prompt("アカウント名を入力してください");
-    if (!name) return;
+    addButton.addEventListener("click", () => {
+        const name = prompt("アカウント名を入力してください");
+        if (!name) return;
 
-    // アカウント配列に追加して保存
-    accounts.push(name);
-    localStorage.setItem("accounts", JSON.stringify(accounts));
+        accounts.push(name);
+        localStorage.setItem("accounts", JSON.stringify(accounts));
 
-    // 💡 HTMLのコンテナを一度空っぽにして、登録されているアカウントの数だけ「部屋」を自動生成する
-    const container = document.getElementById("profileContainer");
-    if (container) {
-        container.innerHTML = ""; // 一旦リセット
+        initializeProfileRooms();
+        renderAccounts();
+        showProfile();
 
-        accounts.forEach((accName) => {
-            const newRoom = document.createElement("div");
-            newRoom.className = "single-profile";
-            
-            // 【修正：classではなく、全て正しい「id」に戻しました！】
-            newRoom.innerHTML = `
-                <div class="profile-header">
-                    <img class="header-image" src="" id="headerImage">
-                   <button class="edit-profile-btn edit-header-button">✏️</button>
-                </div>
-                <div class="profile-info">
-                    <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
-                    <h2 id="profileName">${accName}</h2>
-                    <p id="profileId">@userid</p>
-                    <p id="profileBio">プロフィール未設定</p>
-                    <p id="postCount">投稿数 0</p>
-                    <button id="deleteAccountButton" class="deleteAccountButton">アカウント削除</button>
-                    <div class="follow-counts">
-                        <span id="followingCount">0</span> フォロー
-                        <span id="followerCount">0</span> フォロワー
-                    </div>
-                </div>
-                <div class="profile-tabs">
-                    <div class="profile-tab active" id="postsTab">投稿</div>
-                    <div class="profile-tab" id="likesTab">スキ</div>
-                </div>
-                <div class="timeline" id="profileTimeline"></div>
-            `;
-            container.appendChild(newRoom);
-        });
-    }
-
-    // アカウント選択の丸アイコン一覧を更新
-    renderAccounts();
-    
-    // 生成したすべての部屋にデータを流し込む（これで真っ白が直ります！）
-    showProfile();
-
-    // Swiperなどのスライドのズレを直す
-    if (window.mySwiper && typeof window.mySwiper.update === 'function') {
-        window.mySwiper.update();
-    }
-});
+        if (window.mySwiper && typeof window.mySwiper.update === 'function') {
+            window.mySwiper.update();
+        }
+    });
 
     accountsContainer.appendChild(
         addButton
@@ -945,7 +868,7 @@ function addPostToTimeline(
             postData.account
         ] || {};
 
-post.innerHTML = `
+    post.innerHTML = `
         <div class="post-header">
             <img class="post-icon" src="${profile.icon || "https://via.placeholder.com/50"}">
             <div class="post-user">
@@ -993,395 +916,208 @@ post.innerHTML = `
         </div>
     `;
 
-const pinButton =
-    post.querySelector(
-        ".pin-button"
-    );
-
-if (pinButton) {
-
-pinButton.addEventListener(
-    "click",
-    (event) => {
-
-        event.stopPropagation();
-
-        if (
-            postData.pinned
-        ) {
-
-            postData.pinned =
-                false;
-
-            savePostToDB(
-                postData
-            );
-
-        } else {
-
-            posts.forEach(
-                post => {
-
-                    if (
-                        post.account ===
-                        currentAccount
-                    ) {
-
-                        post.pinned =
-                            false;
-
-                        savePostToDB(
-                            post
-                        );
-                    }
-                }
-            );
-
-            postData.pinned =
-                true;
-
-            savePostToDB(
-                postData
-            );
-        }
-
-        
-
-        renderTimeline();
-        renderProfilePosts();
-    }
-);
-}
-
-
-
-const deleteButton =
+    const pinButton =
         post.querySelector(
-            ".delete-button"
+            ".pin-button"
         );
 
-const editButton =
-    post.querySelector(
-        ".edit-button"
-    );
+    if (pinButton) {
+        pinButton.addEventListener(
+            "click",
+            (event) => {
+                event.stopPropagation();
 
-const likeButton =
-    post.querySelector(
-        ".like-button"
-    );
-
-const commentButton =
-    post.querySelector(
-        ".comment-button"
-    );
-
-if (commentButton) {
-
-commentButton.addEventListener(
-    "click",
-    (event) => {
-
-        event.stopPropagation();
-
-        openPostDetail(
-            postData
-        );
-
-        }
-    );
-}
-
-if (likeButton) {
-    likeButton.addEventListener(
-        "click",
-        () => {
-
-            if (!postData.likedBy) {
-
-                postData.likedBy = [];
-
-            }
-
-            if (
-                postData.likedBy.includes(
-                    currentAccount
-                )
-            ) {
-
-                postData.likedBy =
-                    postData.likedBy.filter(
-                        account =>
-                            account !==
-                            currentAccount
+                if (postData.pinned) {
+                    postData.pinned = false;
+                    savePostToDB(postData);
+                } else {
+                    posts.forEach(
+                        post => {
+                            if (post.account === currentAccount) {
+                                post.pinned = false;
+                                savePostToDB(post);
+                            }
+                        }
                     );
+                    postData.pinned = true;
+                    savePostToDB(postData);
+                }
 
-                postData.likes--;
-
-            } else {
-
-                postData.likedBy.push(
-                    currentAccount
-                );
-
-                postData.likes++;
-
+                renderTimeline();
+                renderProfilePosts();
             }
+        );
+    }
 
-            savePostToDB(
-                postData
+    const deleteButton =
+            post.querySelector(
+                ".delete-button"
             );
 
-            renderTimeline();
+    const editButton =
+        post.querySelector(
+            ".edit-button"
+        );
 
-            renderProfilePosts();
-        }
-    );
-} // ← この閉じカッコの下！
+    const likeButton =
+        post.querySelector(
+            ".like-button"
+        );
 
-if (commentButton) {
+    const commentButton =
+        post.querySelector(
+            ".comment-button"
+        );
 
+    if (commentButton) {
+        commentButton.addEventListener(
+            "click",
+            (event) => {
+                event.stopPropagation();
+                openPostDetail(postData);
+            }
+        );
+    }
 
-}
+    if (likeButton) {
+        likeButton.addEventListener(
+            "click",
+            () => {
+                if (!postData.likedBy) {
+                    postData.likedBy = [];
+                }
 
-if (editButton) {
+                if (postData.likedBy.includes(currentAccount)) {
+                    postData.likedBy = postData.likedBy.filter(account => account !== currentAccount);
+                    postData.likes--;
+                } else {
+                    postData.likedBy.push(currentAccount);
+                    postData.likes++;
+                }
 
-editButton.addEventListener(
-    "click",
-    (event) => {
+                savePostToDB(postData);
+                renderTimeline();
+                renderProfilePosts();
+            }
+        );
+    }
 
-        event.stopPropagation();
+    if (editButton) {
+        editButton.addEventListener(
+            "click",
+            (event) => {
+                event.stopPropagation();
 
-const profile =
-    profiles[currentAccount] || {};
+                const profile = profiles[currentAccount] || {};
+                postUserIcon.src = profile.icon || "https://via.placeholder.com/60";
 
-postUserIcon.src =
-    profile.icon ||
-    "https://via.placeholder.com/60";
+                editingPost = postData;
+                modalPostInput.value = postData.text;
 
-editingPost = postData;
+                if (postData.image) {
+                    postImagePreview.src = postData.image;
+                    document.querySelector(".preview-container").style.display = "block";
+                } else {
+                    document.querySelector(".preview-container").style.display = "none";
+                }
 
-modalPostInput.value =
-    postData.text;
+                editProfileModal.style.display = "none";
+                postModal.style.display = "block";
+                modalPostButton.textContent = "保存";
 
-if (postData.image) {
-
-    postImagePreview.src =
-        postData.image;
-
-   document.querySelector(
-    ".preview-container"
-).style.display =
-    "block";
-} else {
-
-  document.querySelector(
-    ".preview-container"
-).style.display =
-    "none";
-}
-
-editProfileModal.style.display =
-    "none";
-
-postModal.style.display =
-    "block";
-
-modalPostButton.textContent =
-    "保存";
-
-postModal.style.display = "block";
-
-requestAnimationFrame(() => {
-    modalPostInput.focus();
-});
-        }
-    );
-}
+                requestAnimationFrame(() => {
+                    modalPostInput.focus();
+                });
+            }
+        );
+    }
 
     deleteButton.addEventListener(
         "click",
         (event) => {
+            event.stopPropagation();
 
-    event.stopPropagation();
-
-            const result =
-                confirm(
-                    "この投稿を削除しますか？"
-                );
-
+            const result = confirm("この投稿を削除しますか？");
             if (!result) return;
 
-            const index =
-                posts.indexOf(
-                    postData
-                );
+            const index = posts.indexOf(postData);
 
-            if (
-                index !== -1
-            ) {
+            if (index !== -1) {
+                posts.splice(index, 1);
 
-              posts.splice(
-    index,
-    1
-);
+                const transaction = db.transaction(["posts"], "readwrite");
+                const store = transaction.objectStore("posts");
+                store.delete(postData.id);
 
-const transaction =
-    db.transaction(
-        ["posts"],
-        "readwrite"
-    );
-
-const store =
-    transaction.objectStore(
-        "posts"
-    );
-
-store.delete(
-    postData.id
-);
-
-renderTimeline();
-
-renderProfilePosts();
+                renderTimeline();
+                renderProfilePosts();
             }
         }
     );
 
-const images =
-    post.querySelectorAll(
-        ".clickable-image"
+    const images = post.querySelectorAll(".clickable-image");
+    images.forEach(
+        image => {
+            image.addEventListener(
+                "click",
+                event => {
+                    event.stopPropagation();
+                    modalImage.src = image.src;
+                    imageModal.style.display = "flex";
+                }
+            );
+        }
     );
 
-images.forEach(
-    image => {
-
-        image.addEventListener(
+    const video = post.querySelector(".post-video");
+    if (video) {
+        video.addEventListener(
             "click",
-            event => {
-
-                event.stopPropagation();
-
-                modalImage.src =
-                    image.src;
-
-                imageModal.style.display =
-                    "flex";
-
+            () => {
+                modalVideo.src = video.querySelector("source").src;
+                videoModal.style.display = "flex";
             }
         );
-
     }
-);
-
-const video =
-    post.querySelector(
-        ".post-video"
-    );
-
-if (video) {
-
-    video.addEventListener(
-        "click",
-        () => {
-
-            modalVideo.src =
-                video.querySelector(
-                    "source"
-                ).src;
-
-            videoModal.style.display =
-                "flex";
-        }
-    );
-}
 
     container.appendChild(post);
 }
 
 function renderTimeline() {
-
     timeline.innerHTML = "";
 
-   const sortedPosts =
-    [...posts]
-    .sort(
-        (a, b) =>
-            b.time - a.time
-    );
+    const sortedPosts = [...posts].sort((a, b) => b.time - a.time);
 
     for (const post of sortedPosts) {
-
-        addPostToTimeline(
-            post,
-            timeline
-        );
+        addPostToTimeline(post, timeline);
     }
 }
 
 function renderProfilePosts() {
+    profileTimeline.innerHTML = "";
 
-    profileTimeline.innerHTML =
-        "";
+    let targetPosts;
 
- let targetPosts;
+    if (profileMode === "posts") {
+        targetPosts = posts.filter(post => post.account === currentAccount);
+    } else {
+        targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
+    }
 
-if (
-    profileMode === "posts"
-) {
-
-    targetPosts =
-        posts.filter(
-            post =>
-                post.account ===
-                currentAccount
-        );
-
-} else {
-
-    targetPosts =
-        posts.filter(
-            post =>
-
-                post.likedBy &&
-
-                post.likedBy.includes(
-                    currentAccount
-                )
-        );
-}
-
-const sortedPosts =
-    [...targetPosts]
-        .sort(
-            (a, b) => {
-
-                if (
-                    (a.pinned || false) !==
-                    (b.pinned || false)
-                ) {
-                    return (
-                        (b.pinned || false) -
-                        (a.pinned || false)
-                    );
-                }
-
-                return (
-                    b.time -
-                    a.time
-                );
+    const sortedPosts = [...targetPosts].sort(
+        (a, b) => {
+            if ((a.pinned || false) !== (b.pinned || false)) {
+                return (b.pinned || false) - (a.pinned || false);
             }
-        );
+            return b.time - a.time;
+        }
+    );
 
     for (const post of sortedPosts) {
-
-        addPostToTimeline(
-            post,
-            profileTimeline
-        );
+        addPostToTimeline(post, profileTimeline);
     }
 }
 
-// ✨ ここからコピーして貼り付けてください！
 function initializeProfileRooms() {
     const container = document.getElementById("profileContainer");
     if (!container) return;
@@ -1421,7 +1157,23 @@ function initializeProfileRooms() {
     });
 }
 
-// 削除ボタンを動かすための命令（これも一緒に貼り付けておいてください！）
+// ✨ ページ読み込み時に完全に復元する処理
+document.addEventListener("DOMContentLoaded", () => {
+    initializeProfileRooms(); 
+    renderAccounts();         
+    showProfile();            
+
+    // 前回開いていたアカウントのインデックスを復元してスライドさせる
+    const savedIndex = localStorage.getItem("currentAccountIndex");
+    if (savedIndex !== null) {
+        const container = document.getElementById("profileContainer");
+        if (container) {
+            container.style.transition = "none"; // 初回配置時はアニメーションをオフにして一瞬で移動
+            container.style.transform = `translateX(-${savedIndex * 100}%)`;
+        }
+    }
+});
+
 document.addEventListener("click", (e) => {
     if (e.target.classList.contains("deleteAccountButton") || e.target.id === "deleteAccountButton") {
         const index = e.target.getAttribute("data-index");
@@ -1436,25 +1188,17 @@ document.addEventListener("click", (e) => {
             localStorage.setItem("accounts", JSON.stringify(savedAccounts));
             accounts = savedAccounts;
 
+            // 削除した後の安全対策として、初期インデックスに戻す
+            localStorage.setItem("currentAccountIndex", 0);
+
             initializeProfileRooms();
             if (typeof renderAccounts === "function") renderAccounts();
             if (typeof showProfile === "function") showProfile();
             
-            location.reload(); // 画面をスッキリ更新！
+            location.reload(); 
         }
     }
 });
-// ✨ コピーここまで！
-// 🚀 ページが読み込まれたとき（一番最初）に実行する処理を書き換える
-// 元々ある renderAccounts() や showProfile() の呼び出し部分を以下のように並び替えてください
-document.addEventListener("DOMContentLoaded", () => {
-    initializeProfileRooms(); // ① まず部屋を全アカウント分用意する
-    renderAccounts();         // ② 上の丸アイコン一覧を作る
-    showProfile();            // ③ 部屋にデータを配る
-});
-
-// ※もし DOMContentLoaded がすでに他にある場合は、その中で
-// initializeProfileRooms(); を最初に呼ぶように書き換えるだけでもOKです！
 
 function showProfile() {
     const container = document.getElementById("profileContainer");
@@ -1462,23 +1206,19 @@ function showProfile() {
     
     const rooms = container.getElementsByClassName("single-profile");
 
-    // アカウントの部屋（0, 1, 2）をループして、それぞれの部屋に正しいデータを届ける
     accounts.forEach((accountName, index) => {
         const currentRoom = rooms[index];
         if (!currentRoom) return;
 
-        // その部屋が担当するアカウントのプロフィールデータを取得
         const profile = profiles[accountName] || {};
         const userPosts = posts.filter(post => post.account === accountName);
 
-        // ヘッダーとアイコンをその部屋のアカウントのものに書き換える
         const headerEl = currentRoom.querySelector(".header-image");
         if (headerEl) headerEl.src = profile.header || "";
 
         const iconEl = currentRoom.querySelector(".profile-icon");
         if (iconEl) iconEl.src = profile.icon || "https://via.placeholder.com/60";
         
-        // 名前・ID・自己紹介
         const nameEl = currentRoom.querySelector("h2");
         if (nameEl) nameEl.textContent = profile.name || accountName;
         
@@ -1488,21 +1228,17 @@ function showProfile() {
         const bioEl = currentRoom.querySelector("p:nth-of-type(2)");
         if (bioEl) bioEl.textContent = profile.bio || "プロフィール未設定";
         
-        // 投稿数
         const countEl = currentRoom.querySelector("p:nth-of-type(3)");
         if (countEl) countEl.textContent = "投稿数 " + userPosts.length;
 
-        // その部屋のアカウント専用のタイムラインを表示する
         const roomTimeline = currentRoom.querySelector("#profileTimeline");
         if (roomTimeline) {
-            roomTimeline.innerHTML = ""; // 一度リセット
+            roomTimeline.innerHTML = ""; 
             
-            // タブの選択状態（posts か likes か）に合わせて投稿をフィルタリング
             const targetPosts = profileMode === "posts" 
                 ? userPosts 
                 : posts.filter(post => post.likedBy && post.likedBy.includes(accountName));
 
-            // ピン留めを上にするソート処理
             const sortedPosts = [...targetPosts].sort((a, b) => {
                 if ((a.pinned || false) !== (b.pinned || false)) {
                     return (b.pinned || false) - (a.pinned || false);
@@ -1510,14 +1246,12 @@ function showProfile() {
                 return b.time - a.time;
             });
 
-            // その部屋のタイムラインに投稿を追加
             for (const post of sortedPosts) {
                 addPostToTimeline(post, roomTimeline);
             }
         }
     });
 
-    // 全体画面の切り替え
     timeline.style.display = "none";
     profilePage.style.display = "block";
 }
@@ -1548,14 +1282,11 @@ postButton.addEventListener(
         modalPostButton.textContent =
             "投稿";
 
-postModal.style.display =
-    "block";
+        postModal.style.display = "block";
 
-postModal.style.display = "block";
-
-requestAnimationFrame(() => {
-    modalPostInput.focus();
-});
+        requestAnimationFrame(() => {
+            modalPostInput.focus();
+        });
     }
 );
 
@@ -1647,24 +1378,19 @@ modalPostButton.addEventListener(
             return;
         }
 
-        // ===== 編集 =====
-
-if (editingPost) {
+        if (editingPost) {
             editingPost.text = text;
 
             const files = [...postImageUpload.files];
 
-            // 共通の終了処理（保存が完全に終わってから画面を動かす）
             const finalizeEdit = () => {
                 const transaction = db.transaction(["posts"], "readwrite");
                 const store = transaction.objectStore("posts");
                 const request = store.put(editingPost);
 
                 request.onsuccess = () => {
-                    // 最新データをデータベースから再読み込みして画面を更新
                     loadPosts();
 
-                    // 各種入力欄やモーダルのリセット
                     modalPostInput.value = "";
                     postImageUpload.value = "";
                     postImagePreview.src = "";
@@ -1688,8 +1414,6 @@ if (editingPost) {
 
             return;
         }
-
-        // ===== 新規投稿 =====
 
         const files =
             [...postImageUpload.files];
@@ -1726,56 +1450,56 @@ if (editingPost) {
             let loaded =
                 0;
 
- files.forEach(
-    (file, index) => {
+            files.forEach(
+                (file, index) => {
 
-        const reader =
-            new FileReader();
+                    const reader =
+                        new FileReader();
 
-        reader.onload =
-            () => {
+                    reader.onload =
+                        () => {
 
-                newPost.images[index] =
-                    reader.result;
+                            newPost.images[index] =
+                                reader.result;
 
-                loaded++;
+                            loaded++;
 
-                if (
-                    loaded ===
-                    files.length
-                ) {
+                            if (
+                                loaded ===
+                                files.length
+                            ) {
 
-                    posts.push(
-                        newPost
+                                posts.push(
+                                    newPost
+                                );
+
+                                savePostToDB(
+                                    newPost
+                                );
+
+                                modalPostInput.value =
+                                    "";
+
+                                postImageUpload.value =
+                                    "";
+
+                                document.querySelector(
+                                    ".preview-container"
+                                ).style.display =
+                                    "none";
+
+                                postModal.style.display =
+                                    "none";
+                            }
+
+                        };
+
+                    reader.readAsDataURL(
+                        file
                     );
 
-                    savePostToDB(
-                        newPost
-                    );
-
-                    modalPostInput.value =
-                        "";
-
-                    postImageUpload.value =
-                        "";
-
-                    document.querySelector(
-                        ".preview-container"
-                    ).style.display =
-                        "none";
-
-                    postModal.style.display =
-                        "none";
                 }
-
-            };
-
-        reader.readAsDataURL(
-            file
-        );
-
-    }
-);
+            );
         } else {
 
             const newPost = {
@@ -1835,9 +1559,6 @@ backButton.addEventListener(
     }
 );
 
-
-
-
 headerUpload.addEventListener(
     "change",
     () => {
@@ -1849,43 +1570,41 @@ headerUpload.addEventListener(
 
         const reader =
             new FileReader();
-console.log("header start");
-reader.onload = () => {
+        console.log("header start");
+        reader.onload = () => {
 
-    cropTarget =
-        "header";
+            cropTarget =
+                "header";
 
-    cropImage.src =
-        reader.result;
+            cropImage.src =
+                reader.result;
 
-    cropModal.style.display =
-        "block";
+            cropModal.style.display =
+                "block";
 
-        
+            cropImage.onload = () => {
 
-    cropImage.onload = () => {
+                if (cropper) {
 
-        if (cropper) {
+                    cropper.destroy();
+                }
 
-            cropper.destroy();
-        }
+                cropper =
+                    new Cropper(
+                        cropImage,
+                        {
+                            aspectRatio: 3,
+                            viewMode: 1,
 
-cropper =
-    new Cropper(
-        cropImage,
-        {
-            aspectRatio: 3,
-            viewMode: 1,
+                            dragMode: "move",
 
-            dragMode: "move",
+                            cropBoxMovable: false,
 
-            cropBoxMovable: false,
-
-            cropBoxResizable: false
-        }
-    );
-    };
-};
+                            cropBoxResizable: false
+                        }
+                    );
+            };
+        };
 
         reader.readAsDataURL(
             file
@@ -1905,42 +1624,40 @@ iconUpload.addEventListener(
         const reader =
             new FileReader();
 
-reader.onload = () => {
+        reader.onload = () => {
 
-    cropTarget =
-        "icon";
+            cropTarget =
+                "icon";
 
-    cropImage.src =
-        reader.result;
+            cropImage.src =
+                reader.result;
 
-    cropModal.style.display =
-        "block";
+            cropModal.style.display =
+                "block";
 
-    cropImage.onload = () => {
+            cropImage.onload = () => {
 
-        if (cropper) {
+                if (cropper) {
 
-            cropper.destroy();
-        }
+                    cropper.destroy();
+                }
 
-cropper =
-    new Cropper(
-        cropImage,
-        {
-            aspectRatio: 1,
-            viewMode: 1,
+                cropper =
+                    new Cropper(
+                        cropImage,
+                        {
+                            aspectRatio: 1,
+                            viewMode: 1,
 
-            dragMode: "move",
+                            dragMode: "move",
 
-            cropBoxMovable: false,
+                            cropBoxMovable: false,
 
-            cropBoxResizable: false
-
-            
-        }
-    );
-    };
-};
+                            cropBoxResizable: false
+                        }
+                    );
+            };
+        };
 
         reader.readAsDataURL(
             file
@@ -1960,14 +1677,12 @@ cropCancelButton.addEventListener(
             cropper.destroy();
 
             cropper = null;
-             cropImage.src = "";
+            cropImage.src = "";
              
         }
         
     }
 );
-
-
 
 cropConfirmButton.addEventListener(
     "click",
@@ -2010,7 +1725,6 @@ cropConfirmButton.addEventListener(
     }
 );
 
-
 imageModal.addEventListener(
     "click",
     () => {
@@ -2033,13 +1747,13 @@ videoModal.addEventListener(
 
 let db;
 
-const request =
+const indexedDBRequest =
     indexedDB.open(
         "MyMemoDB",
         1
     );
 
-request.onupgradeneeded =
+indexedDBRequest.onupgradeneeded =
     event => {
 
     db =
@@ -2061,7 +1775,7 @@ request.onupgradeneeded =
     }
 };
 
-request.onsuccess =
+indexedDBRequest.onsuccess =
     event => {
 
     db =
@@ -2082,12 +1796,11 @@ function savePostToDB(post) {
             "posts"
         );
 
-    const request =
+    const storeRequest =
         store.put(post);
 
-    request.onsuccess =
+    storeRequest.onsuccess =
         () => {
-            // 保存が成功したら、最新のデータをデータベースから読み直す
             loadPosts();
         };
 }
@@ -2104,15 +1817,14 @@ function loadPosts() {
             "posts"
         );
 
-    const request =
+    const storeRequest =
         store.getAll();
 
-    request.onsuccess =
+    storeRequest.onsuccess =
         () => {
         posts =
-            request.result;
+            storeRequest.result;
 
-        // データベースから読み込みが終わったタイミングで、両方のタイムラインを更新する
         renderTimeline();
         renderProfilePosts();
     };
@@ -2161,11 +1873,14 @@ deleteAccountButton.addEventListener(
             posts.filter(
                 post =>
                     post.account !== currentAccount
-            );
+                );
 
         saveAccounts();
         saveProfiles();
         savePosts();
+
+        // 削除後の安全対策
+        localStorage.setItem("currentAccountIndex", 0);
 
         if (
             accounts.length > 0
@@ -2229,7 +1944,7 @@ function renderComments() {
         commentDiv.className =
             "comment";
 
- commentDiv.innerHTML = `
+        commentDiv.innerHTML = `
 <div class="comment-header">
 
     <img
@@ -2296,7 +2011,7 @@ function openPostDetail(
         postData,
         detailPost
     );
-renderDetailComments();
+    renderDetailComments();
 }
 
 backFromDetailButton.addEventListener(
@@ -2420,14 +2135,12 @@ function renderDetailComments() {
 
 }
 
-// 保存・決定ボタンの処理
 document.addEventListener("click", (e) => {
     if (e.target.id === "saveProfileButton" || e.target.id === "saveButton" || e.target.innerText.trim() === "保存" || e.target.innerText.trim() === "決定") {
         e.preventDefault();
 
         if (!currentAccount) return;
 
-        // データをオブジェクトにまとめてローカルストレージに保存
         profiles[currentAccount] = {
             name: editName.value,
             id: editId.value,
@@ -2438,7 +2151,6 @@ document.addEventListener("click", (e) => {
 
         localStorage.setItem("profiles", JSON.stringify(profiles));
 
-        // モーダルを閉じて画面を更新
         editProfileModal.style.display = "none";
         showProfile(); 
         
@@ -2481,7 +2193,6 @@ function renderSearchHistory() {
             deleteButton.className =
                 "history-delete";
 
-            // ×を左にしたいので先に追加
             div.appendChild(
                 deleteButton
             );
@@ -2490,7 +2201,6 @@ function renderSearchHistory() {
                 text
             );
 
-            // 履歴を押したら検索
             div.addEventListener(
                 "click",
                 () => {
@@ -2505,7 +2215,6 @@ function renderSearchHistory() {
                 }
             );
 
-            // ×を押したら削除
             deleteButton.addEventListener(
                 "click",
                 event => {
