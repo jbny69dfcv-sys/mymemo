@@ -800,20 +800,18 @@ function renderAccounts() {
             const targetIndex = accounts.indexOf(account);
             currentAccount = account;
             localStorage.setItem("currentAccount", currentAccount);
-            
-
+            localStorage.setItem("currentAccountIndex", targetIndex);
 
             renderAccounts();
             renderTimeline();
 
-            if (profilePage.style.display !== "none") {
-                showProfile(); 
+            // ✨【修正】アイコンを押したときは、プロフィール画面を表示するように変更
+            showProfile(); 
 
-                const container = document.getElementById("profileContainer");
-                if (container) {
-                    container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
-                    container.style.transform = `translateX(-${targetIndex * 100}%)`;
-                }
+            const container = document.getElementById("profileContainer");
+            if (container) {
+                container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+                container.style.transform = `translateX(-${targetIndex * 100}%)`;
             }
         });
         accountsContainer.appendChild(
@@ -1156,18 +1154,27 @@ function initializeProfileRooms() {
     });
 }
 
-// ✨ ページ読み込み時に最後に選択していたアカウントでタイムラインを開く
+// ✨【修正】ページ読み込み時は、最後に選んでいたアカウントの状態で「メインタイムライン」を開く
 document.addEventListener("DOMContentLoaded", () => {
     initializeProfileRooms(); 
-    renderAccounts();         // これで前回のアカウントの選択状態が復元されます
+    renderAccounts();         
 
-    // プロフィール画面ではなく、メインのタイムラインを表示する
+    // 更新時はメインタイムラインを開いた状態にする
     timeline.style.display = "block";
     profilePage.style.display = "none";
     
-    // 他の不要なページも非表示にしておく安全対策
     if (postDetailPage) postDetailPage.style.display = "none";
     if (searchPage) searchPage.style.display = "none";
+
+    // プロフィール表示用の事前スライド位置だけ計算してセットしておく
+    const savedIndex = localStorage.getItem("currentAccountIndex");
+    if (savedIndex !== null) {
+        const container = document.getElementById("profileContainer");
+        if (container) {
+            container.style.transition = "none";
+            container.style.transform = `translateX(-${savedIndex * 100}%)`;
+        }
+    }
 });
 
 document.addEventListener("click", (e) => {
@@ -1184,7 +1191,6 @@ document.addEventListener("click", (e) => {
             localStorage.setItem("accounts", JSON.stringify(savedAccounts));
             accounts = savedAccounts;
 
-            // 削除した後の安全対策として、初期インデックスに戻す
             localStorage.setItem("currentAccountIndex", 0);
 
             initializeProfileRooms();
@@ -1875,7 +1881,6 @@ deleteAccountButton.addEventListener(
         saveProfiles();
         savePosts();
 
-        // 削除後の安全対策
         localStorage.setItem("currentAccountIndex", 0);
 
         if (
