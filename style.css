@@ -1301,3 +1301,7 @@ top: -0px;
     width: 100%;
     box-sizing: border-box;
 }
+
+html, body {
+    touch-action: manipulation;
+}
