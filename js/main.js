@@ -1124,6 +1124,7 @@ function renderProfilePosts() {
     }
 }
 
+// ✨ プロフィール部屋を作るときに、タブのクリックイベントも一緒に登録する
 function initializeProfileRooms() {
     const container = document.getElementById("profileContainer");
     if (!container) return;
@@ -1154,11 +1155,32 @@ function initializeProfileRooms() {
                 </div>
             </div>
             <div class="profile-tabs">
-                <div class="profile-tab active" id="postsTab">投稿</div>
-                <div class="profile-tab" id="likesTab">スキ</div>
+                <div class="profile-tab active room-posts-tab">投稿</div>
+                <div class="profile-tab room-likes-tab">スキ</div>
             </div>
             <div class="timeline" id="profileTimeline"></div>
         `;
+
+        // 💡 新しく作った部屋の中のタブに対して、クリックイベントを設定します
+        const pTab = newRoom.querySelector(".room-posts-tab");
+        const lTab = newRoom.querySelector(".room-likes-tab");
+
+        if (pTab && lTab) {
+            pTab.addEventListener("click", () => {
+                profileMode = "posts";
+                pTab.classList.add("active");
+                lTab.classList.remove("active");
+                renderProfilePosts();
+            });
+
+            lTab.addEventListener("click", () => {
+                profileMode = "likes";
+                lTab.classList.add("active");
+                pTab.classList.remove("active");
+                renderProfilePosts();
+            });
+        }
+
         container.appendChild(newRoom);
     });
 }
