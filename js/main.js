@@ -2145,7 +2145,11 @@ function renderDetailComments() {
 
 }
 
+// ✨ 投稿編集の「保存」に反応しないように修正
 document.addEventListener("click", (e) => {
+    // 💡 押されたのが投稿モーダルのボタンなら、プロフィールの処理は絶対にやらない
+    if (e.target.id === "modalPostButton") return;
+
     if (e.target.id === "saveProfileButton" || e.target.id === "saveButton" || e.target.innerText.trim() === "保存" || e.target.innerText.trim() === "決定") {
         e.preventDefault();
 
