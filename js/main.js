@@ -1337,6 +1337,8 @@ function showProfile() {
     
     // 全ての部屋を取得し、現在の部屋（マス）を特定する
     const container = document.getElementById("profileContainer");
+    if (!container) return;
+    
     const rooms = container.getElementsByClassName("single-profile");
     const currentRoom = rooms[targetIndex];
 
@@ -1344,78 +1346,49 @@ function showProfile() {
         // id ではなく class を狙って、その部屋のデータだけを安全に書き換える！
         currentRoom.querySelector(".header-image").src = profile.header || "";
         currentRoom.querySelector(".profile-icon").src = profile.icon || "https://via.placeholder.com/60";
-        currentRoom.querySelector(".p-name").textContent = profile.name || currentAccount;
-        currentRoom.querySelector(".p-id").textContent = "@" + (profile.id || currentAccount);
-        currentRoom.querySelector(".p-bio").textContent = profile.bio || "";
         
+        // クラス名（p-name, p-id, p-bio）がHTML側に無いため、直にタグやIDを考慮して安全に取得
+        const nameEl = currentRoom.querySelector("h2");
+        if (nameEl) nameEl.textContent = profile.name || currentAccount;
+        
+        const idEl = currentRoom.querySelector("p:nth-of-type(1)");
+        if (idEl) idEl.textContent = "@" + (profile.id || "userid");
+        
+        const bioEl = currentRoom.querySelector("p:nth-of-type(2)");
+        if (bioEl) bioEl.textContent = profile.bio || "プロフィール未設定";
+        
+        // 投稿数を計算して反映
+        const userPosts = posts.filter(post => post.account === currentAccount);
+        const countEl = currentRoom.querySelector("p:nth-of-type(3)");
+        if (countEl) countEl.textContent = "投稿数 " + userPosts.length;
+
         // そのアカウントの投稿だけを、その部屋のタイムラインに表示する
-        const profileTimeline = currentRoom.querySelector(".profile-timeline");
-        profileTimeline.innerHTML = ""; // 一度リセット
-        
-        // 【ここに元々あった「そのアカウントの投稿を表示するループ処理」を入れてください】
-        // 例: const userPosts = posts.filter(p => p.account === currentAccount); ...等
+        const roomTimeline = currentRoom.querySelector("#profileTimeline");
+        if (roomTimeline) {
+            roomTimeline.innerHTML = ""; // 一度リセット
+            
+            // プロフィール専用の並び替え（固定ピンを上にする）
+            const targetPosts = profileMode === "posts" 
+                ? userPosts 
+                : posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
+
+            const sortedPosts = [...targetPosts].sort((a, b) => {
+                if ((a.pinned || false) !== (b.pinned || false)) {
+                    return (b.pinned || false) - (a.pinned || false);
+                }
+                return b.time - a.time;
+            });
+
+            // タイムラインに投稿を追加していく
+            for (const post of sortedPosts) {
+                addPostToTimeline(post, roomTimeline);
+            }
+        }
     }
 
-    // ▲ 【追加ここまで】▲
-
-    // --- ここから下は、元々 showProfile() の中にあったコードのままでOK ---
-    // 例: const profile = profiles[currentAccount]; ... など
-
-    const profile =
-        profiles[currentAccount] || {};
-
-   profileName.textContent =
-    profile.name ||
-    currentAccount;
-    profileId.textContent =
-        "@" +
-        (
-            profile.id ||
-            "userid"
-        );
-
-    profileBio.textContent =
-        profile.bio ||
-        "プロフィール未設定";
-const userPosts =
-    posts.filter(
-        post =>
-            post.account ===
-            currentAccount
-    );
-
-postCount.textContent =
-    userPosts.length + " 件の投稿";
-    followingCount.textContent =
-    "0 フォロー中";
-
-followerCount.textContent =
-    "0 フォロワー";
-
-    const count =
-        posts.filter(
-            post =>
-                post.account ===
-                currentAccount
-        ).length;
-
-    postCount.textContent =
-        "投稿数 " + count;
-
-    profileIcon.src =
-        profile.icon ||
-        "https://via.placeholder.com/100";
-
-    headerImage.src =
-        profile.header || "";
-
-    renderProfilePosts();
-
-    timeline.style.display =
-        "none";
-
-    profilePage.style.display =
-        "block";
+    // 全体画面の切り替え
+    timeline.style.display = "none";
+    profilePage.style.display = "block";
 }
 
 postButton.addEventListener(
