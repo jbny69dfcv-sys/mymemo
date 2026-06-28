@@ -676,6 +676,11 @@ cursor: pointer;
     gap: 20px;
 
     margin: 20px 0;
+
+    display: flex;
+    justify-content: space-around; /* または space-between */
+    width: 100%;
+    border-bottom: 1px solid #eee; /* 好みで下線を入れるとさらに綺麗になります */
 }
 
 .profile-tab {
@@ -689,6 +694,10 @@ cursor: pointer;
     font-weight: bold;
 
     cursor: pointer;
+
+    flex: 1;            /* 2つのボタンを50%ずつの等幅にする */
+    text-align: center; /* 文字を中央寄せにする */
+    padding: 10px 0;    /* 上下に少し余白を作って押しやすくする */
 }
 
 .profile-tab.active {
