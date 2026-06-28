@@ -2145,32 +2145,7 @@ function renderDetailComments() {
 
 }
 
-// ✨ 投稿編集の「保存」に反応しないように修正
-document.addEventListener("click", (e) => {
-    // 💡 押されたのが投稿モーダルのボタンなら、プロフィールの処理は絶対にやらない
-    if (e.target.id === "modalPostButton") return;
-
-    if (e.target.id === "saveProfileButton" || e.target.id === "saveButton" || e.target.innerText.trim() === "保存" || e.target.innerText.trim() === "決定") {
-        e.preventDefault();
-
-        if (!currentAccount) return;
-
-        profiles[currentAccount] = {
-            name: editName.value,
-            id: editId.value,
-            bio: editBio.value,
-            icon: tempIcon || (profiles[currentAccount] ? profiles[currentAccount].icon : "https://via.placeholder.com/60"),
-            header: tempHeader || (profiles[currentAccount] ? profiles[currentAccount].header : "")
-        };
-
-        localStorage.setItem("profiles", JSON.stringify(profiles));
-
-        editProfileModal.style.display = "none";
-        showProfile(); 
-        
-        console.log("プロフィールを保存しました！", profiles[currentAccount]);
-    }
-});
+プロフィールを保存しました
 
 function renderSearchHistory() {
 
