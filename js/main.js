@@ -883,111 +883,41 @@ function addPostToTimeline(
             postData.account
         ] || {};
 
-    post.innerHTML = `
+post.innerHTML = `
         <div class="post-header">
+            <img class="post-icon" src="${profile.icon || "https://via.placeholder.com/50"}">
+            <div class="post-user">
+                <div>
+                    ${profile.name || postData.account}
+                    <span class="post-id">@${profile.id || "userid"}</span>
+                </div>
+                <div class="post-time">${formatTime(postData.time)}</div>
+            </div>
+            <div class="post-buttons">
+                <button class="pin-button">${postData.pinned ? "📍" : "📌"}</button>
+                <button class="edit-button">✏️</button>
+                <button class="delete-button">✕</button>
+            </div>
+        </div>
 
-            <img
-                class="post-icon"
-                src="${
-                    profile.icon ||
-                    "https://via.placeholder.com/50"
-                }"
-            >
-
- <div class="post-user">
-
-    <div>
-        ${profile.name || postData.account}
-
-        <span class="post-id">
-            @${profile.id || "userid"}
-        </span>
-    </div>
-
-    <div class="post-time">
-        ${formatTime(
-            postData.time
-        )}
-    </div>
-
-</div>
-
-<div class="post-buttons">
-
-<button
-    class="pin-button"
->
-    ${
-    postData.pinned
-    ? "📍"
-    : "📌"
-}
-</button>
-
-<button
-    class="edit-button"
->
-    ✏️
-</button>
-
-<button
-    class="delete-button"
->
-    ✕
-</button>
-
-</div>
-
-</div>
-
-<div class="post-body">
-
-<div class="post-text">${postData.text}</div>
-
-<div class="post-actions">
-
-<button
-    class="like-button"
->
-${
-    postData.likedBy &&
-    postData.likedBy.includes(
-        currentAccount
-    )
-        ? "❤️"
-        : "🤍"
-}
-${postData.likes || 0}
-</button>
-
-<button
-    class="comment-button"
->
-💬
-${
-    postData.comments
-        ? postData.comments.length
-        : 0
-}
-</button>
-
-</div>
-
-${
-    postData.images && postData.images.length > 0
-    ? `
-    <div class="post-images ${
-        postData.images.length === 1 ? "one" : 
-        postData.images.length === 2 ? "two" : 
-        postData.images.length === 3 ? "three" : "four"
-    }">
-        ${postData.images.map(image => `<img src="${image}" class="post-image clickable-image">`).join("")}
-    </div>
-    `
-    : postData.image
-    ? `<img src="${postData.image}" class="post-image clickable-image">`
-    : ""
-}
+        <div class="post-body">
+            <div class="post-text">${postData.text}</div>
+            
+            ${
+                postData.images && postData.images.length > 0
+                ? `
+                <div class="post-images ${
+                    postData.images.length === 1 ? "one" : 
+                    postData.images.length === 2 ? "two" : 
+                    postData.images.length === 3 ? "three" : "four"
+                }">
+                    ${postData.images.map(image => `<img src="${image}" class="post-image clickable-image">`).join("")}
+                </div>
+                `
+                : postData.image
+                ? `<img src="${postData.image}" class="post-image clickable-image">`
+                : ""
+            }
 
             <div class="post-actions">
                 <button class="like-button">
