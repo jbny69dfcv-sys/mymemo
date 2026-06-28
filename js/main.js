@@ -2068,7 +2068,6 @@ request.onsuccess =
 };
 
 function savePostToDB(post) {
-
     const transaction =
         db.transaction(
             ["posts"],
@@ -2085,16 +2084,12 @@ function savePostToDB(post) {
 
     request.onsuccess =
         () => {
-
+            // 保存が成功したら、最新のデータをデータベースから読み直す
             loadPosts();
-
-            renderProfilePosts();
-
         };
 }
 
 function loadPosts() {
-
     const transaction =
         db.transaction(
             ["posts"],
@@ -2111,11 +2106,12 @@ function loadPosts() {
 
     request.onsuccess =
         () => {
-
         posts =
             request.result;
 
+        // データベースから読み込みが終わったタイミングで、両方のタイムラインを更新する
         renderTimeline();
+        renderProfilePosts();
     };
 }
 
