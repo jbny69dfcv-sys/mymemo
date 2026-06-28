@@ -275,38 +275,30 @@ cancelProfileButton.addEventListener(
 );
  
  
+// ✨ これに貼り替えます！
 editHeaderButton.addEventListener(
     "click",
     () => {
+        // 現在スライドして表示している（選択中の）アカウントのデータを取得
+        const profile = profiles[currentAccount] || {};
 
-        const profile =
-            profiles[currentAccount] || {};
+        // プレビュー画像に現在のデータをセット
+        editHeaderPreview.src = profile.header || "";
+        editIconPreview.src = profile.icon || "https://via.placeholder.com/60";
 
-        editHeaderPreview.src =
-            profile.header || "";
+        // 入力欄に現在のデータをセット（これで2個目、3個目の垢のデータが表示されます！）
+        editName.value = profile.name || currentAccount;
+        editId.value = profile.id || "";
+        editBio.value = profile.bio || "";
 
-        editIconPreview.src =
-            profile.icon || "";
+        console.log("プロフィール編集押された（選択中アカウント:" + currentAccount + "）");
 
-        editName.value =
-    profile.name ||
-    currentAccount;
-
-editId.value =
-    profile.id || "";
-
-
-editBio.value =
-    profile.bio || "";
- console.log("プロフィール編集押された");
-
- tempIcon =
-    profile.icon || null;
-
-tempHeader =
-    profile.header || null;
-        editProfileModal.style.display =
-            "block";
+        // 一時保存用変数にデータをキープ
+        tempIcon = profile.icon || null;
+        tempHeader = profile.header || null;
+        
+        // 編集画面（モーダル）を開く
+        editProfileModal.style.display = "block";
     }
 );
 
@@ -719,12 +711,37 @@ function savePosts() {
     );
 }
 
-function saveProfiles() {
+// プロフィール保存ボタンの処理（function saveProfile() { ... } を丸ごと貼り替え）
+function saveProfile() {
+    if (!currentAccount) return;
 
-    localStorage.setItem(
-        "profiles",
-        JSON.stringify(profiles)
-    );
+    // 入力された値を取得
+    const name = document.getElementById("editName").value;
+    const bio = document.getElementById("editBio").value;
+    const header = document.getElementById("editHeader").value;
+    const icon = document.getElementById("editIcon").value;
+
+    // 現在のアカウントのデータを更新
+    profiles[currentAccount] = {
+        name: name,
+        bio: bio,
+        header: header,
+        icon: icon
+    };
+
+    // ローカルストレージに保存
+    localStorage.setItem("twit_profiles", JSON.stringify(profiles));
+
+    // モーダルを閉じる
+    const modal = document.getElementById("profileModal");
+    if (modal) modal.style.display = "none";
+
+    // 【重要】すべての部屋の表示を最新データに更新する！
+    showProfile();
+    
+    // ヘッダーのアイコン一覧なども連動して更新する
+    renderAccounts();
+    renderTimeline();
 }
 
 function saveAccounts() {
