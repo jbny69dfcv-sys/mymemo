@@ -564,10 +564,51 @@ removePostImageButton.addEventListener(
         removePostImageButton.style.display =
             "none";
 
+        // ===== 編集 =====
         if (editingPost) {
+            editingPost.text = text;
 
-            editingPost.image =
-                null;
+            const files = [...postImageUpload.files];
+
+            // 共通の終了処理（リセット・画面更新）を関数化
+            const finalizeEdit = () => {
+                // メモリ上のposts配列内にある、編集対象の投稿も最新の状態に更新する
+                const postIndex = posts.findIndex(p => p.id === editingPost.id);
+                if (postIndex !== -1) {
+                    posts[postIndex] = editingPost;
+                }
+
+                savePostToDB(editingPost);
+
+                // 画面を再描画して最新の状態を反映させる
+                renderTimeline();
+                renderProfilePosts();
+
+                // フォームをリセットしてモーダルを閉じる
+                modalPostInput.value = "";
+                postImageUpload.value = "";
+                postImagePreview.src = "";
+                document.querySelector(".preview-container").style.display = "none";
+                editingPost = null;
+                modalPostButton.textContent = "投稿";
+                postModal.style.display = "none";
+            };
+
+            if (files.length > 0) {
+                // ① 新しい画像が選択された場合
+                const reader = new FileReader();
+                reader.onload = () => {
+                    editingPost.image = reader.result;
+                    // 画像の読み込みが終わったら共通処理を実行
+                    finalizeEdit();
+                };
+                reader.readAsDataURL(files[0]);
+            } else {
+                // ② 画像が新しく選択されなかった場合（テキストのみ変更、または既存画像を維持）
+                finalizeEdit();
+            }
+
+            return;
         }
     }
 );
