@@ -1376,6 +1376,61 @@ const sortedPosts =
         );
     }
 }
+
+// ✨ ページを読み込んだ瞬間に、保存されているアカウントの数だけHTMLの部屋を自動生成する関数
+function initializeProfileRooms() {
+    const container = document.getElementById("profileContainer");
+    if (!container) return;
+
+    // 一旦コンテナの中身を空っぽにする
+    container.innerHTML = "";
+
+    // ローカルストレージから最新のアカウント一覧を取得
+    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
+
+    // アカウントの数だけ正しいHTML構造の「部屋」を生成
+    savedAccounts.forEach((accName) => {
+        const newRoom = document.createElement("div");
+        newRoom.className = "single-profile";
+        
+        newRoom.innerHTML = `
+            <div class="profile-header">
+                <img class="header-image" src="" id="headerImage">
+                <button class="edit-profile-btn" id="editHeaderButton">✏️</button>
+            </div>
+            <div class="profile-info">
+                <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
+                <h2 id="profileName">${accName}</h2>
+                <p id="profileId">@userid</p>
+                <p id="profileBio">プロフィール未設定</p>
+                <p id="postCount">投稿数 0</p>
+                <button id="deleteAccountButton" class="deleteAccountButton">アカウント削除</button>
+                <div class="follow-counts">
+                    <span id="followingCount">0</span> フォロー
+                    <span id="followerCount">0</span> フォロワー
+                </div>
+            </div>
+            <div class="profile-tabs">
+                <div class="profile-tab active" id="postsTab">投稿</div>
+                <div class="profile-tab" id="likesTab">スキ</div>
+            </div>
+            <div class="timeline" id="profileTimeline"></div>
+        `;
+        container.appendChild(newRoom);
+    });
+}
+
+// 🚀 ページが読み込まれたとき（一番最初）に実行する処理を書き換える
+// 元々ある renderAccounts() や showProfile() の呼び出し部分を以下のように並び替えてください
+document.addEventListener("DOMContentLoaded", () => {
+    initializeProfileRooms(); // ① まず部屋を全アカウント分用意する
+    renderAccounts();         // ② 上の丸アイコン一覧を作る
+    showProfile();            // ③ 部屋にデータを配る
+});
+
+// ※もし DOMContentLoaded がすでに他にある場合は、その中で
+// initializeProfileRooms(); を最初に呼ぶように書き換えるだけでもOKです！
+
 function showProfile() {
     const container = document.getElementById("profileContainer");
     if (!container) return;
