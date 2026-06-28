@@ -793,82 +793,25 @@ function renderAccounts() {
                 }"
             >
         `;
-accountDiv.addEventListener(
-    "click",
-    () => {
-if (
-    currentAccount ===
-    account
-) {
-
-    showProfile();
-
-} else {
-    // どっちのアカウントからどっちに変えるかの位置（インデックス）を取得
-    const currentIndex = accounts.indexOf(currentAccount);
-    const targetIndex = accounts.indexOf(account);
-
-    // HTMLに新しく作った「動かすための箱」を取得
-    const profileContent = document.getElementById("profileContent");
-
-    if (profilePage.style.display !== "none" && profileContent) {
-        
-        // 1. 今の画面（古いプロフィール）をコピーして残像を作る
-        const oldContent = profileContent.cloneNode(true);
-        
-        // 残像が今の位置にピッタリ重なるように設定
-        oldContent.style.position = "absolute";
-        oldContent.style.top = profileContent.offsetTop + "px";
-        oldContent.style.left = "0";
-        oldContent.style.width = "100%";
-        oldContent.style.pointerEvents = "none"; // 誤操作防止
-        oldContent.style.transition = "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
-        
-        // 残像を画面に追加
-        profileContent.parentNode.appendChild(oldContent);
-
-        // 2. データを新しいアカウントに更新する
-        currentAccount = account;
-        localStorage.setItem("currentAccount", currentAccount);
-        renderAccounts();
-        renderTimeline();
-        showProfile(); // ここで本物の箱の中身が一瞬で新しくなる
-
- // 3. アニメーションの向きの準備
-        const isNext = targetIndex > currentIndex;
-        
-        // 新しい箱のスタート位置を画面外（右か左）にセット
-        profileContent.style.transition = "none";
-        profileContent.style.transform = isNext ? "translateX(100%)" : "translateX(-100%)";
-
-        // 4. 【修正】1回だけ優しく待って、2つの画面を同時にスライド開始！
-        requestAnimationFrame(() => {
-            // ここで一瞬だけアニメーションの設定をONにする
-            profileContent.style.transition = "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
-            oldContent.style.transition = "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
-            
-            // 同時に動かす！
-            profileContent.style.transform = "translateX(0)";
-            oldContent.style.transform = isNext ? "translateX(-100%)" : "translateX(100%)";
-        });
-
-        // 5. アニメーションが終わったら残像を消す
-        setTimeout(() => {
-            if (oldContent.parentNode) oldContent.remove();
-            profileContent.style.transition = "";
-            profileContent.style.transform = "";
-        }, 400); // 0.4秒後に削除
-
+accountDiv.addEventListener("click", () => {
+    if (currentAccount === account) {
+        // 同じアイコンなら何もしない、または画面を上までスクロール
     } else {
-        // プロフィール画面を開いていない時は、普通にデータだけ切り替える
+        const targetIndex = accounts.indexOf(account);
         currentAccount = account;
         localStorage.setItem("currentAccount", currentAccount);
+
         renderAccounts();
         renderTimeline();
+
+        // X（Twitter）方式：巨大なステージを、選んだアカウントの番号分だけ左にスライドさせる！
+        const container = document.getElementById("profileContainer");
+        if (container && profilePage.style.display !== "none") {
+            // 例：2番目のアカウント（index: 1）なら、-100% 左にずらす
+            container.style.transform = `translateX(-${targetIndex * 100}%)`;
+        }
     }
-}
-    }
-);
+});
         accountsContainer.appendChild(
             accountDiv
         );
@@ -2564,6 +2507,41 @@ function setAppHeight() {
         `${window.innerHeight}px`
     );
 
+}
+
+// 全てのアカウントのプロフィール画面を、あらかじめ横一列に一括で組み立てる関数
+function setupAllProfiles() {
+    const container = document.getElementById("profileContainer");
+    if (!container) return;
+    
+    container.innerHTML = ""; // 一度リセット
+
+    // 全てのアカウント分、プロフィール画面のHTMLを作って横に並べる
+    accounts.forEach((account) => {
+        const profile = profiles[account] || {};
+        const profileDiv = document.createElement("div");
+        profileDiv.className = "single-profile";
+
+        // 元のHTMLにあった中身をここに移植します
+        profileDiv.innerHTML = `
+            <div class="profile-header">
+                <img class="header-image" src="${profile.header || ''}">
+                <button class="edit-header-button">✏️</button>
+            </div>
+            <div class="profile-info">
+                <img class="profile-icon" src="${profile.icon || 'https://via.placeholder.com/60'}">
+                <h2>${profile.name || account}</h2>
+                <p>@${profile.id || account}</p>
+                <p>${profile.bio || ''}</p>
+                <div class="profile-tabs">
+                    <button class="profile-tab active">投稿</button>
+                    <button class="profile-tab">スキ</button>
+                </div>
+                <div class="profile-timeline-placeholder"></div>
+            </div>
+        `;
+        container.appendChild(profileDiv);
+    });
 }
 
 window.addEventListener(

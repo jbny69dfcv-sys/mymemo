@@ -61,86 +61,24 @@
 
     <div id="timeline"></div>
 
-<!-- 変更前と変わらない部分 -->
-    <div id="profilePage" style="display:none;">
+<div id="profilePage" style="display:none;">
 
+        <!-- 1. トップの戻るボタン（これは完全に固定） -->
         <button id="backButton">
             ← タイムライン
         </button>
 
-        <!-- ★ココを追加：動かす中身を全部包む箱の始まり -->
-        <div id="profileContent">
-
-             <div class="profile-header">
-                <img
-                    id="headerImage"
-                    class="header-image"
-                    src=""
-                >
-                <button
-                    id="editHeaderButton"
-                    class="edit-header-button"
-                >
-                    ✏️
-                </button>
+        <!-- 2. 【超重要】ここを「窓」にして、はみ出た部分を隠す -->
+        <div class="profile-window">
+            
+            <!-- 3. 【超重要】この中に、アカウントごとの画面を横並びで一列に並べる -->
+            <div id="profileContainer">
+                <!-- ここはJavaScriptが自動で「アカウントの数だけ」画面を横に並べます！ -->
             </div>
 
-            <div class="profile-info">
-                <img
-                    id="profileIcon"
-                    class="profile-icon"
-                    src=""
-                >
+        </div>
 
-                <h2 id="profileName"></h2>
-                <p id="profileId"></p>
-                <p id="profileBio"></p>
-                <p id="postCount"></p>
-                <button id="deleteAccountButton">
-                    アカウント削除
-                </button>
-                
-                <div class="follow-stats">
-                    <span id="followingCount">0 フォロー中</span>
-                    <span id="followerCount">0 フォロワー</span>
-                </div>
-                   
-                <input
-                    type="file"
-                    id="headerUpload"
-                    accept="image/*"
-                    style="display:none;"
-                >
-
-                <input
-                    type="file"
-                    id="iconUpload"
-                    accept="image/*"
-                    style="display:none;"
-                >
-
-                <div class="profile-tabs">
-                    <button
-                        id="postsTab"
-                        class="profile-tab active"
-                    >
-                        投稿
-                    </button>
-                    <button
-                        id="likesTab"
-                        class="profile-tab"
-                    >
-                        スキ
-                    </button>
-                </div>
-
-                <div id="profileTimeline"></div>
-                
-            </div> <!-- .profile-info の閉じタグ -->
-
-        </div> <!-- ★ココを追加：profileContent の閉じタグ -->
-
-    </div> <!-- profilePage の閉じタグ -->
+    </div><!-- profilePage の閉じタグ -->
     <!-- ここから下は変更なし -->
 
 <div
