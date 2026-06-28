@@ -794,24 +794,48 @@ function renderAccounts() {
             >
         `;
 accountDiv.addEventListener("click", () => {
+    // 【ルール1】すでに選択中のアカウントを「もう1回」押した場合
     if (currentAccount === account) {
-        // 同じアカウントなら何もしない
+        
+        // もしすでにプロフィール画面を開いているなら、何もしない（または上までスクロール）
+        if (profilePage.style.display !== "none") {
+            return; 
+        }
+
+        // プロフィール画面が開いていない（タイムラインにいる）なら、プロフィールを表示する！
+        showProfile();
+        
+        // 初めてプロフィールを開く時は、右からスッと気持ちよくスライドインさせる
+        profilePage.classList.remove("slide-active");
+        profilePage.style.transform = "translateX(100%)";
+        requestAnimationFrame(() => {
+            profilePage.classList.add("slide-active");
+            profilePage.style.transform = "translateX(0)";
+        });
+
+    // 【ルール2】今とは「別のアカウント」を押した場合
     } else {
+        const currentIndex = accounts.indexOf(currentAccount);
         const targetIndex = accounts.indexOf(account);
+        const isNext = targetIndex > currentIndex;
+
+        // データを切り替えて、タイムラインをそのアカウントのものに更新する（画面はタイムラインのまま！）
         currentAccount = account;
         localStorage.setItem("currentAccount", currentAccount);
-
         renderAccounts();
         renderTimeline();
 
-        // 1. まず元の処理を呼び出して、いつも通りプロフィール画面を最新に更新する
-        showProfile(); 
+        // もし「プロフィール画面を開いた状態」で別のアカウントに切り替えた場合だけ、X風にスライドさせる
+        if (profilePage.style.display !== "none") {
+            showProfile(); // プロフィールの中身を新しいアカウントに更新
 
-        // 2. その上で、横並びのステージをスライドさせる！
-        const container = document.getElementById("profileContainer");
-        if (container && profilePage.style.display !== "none") {
-            // X（Twitter）方式でスライド！
-            container.style.transform = `translateX(-${targetIndex * 100}%)`;
+            profilePage.classList.remove("slide-active");
+            profilePage.style.transform = isNext ? "translateX(100%)" : "translateX(-100%)";
+
+            requestAnimationFrame(() => {
+                profilePage.classList.add("slide-active");
+                profilePage.style.transform = "translateX(0)";
+            });
         }
     }
 });

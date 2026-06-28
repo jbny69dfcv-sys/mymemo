@@ -67,51 +67,70 @@
             ← タイムライン
         </button>
 
-        <!-- ▼ ココを追加：窓の役割 ▼ -->
-        <div class="profile-window">
-            
-            <!-- ▼ ココを追加：横一列に並べるためのコンテナ ▼ -->
-            <div id="profileContainer">
+        <div class="profile-header">
+            <img
+                id="headerImage"
+                class="header-image"
+                src=""
+            >
+            <button
+                id="editHeaderButton"
+                class="edit-header-button"
+            >
+                ✏️
+            </button>
+        </div>
 
-                <!-- ▼ ココを追加：今までのプロフィールの中身を丸ごと1つの画面として包む ▼ -->
-                <div class="single-profile">
+        <div class="profile-info">
+            <img
+                id="profileIcon"
+                class="profile-icon"
+                src=""
+            >
+            <h2 id="profileName"></h2>
+            <p id="profileId"></p>
+            <p id="profileBio"></p>
+            <p id="postCount"></p>
+            <button id="deleteAccountButton">
+                アカウント削除
+            </button>
+            <div class="follow-stats">
+                <span id="followingCount">0 フォロー中</span>
+                <span id="followerCount">0 フォロワー</span>
+            </div>
+           
+            <input
+                type="file"
+                id="headerUpload"
+                accept="image/*"
+                style="display:none;"
+            >
+            <input
+                type="file"
+                id="iconUpload"
+                accept="image/*"
+                style="display:none;"
+            >
 
-                    <div class="profile-header">
-                        <img id="headerImage" class="header-image" src="">
-                        <button id="editHeaderButton" class="edit-header-button">✏️</button>
-                    </div>
+            <div class="profile-tabs">
+                <button
+                    id="postsTab"
+                    class="profile-tab active"
+                >
+                    投稿
+                </button>
+                <button
+                    id="likesTab"
+                    class="profile-tab"
+                >
+                    スキ
+                </button>
+            </div>
 
-                    <div class="profile-info">
-                        <img id="profileIcon" class="profile-icon" src="">
-                        <h2 id="profileName"></h2>
-                        <p id="profileId"></p>
-                        <p id="profileBio"></p>
-                        <p id="postCount"></p>
-                        <button id="deleteAccountButton">アカウント削除</button>
-                        
-                        <div class="follow-stats">
-                            <span id="followingCount">0 フォロー中</span>
-                            <span id="followerCount">0 フォロワー</span>
-                        </div>
-                           
-                        <input type="file" id="headerUpload" accept="image/*" style="display:none;">
-                        <input type="file" id="iconUpload" accept="image/*" style="display:none;">
+            <div id="profileTimeline"></div>
+        </div>
 
-                        <div class="profile-tabs">
-                            <button id="postsTab" class="profile-tab active">投稿</button>
-                            <button id="likesTab" class="profile-tab">スキ</button>
-                        </div>
-
-                        <div id="profileTimeline"></div>
-                    </div>
-
-                </div> <!-- .single-profile の閉じタグ -->
-
-            </div> <!-- #profileContainer の閉じタグ -->
-
-        </div> <!-- .profile-window の閉じタグ -->
-
-    </div> <!-- #profilePage の閉じタグ -->
+    </div>
 
 <div
     id="postDetailPage"
