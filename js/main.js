@@ -1100,36 +1100,21 @@ function renderTimeline() {
 }
 
 function renderProfilePosts() {
-    profileTimeline.innerHTML = "";
+    // ❌ 古い書き方：const profileTimeline = document.getElementById("profileTimeline");
+    
+    // ✨ 新しい書き方：現在選択されているアカウント（部屋）の中にあるタイムラインを正確に取得する
+    const targetIndex = accounts.indexOf(currentAccount);
+    const rooms = document.querySelectorAll(".single-profile");
+    const currentRoom = rooms[targetIndex];
+    
+    if (!currentRoom) return;
+    const profileTimeline = currentRoom.querySelector(".timeline"); // その部屋のタイムライン枠を取得
+    if (!profileTimeline) return;
 
-    let targetPosts;
+    profileTimeline.innerHTML = ""; // 一旦中身を空にする
 
-    if (profileMode === "posts") {
-        targetPosts = posts.filter(post => post.account === currentAccount);
-    } else {
-        targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
-    }
-
-    const sortedPosts = [...targetPosts].sort(
-        (a, b) => {
-            if ((a.pinned || false) !== (b.pinned || false)) {
-                return (b.pinned || false) - (a.pinned || false);
-            }
-            return b.time - a.time;
-        }
-    );
-
-    for (const post of sortedPosts) {
-        addPostToTimeline(post, profileTimeline);
-    }
-}
-
-// ✨ プロフィール部屋を作るときに、タブのクリックイベントも一緒に登録する
-function initializeProfileRooms() {
-    const container = document.getElementById("profileContainer");
-    if (!container) return;
-
-    container.innerHTML = "";
+    // 💡 ここから下の、実際の投稿を表示するループ処理（forやforEachなど）はそのまま残してください！
+    // 例：posts.forEach(post => { ... }) のような既存の処理に続きます。
 
     const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
 
