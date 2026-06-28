@@ -1252,7 +1252,8 @@ top: -0px;
     margin-top: 8px;
     white-space: pre-wrap;
     word-break: break-word;
-      font-size: 10px;
+    padding: 8px 12px;   /* 上下左右に12pxの内側余白を作る */
+    box-sizing: border-box;   /* 余白を作っても全体の横幅がはみ出さないようにする記述 */
 
     
     /* 親要素のFlexboxの影響を打ち消して左端に寄せる */
