@@ -2362,9 +2362,7 @@ function renderDetailComments() {
 
     </div>
 
-    <div class="comment-text">
-        ${comment.text}
-    </div>
+<div class="comment-text">${comment.text}</div>
 
 </div>
 `;
