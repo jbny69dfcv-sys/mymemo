@@ -862,56 +862,63 @@ accountDiv.addEventListener("click", () => {
     addButton.textContent =
         "＋";
 
-// ✨ これに貼り替えます！
-addButton.addEventListener(
-    "click",
-    () => {
-        const name = prompt("アカウント名を入力してください");
-        if (!name) return;
+// アカウント追加ボタンの処理（完全に自動生成する安心安全版）
+addButton.addEventListener("click", () => {
+    const name = prompt("アカウント名を入力してください");
+    if (!name) return;
 
-        accounts.push(name);
-        localStorage.setItem("accounts", JSON.stringify(accounts));
+    // アカウント配列に追加して保存
+    accounts.push(name);
+    localStorage.setItem("accounts", JSON.stringify(accounts));
 
-        // 2枚目の綺麗なデザインと全く同じ構造の「部屋」を新しく追加します
-        const container = document.getElementById("profileContainer");
-        if (container) {
+    // 💡 HTMLのコンテナを一度空っぽにして、登録されているアカウントの数だけ「部屋」を自動生成する
+    const container = document.getElementById("profileContainer");
+    if (container) {
+        container.innerHTML = ""; // 一旦リセット
+
+        accounts.forEach((accName) => {
             const newRoom = document.createElement("div");
             newRoom.className = "single-profile";
             
-            // 元々のHTMLと完全に一致させた構造です
+            // 2枚目のスクショの正しいHTML構造を完璧に再現
             newRoom.innerHTML = `
                 <div class="profile-header">
-                    <img class="header-image" src="" id="headerImage">
-                    <button id="editHeaderButton">✏️</button>
+                    <img class="header-image" src="" class="headerImage">
+                    <button class="edit-profile-btn" id="editHeaderButton">✏️</button>
                 </div>
                 <div class="profile-info">
-                    <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
-                    <h2 id="profileName">${name}</h2>
-                    <p id="profileId">@userid</p>
-                    <p id="profileBio">プロフィール未設定</p>
-                    <p id="postCount">投稿数 0</p>
-                    <button id="deleteAccountButton">アカウント削除</button>
+                    <img class="profile-icon" src="https://via.placeholder.com/60" class="profileIcon">
+                    <h2 class="profileName">${accName}</h2>
+                    <p class="profileId">@userid</p>
+                    <p class="profileBio">プロフィール未設定</p>
+                    <p class="postCount">投稿数 0</p>
+                    <button class="deleteAccountButton">アカウント削除</button>
                     <div class="follow-counts">
-                        <span id="followingCount">0</span> フォロー
-                        <span id="followerCount">0</span> フォロワー
+                        <span class="followingCount">0</span> フォロー
+                        <span class="followerCount">0</span> フォロワー
                     </div>
                 </div>
                 <div class="profile-tabs">
-                    <div class="profile-tab active" id="postsTab">投稿</div>
-                    <div class="profile-tab" id="likesTab">スキ</div>
+                    <div class="profile-tab active" class="postsTab">投稿</div>
+                    <div class="profile-tab" class="likesTab">スキ</div>
                 </div>
-                <div class="timeline" id="profileTimeline"></div>
+                <div class="timeline" class="profileTimeline"></div>
             `;
             container.appendChild(newRoom);
-        }
-
-        // アカウント一覧を更新
-        renderAccounts();
-        
-        // 新しい部屋にデータを正しく配る
-        showProfile();
+        });
     }
-);
+
+    // アカウント選択の丸アイコン一覧を更新
+    renderAccounts();
+    
+    // 生成したすべての部屋にデータを流し込む
+    showProfile();
+
+    // 💡 もしSwiperなどのスライドプラグインを使っている場合、これを呼ぶとズレが直ります
+    if (window.mySwiper && typeof window.mySwiper.update === 'function') {
+        window.mySwiper.update();
+    }
+});
 
     accountsContainer.appendChild(
         addButton
@@ -2333,32 +2340,38 @@ function renderDetailComments() {
 
 }
 
-// どの部屋の「プロフィールを設定」ボタンを押しても、現在のアカウントを編集できるようにする
+// 「保存」または「決定」ボタンを押したときの処理
+// どちらのIDやクラス名でも反応するように調整しました！
 document.addEventListener("click", (e) => {
-    // クリックされた要素が「プロフィールを設定」ボタン（edit-profile-btn クラス、または id が editHeaderButton のもの）かチェック
-    if (e.target.classList.contains("edit-profile-btn") || e.target.id === "editHeaderButton") {
-        e.stopPropagation();
+    if (e.target.id === "saveProfileButton" || e.target.id === "saveButton" || e.target.innerText.trim() === "保存" || e.target.innerText.trim() === "決定") {
+        e.preventDefault();
 
-        // 現在表示しているアカウントのデータを取得
-        const profile = profiles[currentAccount] || {};
+        // 現在選択中のアカウント名がキーになります
+        if (!currentAccount) return;
 
-        // プレビュー画像に現在のデータをセット
-        editHeaderPreview.src = profile.header || "";
-        editIconPreview.src = profile.icon || "https://via.placeholder.com/60";
+        // データをオブジェクトにまとめる
+        profiles[currentAccount] = {
+            name: editName.value,
+            id: editId.value,
+            bio: editBio.value,
+            icon: tempIcon || (profiles[currentAccount] ? profiles[currentAccount].icon : "https://via.placeholder.com/60"),
+            header: tempHeader || (profiles[currentAccount] ? profiles[currentAccount].header : "")
+        };
 
-        // 入力欄に現在のデータをセット
-        editName.value = profile.name || currentAccount;
-        editId.value = profile.id || "";
-        editBio.value = profile.bio || "";
+        // ローカルストレージに保存（これで更新しても消えなくなります！）
+        localStorage.setItem("profiles", JSON.stringify(profiles));
 
-        console.log("プロフィール編集押された（選択中アカウント: " + currentAccount + "）");
+        // モーダルを閉じる
+        editProfileModal.style.display = "none";
 
-        // 一時保存用変数にデータをキープ
-        tempIcon = profile.icon || null;
-        tempHeader = profile.header || null;
+        // 画面の表示を更新する
+        if (typeof showProfile === "function") {
+            showProfile();
+        } else if (typeof renderAccounts === "function") {
+            renderAccounts();
+        }
         
-        // 編集画面（モーダル）を開く
-        editProfileModal.style.display = "block";
+        console.log("プロフィールを保存しました！", profiles[currentAccount]);
     }
 });
 function renderSearchHistory() {
