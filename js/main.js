@@ -983,13 +983,7 @@ pinButton.addEventListener(
             );
         }
 
-        renderTimeline();
-        renderProfilePosts();
-    }
-);
-}
-
-// コメント削除ボタンのクリックイベント（グローバルに設定）
+        // コメント削除ボタンのクリックイベント（グローバルに設定）
 document.addEventListener("click", (e) => {
     // クリックされた要素、またはその親に .comment-delete-button があるかチェック
     const deleteButton = e.target.closest(".comment-delete-button");
@@ -1027,6 +1021,14 @@ document.addEventListener("click", (e) => {
         }
     }
 });
+
+        renderTimeline();
+        renderProfilePosts();
+    }
+);
+}
+
+
 
 const deleteButton =
         post.querySelector(
