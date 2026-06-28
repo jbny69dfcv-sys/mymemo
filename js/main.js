@@ -983,44 +983,7 @@ pinButton.addEventListener(
             );
         }
 
-        // コメント削除ボタンのクリックイベント（グローバルに設定）
-document.addEventListener("click", (e) => {
-    // クリックされた要素、またはその親に .comment-delete-button があるかチェック
-    const deleteButton = e.target.closest(".comment-delete-button");
-    
-    if (deleteButton) {
-        e.stopPropagation(); // 念のため親要素へのクリック伝播を防ぐ
-
-        // ボタンの属性（data-attributes）から投稿IDとコメントの番号を取得
-        const postId = parseInt(deleteButton.dataset.postId);
-        const commentIndex = parseInt(deleteButton.dataset.commentIndex);
-
-        if (confirm("このコメントを削除してもよろしいですか？")) {
-            const transaction = db.transaction(["posts"], "readwrite");
-            const store = transaction.objectStore("posts");
-            
-            // ① 該当の投稿データをIndexedDBから取得
-            const getRequest = store.get(postId);
-
-            getRequest.onsuccess = () => {
-                const postData = getRequest.result;
-                if (postData && postData.comments) {
-                    
-                    // ② 配列から指定の番号のコメントを削除
-                    postData.comments.splice(commentIndex, 1);
-
-                    // ③ データベースに上書き保存
-                    const updateRequest = store.put(postData);
-
-                    // ④ 保存が完全に完了してから画面を再読み込み（すれ違い防止）
-                    updateRequest.onsuccess = () => {
-                        loadPosts(); // タイムラインや詳細画面の再描画を走らせる
-                    };
-                }
-            };
-        }
-    }
-});
+        
 
         renderTimeline();
         renderProfilePosts();
@@ -2311,6 +2274,49 @@ function renderDetailComments() {
     );
 
 }
+
+// コメントの✕ボタン（delete-comment）がクリックされた時の処理
+document.addEventListener("click", (e) => {
+    const deleteButton = e.target.closest(".delete-comment");
+    
+    // クリックされたのがコメントの✕ボタン、かつ現在開いている詳細投稿データが存在する場合
+    if (deleteButton && currentDetailPost) {
+        e.stopPropagation();
+
+        // ボタンの data-index から、何番目のコメントかを取得
+        const commentIndex = parseInt(deleteButton.dataset.index);
+
+        if (confirm("このコメントを削除してもよろしいですか？")) {
+            const transaction = db.transaction(["posts"], "readwrite");
+            const store = transaction.objectStore("posts");
+            
+            // ① 現在開いている詳細投稿の最新データをIndexedDBから取得
+            const getRequest = store.get(currentDetailPost.id);
+
+            getRequest.onsuccess = () => {
+                const postData = getRequest.result;
+                if (postData && postData.comments) {
+                    
+                    // ② コメント配列から、クリックされた番号のコメントを削除
+                    postData.comments.splice(commentIndex, 1);
+
+                    // ③ データベースへ上書き保存
+                    const updateRequest = store.put(postData);
+
+                    // ④ 保存が完全に完了したら画面を更新する
+                    updateRequest.onsuccess = () => {
+                        // グローバルな変数側のコメントデータも同期させる
+                        currentDetailPost.comments = postData.comments;
+                        
+                        // タイムラインと、詳細画面のコメント一覧を再描画
+                        loadPosts(); 
+                        renderDetailComments();
+                    };
+                }
+            };
+        }
+    }
+});
 function renderSearchHistory() {
 
     searchHistory.innerHTML =
