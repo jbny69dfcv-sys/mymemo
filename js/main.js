@@ -842,10 +842,10 @@ if (
         profileContent.style.transform = isNext ? "translateX(100%)" : "translateX(-100%)";
 
 // 4. 遅延をなくして、押した瞬間にスライドを開始させる！
-        profileContent.style.transition = "transform 0s cubic-bezier(0.2, 0.8, 0.2, 1)";
+        profileContent.style.transition = "transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)";
         
         // 残像も同じタイミングで動き出させる
-        oldContent.style.transition = "transform 0s cubic-bezier(0.2, 0.8, 0.2, 1)";
+        oldContent.style.transition = "transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)";
 
         requestAnimationFrame(() => {
             // 新しい箱は元の位置(0)へ、残像は画面外へスッっと移動
