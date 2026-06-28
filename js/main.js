@@ -862,7 +862,7 @@ accountDiv.addEventListener("click", () => {
     addButton.textContent =
         "＋";
 
-// アカウント追加ボタンの処理（完全に自動生成する安心安全版）
+// アカウント追加ボタンの処理（今度こそ完全にIDを再現した修正版！）
 addButton.addEventListener("click", () => {
     const name = prompt("アカウント名を入力してください");
     if (!name) return;
@@ -880,29 +880,29 @@ addButton.addEventListener("click", () => {
             const newRoom = document.createElement("div");
             newRoom.className = "single-profile";
             
-            // 2枚目のスクショの正しいHTML構造を完璧に再現
+            // 【修正：classではなく、全て正しい「id」に戻しました！】
             newRoom.innerHTML = `
                 <div class="profile-header">
-                    <img class="header-image" src="" class="headerImage">
+                    <img class="header-image" src="" id="headerImage">
                     <button class="edit-profile-btn" id="editHeaderButton">✏️</button>
                 </div>
                 <div class="profile-info">
-                    <img class="profile-icon" src="https://via.placeholder.com/60" class="profileIcon">
-                    <h2 class="profileName">${accName}</h2>
-                    <p class="profileId">@userid</p>
-                    <p class="profileBio">プロフィール未設定</p>
-                    <p class="postCount">投稿数 0</p>
-                    <button class="deleteAccountButton">アカウント削除</button>
+                    <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
+                    <h2 id="profileName">${accName}</h2>
+                    <p id="profileId">@userid</p>
+                    <p id="profileBio">プロフィール未設定</p>
+                    <p id="postCount">投稿数 0</p>
+                    <button id="deleteAccountButton" class="deleteAccountButton">アカウント削除</button>
                     <div class="follow-counts">
-                        <span class="followingCount">0</span> フォロー
-                        <span class="followerCount">0</span> フォロワー
+                        <span id="followingCount">0</span> フォロー
+                        <span id="followerCount">0</span> フォロワー
                     </div>
                 </div>
                 <div class="profile-tabs">
-                    <div class="profile-tab active" class="postsTab">投稿</div>
-                    <div class="profile-tab" class="likesTab">スキ</div>
+                    <div class="profile-tab active" id="postsTab">投稿</div>
+                    <div class="profile-tab" id="likesTab">スキ</div>
                 </div>
-                <div class="timeline" class="profileTimeline"></div>
+                <div class="timeline" id="profileTimeline"></div>
             `;
             container.appendChild(newRoom);
         });
@@ -911,10 +911,10 @@ addButton.addEventListener("click", () => {
     // アカウント選択の丸アイコン一覧を更新
     renderAccounts();
     
-    // 生成したすべての部屋にデータを流し込む
+    // 生成したすべての部屋にデータを流し込む（これで真っ白が直ります！）
     showProfile();
 
-    // 💡 もしSwiperなどのスライドプラグインを使っている場合、これを呼ぶとズレが直ります
+    // Swiperなどのスライドのズレを直す
     if (window.mySwiper && typeof window.mySwiper.update === 'function') {
         window.mySwiper.update();
     }
@@ -2340,16 +2340,14 @@ function renderDetailComments() {
 
 }
 
-// 「保存」または「決定」ボタンを押したときの処理
-// どちらのIDやクラス名でも反応するように調整しました！
+// 保存・決定ボタンの処理
 document.addEventListener("click", (e) => {
     if (e.target.id === "saveProfileButton" || e.target.id === "saveButton" || e.target.innerText.trim() === "保存" || e.target.innerText.trim() === "決定") {
         e.preventDefault();
 
-        // 現在選択中のアカウント名がキーになります
         if (!currentAccount) return;
 
-        // データをオブジェクトにまとめる
+        // データをオブジェクトにまとめてローカルストレージに保存
         profiles[currentAccount] = {
             name: editName.value,
             id: editId.value,
@@ -2358,22 +2356,16 @@ document.addEventListener("click", (e) => {
             header: tempHeader || (profiles[currentAccount] ? profiles[currentAccount].header : "")
         };
 
-        // ローカルストレージに保存（これで更新しても消えなくなります！）
         localStorage.setItem("profiles", JSON.stringify(profiles));
 
-        // モーダルを閉じる
+        // モーダルを閉じて画面を更新
         editProfileModal.style.display = "none";
-
-        // 画面の表示を更新する
-        if (typeof showProfile === "function") {
-            showProfile();
-        } else if (typeof renderAccounts === "function") {
-            renderAccounts();
-        }
+        showProfile(); 
         
         console.log("プロフィールを保存しました！", profiles[currentAccount]);
     }
 });
+
 function renderSearchHistory() {
 
     searchHistory.innerHTML =
