@@ -2218,9 +2218,7 @@ function renderComments() {
 
         </div>
 
-        <div class="comment-text">
-        ${comment.text}
-        </div>
+        <div class="comment-text">${comment.text}</div>
 
     </div>
 
