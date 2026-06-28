@@ -862,27 +862,51 @@ accountDiv.addEventListener("click", () => {
     addButton.textContent =
         "＋";
 
-    addButton.addEventListener(
-        "click",
-        () => {
+// ✨ これに貼り替えます！
+addButton.addEventListener(
+    "click",
+    () => {
+        const name = prompt("アカウント名を入力してください");
+        if (!name) return;
 
-            const name =
-                prompt(
-                    "アカウント名を入力してください"
-                );
+        accounts.push(name);
+        localStorage.setItem("accounts", JSON.stringify(accounts));
 
-            if (!name) return;
-
-            accounts.push(name);
-
-            localStorage.setItem(
-                "accounts",
-                JSON.stringify(accounts)
-            );
-
-            renderAccounts();
+        // 【ここが重要！】新しいアカウント用の「部屋（HTML）」を動的に作成してコンテナに追加する
+        const container = document.getElementById("profileContainer");
+        if (container) {
+            const newRoom = document.createElement("div");
+            newRoom.className = "single-profile";
+            
+            // 既存の1個目の部屋と同じ構造のHTMLを流し込む
+            newRoom.innerHTML = `
+                <img class="header-image" src="" alt="ヘッダー">
+                <div class="profile-header-container">
+                    <img class="profile-icon" src="https://via.placeholder.com/60" alt="アイコン">
+                    <button class="edit-profile-btn" id="editHeaderButton">プロフィールを設定</button>
+                </div>
+                <div class="profile-info-text">
+                    <h2>${name}</h2>
+                    <p class="profile-user-id">@userid</p>
+                    <p class="profile-bio-text">プロフィール未設定</p>
+                    <p class="profile-post-count">投稿数 0</p>
+                </div>
+                <div class="profile-tabs">
+                    <div class="profile-tab active" id="postsTab">投稿</div>
+                    <div class="profile-tab" id="likesTab">いいね</div>
+                </div>
+                <div class="timeline" id="profileTimeline"></div>
+            `;
+            container.appendChild(newRoom);
         }
-    );
+
+        // アカウント一覧を更新
+        renderAccounts();
+        
+        // すべての部屋（新しく作った部屋も含む）にデータを配る
+        showProfile();
+    }
+);
 
     accountsContainer.appendChild(
         addButton
