@@ -973,56 +973,32 @@ ${
 
 </div>
 
- ${
-    postData.images &&
-    postData.images.length > 0
-
-    ?
-
+${
+    postData.images && postData.images.length > 0
+    ? `
+    <div class="post-images ${
+        postData.images.length === 1 ? "one" : 
+        postData.images.length === 2 ? "two" : 
+        postData.images.length === 3 ? "three" : "four"
+    }">
+        ${postData.images.map(image => `<img src="${image}" class="post-image clickable-image">`).join("")}
+    </div>
     `
-<div class="post-images ${
-    postData.images.length === 1
-        ? "one"
-        : postData.images.length === 2
-        ? "two"
-        : postData.images.length === 3
-        ? "three"
-        : "four"
-}">
-
-${postData.images.map(image => `
-
-<img
-    src="${image}"
-    class="post-image clickable-image"
->
-
-`).join("")}
-
-</div>
-`
-
-:
-
-postData.image
-
-?
-
-`
-<img
-    src="${postData.image}"
-    class="post-image clickable-image"
->
-`
-
-:
-
-""
+    : postData.image
+    ? `<img src="${postData.image}" class="post-image clickable-image">`
+    : ""
 }
+
+            <div class="post-actions">
+                <button class="like-button">
+                    ${postData.likedBy && postData.likedBy.includes(currentAccount) ? "❤️" : "🤍"}
+                    ${postData.likes || 0}
+                </button>
+                <button class="comment-button">
+                    💬 ${postData.comments ? postData.comments.length : 0}
+                </button>
+            </div>
         </div>
-
-
-
     `;
 
 const pinButton =
