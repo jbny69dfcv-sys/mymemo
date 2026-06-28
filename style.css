@@ -1145,7 +1145,6 @@ top: -0px;
     margin-top:8px;
     white-space:pre-wrap;
     word-break:break-word;
-    text-indent: 0;
 }
 
 .comment-buttons{
@@ -1247,4 +1246,14 @@ top: -0px;
 
     flex-shrink:0;
 
+}
+
+.comment-text {
+    margin-top: 8px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    
+    /* 親要素のFlexboxの影響を打ち消して左端に寄せる */
+    align-self: flex-start; 
+    width: 100%; /* 横幅いっぱいに広げる */
 }
