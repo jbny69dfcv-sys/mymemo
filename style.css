@@ -1252,9 +1252,11 @@ top: -0px;
     margin-top: 8px;
     white-space: pre-wrap;
     word-break: break-word;
-    font-size: 5px;
+
+    padding: 12px;           /* 上下左右に12pxの内側余白を作る */
+    box-sizing: border-box;
     
     /* 親要素のFlexboxの影響を打ち消して左端に寄せる */
     align-self: flex-start; 
-    width: 90%; /* 横幅いっぱいに広げる */
+    width: 100%; /* 横幅いっぱいに広げる */
 }
