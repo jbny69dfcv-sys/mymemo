@@ -801,8 +801,7 @@ function renderAccounts() {
             currentAccount = account;
             localStorage.setItem("currentAccount", currentAccount);
             
-            // ✨【追加】最後に選んだアカウントの並び順（インデックス）もセットで保存する
-            localStorage.setItem("currentAccountIndex", targetIndex);
+
 
             renderAccounts();
             renderTimeline();
@@ -1157,21 +1156,18 @@ function initializeProfileRooms() {
     });
 }
 
-// ✨ ページ読み込み時に完全に復元する処理
+// ✨ ページ読み込み時に最後に選択していたアカウントでタイムラインを開く
 document.addEventListener("DOMContentLoaded", () => {
     initializeProfileRooms(); 
-    renderAccounts();         
-    showProfile();            
+    renderAccounts();         // これで前回のアカウントの選択状態が復元されます
 
-    // 前回開いていたアカウントのインデックスを復元してスライドさせる
-    const savedIndex = localStorage.getItem("currentAccountIndex");
-    if (savedIndex !== null) {
-        const container = document.getElementById("profileContainer");
-        if (container) {
-            container.style.transition = "none"; // 初回配置時はアニメーションをオフにして一瞬で移動
-            container.style.transform = `translateX(-${savedIndex * 100}%)`;
-        }
-    }
+    // プロフィール画面ではなく、メインのタイムラインを表示する
+    timeline.style.display = "block";
+    profilePage.style.display = "none";
+    
+    // 他の不要なページも非表示にしておく安全対策
+    if (postDetailPage) postDetailPage.style.display = "none";
+    if (searchPage) searchPage.style.display = "none";
 });
 
 document.addEventListener("click", (e) => {
