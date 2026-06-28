@@ -1280,3 +1280,24 @@ top: -0px;
 .slide-active {
     transition: transform 0.3s cubic-bezier(0.35, 0, 0.25, 1) !important;
 }
+
+/* 画面の幅だけを見せる窓 */
+.profile-window {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* アカウントを横一列に並べるステージ（Xと全く同じ加速感） */
+#profileContainer {
+    display: flex;
+    width: 100%;
+    transition: transform 0.3s cubic-bezier(0.35, 0, 0.25, 1);
+}
+
+/* 1画面分のサイズを固定 */
+.single-profile {
+    min-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}

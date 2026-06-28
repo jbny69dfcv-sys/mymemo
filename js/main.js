@@ -794,48 +794,37 @@ function renderAccounts() {
             >
         `;
 accountDiv.addEventListener("click", () => {
-    // 【ルール1】すでに選択中のアカウントを「もう1回」押した場合
+    // 1. すでに選択中のアカウントを「もう1回」押した場合
     if (currentAccount === account) {
-        
-        // もしすでにプロフィール画面を開いているなら、何もしない（または上までスクロール）
-        if (profilePage.style.display !== "none") {
-            return; 
-        }
+        if (profilePage.style.display !== "none") return; 
 
-        // プロフィール画面が開いていない（タイムラインにいる）なら、プロフィールを表示する！
+        // 初めてプロフィールを開くときは、まず最新のデータを全部屋に反映させてからスライド
         showProfile();
+        profilePage.style.display = "block";
+        timeline.style.display = "none";
         
-        // 初めてプロフィールを開く時は、右からスッと気持ちよくスライドインさせる
-        profilePage.classList.remove("slide-active");
-        profilePage.style.transform = "translateX(100%)";
-        requestAnimationFrame(() => {
-            profilePage.classList.add("slide-active");
-            profilePage.style.transform = "translateX(0)";
-        });
-
-    // 【ルール2】今とは「別のアカウント」を押した場合
-    } else {
-        const currentIndex = accounts.indexOf(currentAccount);
+        const container = document.getElementById("profileContainer");
         const targetIndex = accounts.indexOf(account);
-        const isNext = targetIndex > currentIndex;
-
-        // データを切り替えて、タイムラインをそのアカウントのものに更新する（画面はタイムラインのまま！）
+        
+        // 最初の登場はアニメーションなしで一瞬でその位置へ
+        container.style.transition = "none";
+        container.style.transform = `translateX(-${targetIndex * 100}%)`;
+    } 
+    // 2. 今とは「別のアカウント」を押した場合
+    else {
+        const targetIndex = accounts.indexOf(account);
         currentAccount = account;
         localStorage.setItem("currentAccount", currentAccount);
         renderAccounts();
         renderTimeline();
 
-        // もし「プロフィール画面を開いた状態」で別のアカウントに切り替えた場合だけ、X風にスライドさせる
+        // もしプロフィール画面を開いているなら、X方式で大画面ごとスイーッと滑らせる！
         if (profilePage.style.display !== "none") {
-            showProfile(); // プロフィールの中身を新しいアカウントに更新
-
-            profilePage.classList.remove("slide-active");
-            profilePage.style.transform = isNext ? "translateX(100%)" : "translateX(-100%)";
-
-            requestAnimationFrame(() => {
-                profilePage.classList.add("slide-active");
-                profilePage.style.transform = "translateX(0)";
-            });
+            showProfile(); // 移動先の部屋のデータを裏で最新にする
+            
+            const container = document.getElementById("profileContainer");
+            container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+            container.style.transform = `translateX(-${targetIndex * 100}%)`;
         }
     }
 });
@@ -1332,19 +1321,30 @@ const sortedPosts =
     }
 }
 function showProfile() {
-
-    // ▼ 【ココを追加】アカウントの数だけ、横並びの部屋（.single-profile）を自動で量産する
+    const profile = profiles[currentAccount] || {};
+    const targetIndex = accounts.indexOf(currentAccount);
+    
+    // 全ての部屋を取得し、現在の部屋（マス）を特定する
     const container = document.getElementById("profileContainer");
-    if (container) {
-        // 元々あった1個分の部屋（HTMLに書いたやつ）を取得
-        const template = container.querySelector(".single-profile");
+    const rooms = container.getElementsByClassName("single-profile");
+    const currentRoom = rooms[targetIndex];
+
+    if (currentRoom) {
+        // id ではなく class を狙って、その部屋のデータだけを安全に書き換える！
+        currentRoom.querySelector(".header-image").src = profile.header || "";
+        currentRoom.querySelector(".profile-icon").src = profile.icon || "https://via.placeholder.com/60";
+        currentRoom.querySelector(".p-name").textContent = profile.name || currentAccount;
+        currentRoom.querySelector(".p-id").textContent = "@" + (profile.id || currentAccount);
+        currentRoom.querySelector(".p-bio").textContent = profile.bio || "";
         
-        // アカウントの数に対して、部屋が足りなかったら自動でコピーして増やす
-        while (container.children.length < accounts.length) {
-            const clone = template.cloneNode(true);
-            container.appendChild(clone);
-        }
+        // そのアカウントの投稿だけを、その部屋のタイムラインに表示する
+        const profileTimeline = currentRoom.querySelector(".profile-timeline");
+        profileTimeline.innerHTML = ""; // 一度リセット
+        
+        // 【ここに元々あった「そのアカウントの投稿を表示するループ処理」を入れてください】
+        // 例: const userPosts = posts.filter(p => p.account === currentAccount); ...等
     }
+
     // ▲ 【追加ここまで】▲
 
     // --- ここから下は、元々 showProfile() の中にあったコードのままでOK ---
