@@ -1142,19 +1142,18 @@ function renderProfilePosts() {
     }
 }
 
-// ✨【修正】ページ読み込み時は、最後に選んでいたアカウントの状態で「メインタイムライン」を開く
+// 🔄 既存の DOMContentLoaded の部分をこれに置き換えてください
 document.addEventListener("DOMContentLoaded", () => {
+    // 💡 ページ読み込み時に、まずプロフィール部屋を自動で組み立てる
     initializeProfileRooms(); 
     renderAccounts();         
 
-    // 更新時はメインタイムラインを開いた状態にする
     timeline.style.display = "block";
     profilePage.style.display = "none";
     
     if (postDetailPage) postDetailPage.style.display = "none";
     if (searchPage) searchPage.style.display = "none";
 
-    // プロフィール表示用の事前スライド位置だけ計算してセットしておく
     const savedIndex = localStorage.getItem("currentAccountIndex");
     if (savedIndex !== null) {
         const container = document.getElementById("profileContainer");
@@ -1195,8 +1194,11 @@ function showProfile() {
     if (!container) return;
     
     const rooms = container.getElementsByClassName("single-profile");
+    
+    // 💡 固定の accounts ではなく、保存されたアカウント一覧を基準にする
+    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
 
-    accounts.forEach((accountName, index) => {
+    savedAccounts.forEach((accountName, index) => {
         const currentRoom = rooms[index];
         if (!currentRoom) return;
 
@@ -1221,10 +1223,11 @@ function showProfile() {
         const countEl = currentRoom.querySelector("p:nth-of-type(3)");
         if (countEl) countEl.textContent = "投稿数 " + userPosts.length;
 
-        const roomTimeline = currentRoom.querySelector("#profileTimeline");
+        const roomTimeline = currentRoom.querySelector(".timeline") || currentRoom.querySelector("#profileTimeline");
         if (roomTimeline) {
             roomTimeline.innerHTML = ""; 
             
+            // 💡 ここも profileMode に応じて正しく表示を分ける
             const targetPosts = profileMode === "posts" 
                 ? userPosts 
                 : posts.filter(post => post.likedBy && post.likedBy.includes(accountName));
@@ -2327,6 +2330,127 @@ function setAppHeight() {
         `${window.innerHeight}px`
     );
 
+}
+
+// ✨ 1. 新しくこの関数をコードの末尾などに追加してください
+function initializeProfileRooms() {
+    const container = document.getElementById("profileContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    // ローカルストレージから最新のアカウント一覧を取得
+    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
+
+    savedAccounts.forEach((accName, index) => {
+        const newRoom = document.createElement("div");
+        newRoom.className = "single-profile";
+        
+        newRoom.innerHTML = `
+            <div class="profile-header">
+                <img class="header-image" src="" id="headerImage">
+                <button class="edit-profile-btn edit-header-button">✏️</button>
+            </div>
+            <div class="profile-info">
+                <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
+                <h2 id="profileName">${accName}</h2>
+                <p id="profileId">@userid</p>
+                <p id="profileBio">プロフィール未設定</p>
+                <p id="postCount">投稿数 0</p>
+                <button class="deleteAccountButton" data-index="${index}">アカウント削除</button>
+                <div class="follow-counts">
+                    <span id="followingCount">0</span> フォロー
+                    <span id="followerCount">0</span> フォロワー
+                </div>
+            </div>
+            <div class="profile-tabs">
+                <div class="profile-tab active room-posts-tab">投稿</div>
+                <div class="profile-tab room-likes-tab">スキ</div>
+            </div>
+            <div class="timeline" id="profileTimeline"></div>
+        `;
+
+        // 💡 全てのアカウントのタブにクリックイベントを確実に登録
+        const pTab = newRoom.querySelector(".room-posts-tab");
+        const lTab = newRoom.querySelector(".room-likes-tab");
+
+        if (pTab && lTab) {
+            pTab.addEventListener("click", () => {
+                profileMode = "posts";
+                pTab.classList.add("active");
+                lTab.classList.remove("active");
+                renderProfilePosts();
+            });
+
+            lTab.addEventListener("click", () => {
+                profileMode = "likes";
+                lTab.classList.add("active");
+                pTab.classList.remove("active");
+                renderProfilePosts();
+            });
+        }
+
+        container.appendChild(newRoom);
+    });
+}
+
+// 🔄 2. 既存の showProfile() をこの内容に丸ごと置き換えてください
+function showProfile() {
+    const container = document.getElementById("profileContainer");
+    if (!container) return;
+    
+    const rooms = container.getElementsByClassName("single-profile");
+    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
+
+    savedAccounts.forEach((accountName, index) => {
+        const currentRoom = rooms[index];
+        if (!currentRoom) return;
+
+        const profile = profiles[accountName] || {};
+        const userPosts = posts.filter(post => post.account === accountName);
+
+        const headerEl = currentRoom.querySelector(".header-image");
+        if (headerEl) headerEl.src = profile.header || "";
+
+        const iconEl = currentRoom.querySelector(".profile-icon");
+        if (iconEl) iconEl.src = profile.icon || "https://via.placeholder.com/60";
+        
+        const nameEl = currentRoom.querySelector("h2");
+        if (nameEl) nameEl.textContent = profile.name || accountName;
+        
+        const idEl = currentRoom.querySelector("p:nth-of-type(1)");
+        if (idEl) idEl.textContent = "@" + (profile.id || "userid");
+        
+        const bioEl = currentRoom.querySelector("p:nth-of-type(2)");
+        if (bioEl) bioEl.textContent = profile.bio || "プロフィール未設定";
+        
+        const countEl = currentRoom.querySelector("p:nth-of-type(3)");
+        if (countEl) countEl.textContent = "投稿数 " + userPosts.length;
+
+        const roomTimeline = currentRoom.querySelector(".timeline") || currentRoom.querySelector("#profileTimeline");
+        if (roomTimeline) {
+            roomTimeline.innerHTML = ""; 
+            
+            // モード（投稿 or スキ）に応じて表示する投稿を切り替える
+            const targetPosts = profileMode === "posts" 
+                ? userPosts 
+                : posts.filter(post => post.likedBy && post.likedBy.includes(accountName));
+
+            const sortedPosts = [...targetPosts].sort((a, b) => {
+                if ((a.pinned || false) !== (b.pinned || false)) {
+                    return (b.pinned || false) - (a.pinned || false);
+                }
+                return b.time - a.time;
+            });
+
+            for (const post of sortedPosts) {
+                addPostToTimeline(post, roomTimeline);
+            }
+        }
+    });
+
+    timeline.style.display = "none";
+    profilePage.style.display = "block";
 }
 
 
