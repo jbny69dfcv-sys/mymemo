@@ -1145,6 +1145,7 @@ top: -0px;
     margin-top:8px;
     white-space:pre-wrap;
     word-break:break-word;
+    text-indent: 0;
 }
 
 .comment-buttons{
