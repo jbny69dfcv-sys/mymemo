@@ -798,7 +798,7 @@ accountDiv.addEventListener("click", () => {
     if (currentAccount === account) {
         if (profilePage.style.display !== "none") return; 
 
-        // 元々の処理をそのまま動かして、普通にプロフィールを開く
+        // 普通にプロフィールを開く
         showProfile();
         
         const container = document.getElementById("profileContainer");
@@ -818,21 +818,13 @@ accountDiv.addEventListener("click", () => {
 
         // もしプロフィール画面を開いているなら、X方式で大画面スライド！
         if (profilePage.style.display !== "none") {
-            // ① 元の安全な処理を動かして、1つ目の部屋(index: 0)を最新状態に更新する
+            // 全部屋のプロフィールデータを最新に更新する
             showProfile(); 
 
             const container = document.getElementById("profileContainer");
             if (container) {
-                const rooms = container.getElementsByClassName("single-profile");
-                const firstRoom = rooms[0]; // 元の部屋
-                const targetRoom = rooms[targetIndex]; // これから移動する目的地の部屋
-
-                // ② 1つ目の部屋の中身を、移動先の部屋に丸ごと一瞬でコピーする（魔法の1行）
-                if (firstRoom && targetRoom && targetIndex !== 0) {
-                    targetRoom.innerHTML = firstRoom.innerHTML;
-                }
-
-                // ③ Xと全く同じ滑らかさでスイーッとスライドさせる！
+                // 【修正ポイント】余計な innerHTML のコピー処理を完全に削除しました！
+                // X（Twitter）と同じ滑らかさで、それぞれの部屋へスイーッとスライドさせるだけ！
                 container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
                 container.style.transform = `translateX(-${targetIndex * 100}%)`;
             }
