@@ -1100,73 +1100,53 @@ function renderTimeline() {
 }
 
 function renderProfilePosts() {
-    // ❌ 古い書き方：const profileTimeline = document.getElementById("profileTimeline");
-    
-    // ✨ 新しい書き方：現在選択されているアカウント（部屋）の中にあるタイムラインを正確に取得する
+    // 1. 現在選択されているアカウントのプロフィール部屋を正しく取得
     const targetIndex = accounts.indexOf(currentAccount);
     const rooms = document.querySelectorAll(".single-profile");
     const currentRoom = rooms[targetIndex];
     
     if (!currentRoom) return;
-    const profileTimeline = currentRoom.querySelector(".timeline"); // その部屋のタイムライン枠を取得
+    const profileTimeline = currentRoom.querySelector(".timeline");
     if (!profileTimeline) return;
 
-    profileTimeline.innerHTML = ""; // 一旦中身を空にする
+    profileTimeline.innerHTML = ""; // タイムラインを一旦クリア
 
-    // 💡 ここから下の、実際の投稿を表示するループ処理（forやforEachなど）はそのまま残してください！
-    // 例：posts.forEach(post => { ... }) のような既存の処理に続きます。
+    // 2. ローカルストレージなどから最新の投稿データを取得（※変数名が異なる場合は既存のデータソースに合わせてください）
+    const allPosts = JSON.parse(localStorage.getItem("posts")) || [];
 
-    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
+    // 3. 現在のモード（「投稿」か「スキ」か）に合わせて表示する投稿を絞り込む
+    let displayPosts = [];
 
-    savedAccounts.forEach((accName, index) => {
-        const newRoom = document.createElement("div");
-        newRoom.className = "single-profile";
-        
-        newRoom.innerHTML = `
-            <div class="profile-header">
-                <img class="header-image" src="" id="headerImage">
-               <button class="edit-profile-btn edit-header-button">✏️</button>
+    if (profileMode === "likes") {
+        // 【スキ モード】自分がハート（いいね）を押した投稿だけをフィルター
+        // ※ post.likedBy や post.likes など、アプリのいいね保持形式に合わせて調整してください
+        displayPosts = allPosts.filter(post => {
+            return post.likedUsers && post.likedUsers.includes(currentAccount);
+        });
+    } else {
+        // 【投稿 モード】そのアカウントが自分で投稿したものだけをフィルター
+        displayPosts = allPosts.filter(post => post.account === currentAccount);
+    }
+
+    // 4. 絞り込んだ投稿を画面に描画する
+    if (displayPosts.length === 0) {
+        profileTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">${profileMode === "likes" ? "スキした投稿はありません" : "投稿はありません"}</div>`;
+        return;
+    }
+
+    // 💡 ここから下は、既存の「投稿をHTMLに変換して追加する処理」をそのまま合流させてください
+    displayPosts.forEach(post => {
+        const postDiv = document.createElement("div");
+        postDiv.className = "post";
+        // （※ あなたのコードにある、投稿の見た目を作るHTMLをここに入れます）
+        postDiv.innerHTML = `
+            <div class="post-header">
+                <img src="${post.icon}" class="post-icon">
+                <span class="post-name">${post.name}</span>
             </div>
-            <div class="profile-info">
-                <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
-                <h2 id="profileName">${accName}</h2>
-                <p id="profileId">@userid</p>
-                <p id="profileBio">プロフィール未設定</p>
-                <p id="postCount">投稿数 0</p>
-                <button class="deleteAccountButton" data-index="${index}">アカウント削除</button>
-                <div class="follow-counts">
-                    <span id="followingCount">0</span> フォロー
-                    <span id="followerCount">0</span> フォロワー
-                </div>
-            </div>
-            <div class="profile-tabs">
-                <div class="profile-tab active room-posts-tab">投稿</div>
-                <div class="profile-tab room-likes-tab">スキ</div>
-            </div>
-            <div class="timeline" id="profileTimeline"></div>
+            <div class="post-content">${post.content}</div>
         `;
-
-        // 💡 新しく作った部屋の中のタブに対して、クリックイベントを設定します
-        const pTab = newRoom.querySelector(".room-posts-tab");
-        const lTab = newRoom.querySelector(".room-likes-tab");
-
-        if (pTab && lTab) {
-            pTab.addEventListener("click", () => {
-                profileMode = "posts";
-                pTab.classList.add("active");
-                lTab.classList.remove("active");
-                renderProfilePosts();
-            });
-
-            lTab.addEventListener("click", () => {
-                profileMode = "likes";
-                lTab.classList.add("active");
-                pTab.classList.remove("active");
-                renderProfilePosts();
-            });
-        }
-
-        container.appendChild(newRoom);
+        profileTimeline.appendChild(postDiv);
     });
 }
 
