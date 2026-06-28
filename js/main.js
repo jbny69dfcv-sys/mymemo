@@ -989,6 +989,45 @@ pinButton.addEventListener(
 );
 }
 
+// コメント削除ボタンのクリックイベント（グローバルに設定）
+document.addEventListener("click", (e) => {
+    // クリックされた要素、またはその親に .comment-delete-button があるかチェック
+    const deleteButton = e.target.closest(".comment-delete-button");
+    
+    if (deleteButton) {
+        e.stopPropagation(); // 念のため親要素へのクリック伝播を防ぐ
+
+        // ボタンの属性（data-attributes）から投稿IDとコメントの番号を取得
+        const postId = parseInt(deleteButton.dataset.postId);
+        const commentIndex = parseInt(deleteButton.dataset.commentIndex);
+
+        if (confirm("このコメントを削除してもよろしいですか？")) {
+            const transaction = db.transaction(["posts"], "readwrite");
+            const store = transaction.objectStore("posts");
+            
+            // ① 該当の投稿データをIndexedDBから取得
+            const getRequest = store.get(postId);
+
+            getRequest.onsuccess = () => {
+                const postData = getRequest.result;
+                if (postData && postData.comments) {
+                    
+                    // ② 配列から指定の番号のコメントを削除
+                    postData.comments.splice(commentIndex, 1);
+
+                    // ③ データベースに上書き保存
+                    const updateRequest = store.put(postData);
+
+                    // ④ 保存が完全に完了してから画面を再読み込み（すれ違い防止）
+                    updateRequest.onsuccess = () => {
+                        loadPosts(); // タイムラインや詳細画面の再描画を走らせる
+                    };
+                }
+            };
+        }
+    }
+});
+
 const deleteButton =
         post.querySelector(
             ".delete-button"
