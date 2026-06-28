@@ -1292,3 +1292,8 @@ top: -0px;
     width: 100%;
     box-sizing: border-box;
 }
+
+/* アカウントのアイコンのCSSに足す */
+.your-account-icon-class {
+    touch-action: manipulation; /* タップの遅延を限界までゼロにする */
+}
