@@ -276,9 +276,12 @@ cancelProfileButton.addEventListener(
  
  
 // ✨ これに貼り替えます！
-editHeaderButton.addEventListener(
-    "click",
-    () => {
+// ✨ どの部屋の編集ボタンを押しても、現在のアカウントを編集できるようにする（これに差し替えます！）
+document.addEventListener("click", (e) => {
+    // クリックされたボタンが「edit-profile-btn」クラス、またはIDが「editHeaderButton」の場合
+    if (e.target.classList.contains("edit-profile-btn") || e.target.id === "editHeaderButton" || e.target.innerText === "✏️") {
+        e.stopPropagation();
+
         // 現在スライドして表示している（選択中の）アカウントのデータを取得
         const profile = profiles[currentAccount] || {};
 
@@ -286,7 +289,7 @@ editHeaderButton.addEventListener(
         editHeaderPreview.src = profile.header || "";
         editIconPreview.src = profile.icon || "https://via.placeholder.com/60";
 
-        // 入力欄に現在のデータをセット（これで2個目、3個目の垢のデータが表示されます！）
+        // 入力欄に現在のデータをセット
         editName.value = profile.name || currentAccount;
         editId.value = profile.id || "";
         editBio.value = profile.bio || "";
@@ -300,7 +303,7 @@ editHeaderButton.addEventListener(
         // 編集画面（モーダル）を開く
         editProfileModal.style.display = "block";
     }
-);
+});
 
 
 saveProfileButton.addEventListener(
