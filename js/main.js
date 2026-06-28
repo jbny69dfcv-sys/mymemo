@@ -841,23 +841,24 @@ if (
         profileContent.style.transition = "none";
         profileContent.style.transform = isNext ? "translateX(100%)" : "translateX(-100%)";
 
-        // 4. ほんの一瞬待ってからスライド開始！（ここで押し出す動きになります）
+// 4. 遅延をなくして、押した瞬間にスライドを開始させる！
+        profileContent.style.transition = "transform 0s cubic-bezier(0.2, 0.8, 0.2, 1)";
+        
+        // 残像も同じタイミングで動き出させる
+        oldContent.style.transition = "transform 0s cubic-bezier(0.2, 0.8, 0.2, 1)";
+
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                profileContent.style.transition = "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
-                
-                // 新しい箱は元の位置(0)へ、残像は画面外へヒュイッ！
-                profileContent.style.transform = "translateX(0)";
-                oldContent.style.transform = isNext ? "translateX(-100%)" : "translateX(100%)";
-            });
+            // 新しい箱は元の位置(0)へ、残像は画面外へスッっと移動
+            profileContent.style.transform = "translateX(0)";
+            oldContent.style.transform = isNext ? "translateX(-100%)" : "translateX(100%)";
         });
 
-        // 5. アニメーションが終わったら残像を消す
+        // 5. アニメーションが終わったら残像を消す（時間を0.35秒に合わせたので 350 に変更）
         setTimeout(() => {
             if (oldContent.parentNode) oldContent.remove();
             profileContent.style.transition = "";
             profileContent.style.transform = "";
-        }, 400); // 0.4秒後に削除
+        }, 350);
 
     } else {
         // プロフィール画面を開いていない時は、普通にデータだけ切り替える
