@@ -63,69 +63,59 @@
 
 <div id="profilePage" style="display:none;">
 
-        <!-- タイムライン戻るボタン（完全に固定） -->
         <button id="backButton">
             ← タイムライン
         </button>
 
-        <!-- ▼ 【X方式】はみ出た右側の画面を隠す「窓」 ▼ -->
         <div class="profile-window">
             
-            <!-- ▼ 【X方式】画面を横一列に並べるコンテナ ▼ -->
             <div id="profileContainer">
 
-                <!-- 1つ目のアカウントの部屋 (index: 0) -->
-                <div class="single-profile">
+                <div class="single-profile" data-index="0">
                     <div class="profile-header">
-                        <img class="header-image" src=""><button class="edit-header-button">✏️</button>
+                        <img id="headerImage" class="header-image" src=""><button id="editHeaderButton" class="edit-header-button">✏️</button>
                     </div>
                     <div class="profile-info">
-                        <img class="profile-icon" src="">
-                        <h2 class="p-name"></h2><p class="p-id"></p><p class="p-bio"></p><p class="p-count"></p>
-                        <button class="delete-btn">アカウント削除</button>
-                        <div class="follow-stats"><span>0 フォロー中</span><span>0 フォロワー</span></div>
-                        <div class="profile-tabs"><button class="profile-tab active">投稿</button><button class="profile-tab">スキ</button></div>
-                        <div class="profile-timeline"></div>
+                        <img id="profileIcon" class="profile-icon" src="">
+                        <h2 id="profileName"></h2><p id="profileId"></p><p id="profileBio"></p><p id="postCount"></p>
+                        <button id="deleteAccountButton">アカウント削除</button>
+                        <div class="follow-stats"><span id="followingCount">0 フォロー中</span><span id="followerCount">0 フォロワー</span></div>
+                        <input type="file" id="headerUpload" accept="image/*" style="display:none;">
+                        <input type="file" id="iconUpload" accept="image/*" style="display:none;">
+                        <div class="profile-tabs"><button id="postsTab" class="profile-tab active">投稿</button><button id="likesTab" class="profile-tab">スキ</button></div>
+                        <div id="profileTimeline"></div>
                     </div>
                 </div>
 
-                <!-- 2つ目のアカウントの部屋 (index: 1) -->
-                <div class="single-profile">
+                <div class="single-profile" data-index="1">
                     <div class="profile-header">
-                        <img class="header-image" src=""><button class="edit-header-button">✏️</button>
+                        <img id="headerImage" class="header-image" src=""><button id="editHeaderButton" class="edit-header-button">✏️</button>
                     </div>
                     <div class="profile-info">
-                        <img class="profile-icon" src="">
-                        <h2 class="p-name"></h2><p class="p-id"></p><p class="p-bio"></p><p class="p-count"></p>
-                        <button class="delete-btn">アカウント削除</button>
-                        <div class="follow-stats"><span>0 フォロー中</span><span>0 フォロワー</span></div>
-                        <div class="profile-tabs"><button class="profile-tab active">投稿</button><button class="profile-tab">スキ</button></div>
-                        <div class="profile-timeline"></div>
+                        <img id="profileIcon" class="profile-icon" src="">
+                        <h2 id="profileName"></h2><p id="profileId"></p><p id="profileBio"></p><p id="postCount"></p>
+                        <button id="deleteAccountButton">アカウント削除</button>
+                        <div class="follow-stats"><span id="followingCount">0 フォロー中</span><span id="followerCount">0 フォロワー</span></div>
+                        <div class="profile-tabs"><button id="postsTab" class="profile-tab active">投稿</button><button id="likesTab" class="profile-tab">スキ</button></div>
+                        <div id="profileTimeline"></div>
                     </div>
                 </div>
 
-                <!-- 3つ目のアカウントの部屋 (index: 2) -->
-                <div class="single-profile">
+                <div class="single-profile" data-index="2">
                     <div class="profile-header">
-                        <img class="header-image" src=""><button class="edit-header-button">✏️</button>
+                        <img id="headerImage" class="header-image" src=""><button id="editHeaderButton" class="edit-header-button">✏️</button>
                     </div>
                     <div class="profile-info">
-                        <img class="profile-icon" src="">
-                        <h2 class="p-name"></h2><p class="p-id"></p><p class="p-bio"></p><p class="p-count"></p>
-                        <button class="delete-btn">アカウント削除</button>
-                        <div class="follow-stats"><span>0 フォロー中</span><span>0 フォロワー</span></div>
-                        <div class="profile-tabs"><button class="profile-tab active">投稿</button><button class="profile-tab">スキ</button></div>
-                        <div class="profile-timeline"></div>
+                        <img id="profileIcon" class="profile-icon" src="">
+                        <h2 id="profileName"></h2><p id="profileId"></p><p id="profileBio"></p><p id="postCount"></p>
+                        <button id="deleteAccountButton">アカウント削除</button>
+                        <div class="follow-stats"><span id="followingCount">0 フォロー中</span><span id="followerCount">0 フォロワー</span></div>
+                        <div class="profile-tabs"><button id="postsTab" class="profile-tab active">投稿</button><button id="likesTab" class="profile-tab">スキ</button></div>
+                        <div id="profileTimeline"></div>
                     </div>
                 </div>
 
-            </div> <!-- #profileContainer -->
-        </div> <!-- .profile-window -->
-
-        <!-- プロフィール編集用の共通パーツは外側に置いておく -->
-        <input type="file" id="headerUpload" accept="image/*" style="display:none;">
-        <input type="file" id="iconUpload" accept="image/*" style="display:none;">
-    </div>
+            </div> </div> </div>
 
 <div
     id="postDetailPage"

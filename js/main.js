@@ -798,17 +798,15 @@ accountDiv.addEventListener("click", () => {
     if (currentAccount === account) {
         if (profilePage.style.display !== "none") return; 
 
-        // 初めてプロフィールを開くときは、まず最新のデータを全部屋に反映させてからスライド
+        // 元々の処理をそのまま動かして、普通にプロフィールを開く
         showProfile();
-        profilePage.style.display = "block";
-        timeline.style.display = "none";
         
         const container = document.getElementById("profileContainer");
         const targetIndex = accounts.indexOf(account);
-        
-        // 最初の登場はアニメーションなしで一瞬でその位置へ
-        container.style.transition = "none";
-        container.style.transform = `translateX(-${targetIndex * 100}%)`;
+        if (container) {
+            container.style.transition = "none";
+            container.style.transform = `translateX(-${targetIndex * 100}%)`;
+        }
     } 
     // 2. 今とは「別のアカウント」を押した場合
     else {
@@ -818,13 +816,26 @@ accountDiv.addEventListener("click", () => {
         renderAccounts();
         renderTimeline();
 
-        // もしプロフィール画面を開いているなら、X方式で大画面ごとスイーッと滑らせる！
+        // もしプロフィール画面を開いているなら、X方式で大画面スライド！
         if (profilePage.style.display !== "none") {
-            showProfile(); // 移動先の部屋のデータを裏で最新にする
-            
+            // ① 元の安全な処理を動かして、1つ目の部屋(index: 0)を最新状態に更新する
+            showProfile(); 
+
             const container = document.getElementById("profileContainer");
-            container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
-            container.style.transform = `translateX(-${targetIndex * 100}%)`;
+            if (container) {
+                const rooms = container.getElementsByClassName("single-profile");
+                const firstRoom = rooms[0]; // 元の部屋
+                const targetRoom = rooms[targetIndex]; // これから移動する目的地の部屋
+
+                // ② 1つ目の部屋の中身を、移動先の部屋に丸ごと一瞬でコピーする（魔法の1行）
+                if (firstRoom && targetRoom && targetIndex !== 0) {
+                    targetRoom.innerHTML = firstRoom.innerHTML;
+                }
+
+                // ③ Xと全く同じ滑らかさでスイーッとスライドさせる！
+                container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+                container.style.transform = `translateX(-${targetIndex * 100}%)`;
+            }
         }
     }
 });
