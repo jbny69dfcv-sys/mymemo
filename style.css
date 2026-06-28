@@ -1256,5 +1256,5 @@ top: -0px;
     
     /* 親要素のFlexboxの影響を打ち消して左端に寄せる */
     align-self: flex-start; 
-    width: 100%; /* 横幅いっぱいに広げる */
+    width: 90%; /* 横幅いっぱいに広げる */
 }
