@@ -1332,24 +1332,30 @@ const sortedPosts =
     }
 }
 function showProfile() {
-    const profile = profiles[currentAccount] || {};
-    const targetIndex = accounts.indexOf(currentAccount);
-    
-    // 全ての部屋を取得し、現在の部屋（マス）を特定する
     const container = document.getElementById("profileContainer");
     if (!container) return;
     
     const rooms = container.getElementsByClassName("single-profile");
-    const currentRoom = rooms[targetIndex];
 
-    if (currentRoom) {
-        // id ではなく class を狙って、その部屋のデータだけを安全に書き換える！
-        currentRoom.querySelector(".header-image").src = profile.header || "";
-        currentRoom.querySelector(".profile-icon").src = profile.icon || "https://via.placeholder.com/60";
+    // アカウントの部屋（0, 1, 2）をループして、それぞれの部屋に正しいデータを届ける
+    accounts.forEach((accountName, index) => {
+        const currentRoom = rooms[index];
+        if (!currentRoom) return;
+
+        // その部屋が担当するアカウントのプロフィールデータを取得
+        const profile = profiles[accountName] || {};
+        const userPosts = posts.filter(post => post.account === accountName);
+
+        // ヘッダーとアイコンをその部屋のアカウントのものに書き換える
+        const headerEl = currentRoom.querySelector(".header-image");
+        if (headerEl) headerEl.src = profile.header || "";
+
+        const iconEl = currentRoom.querySelector(".profile-icon");
+        if (iconEl) iconEl.src = profile.icon || "https://via.placeholder.com/60";
         
-        // クラス名（p-name, p-id, p-bio）がHTML側に無いため、直にタグやIDを考慮して安全に取得
+        // 名前・ID・自己紹介
         const nameEl = currentRoom.querySelector("h2");
-        if (nameEl) nameEl.textContent = profile.name || currentAccount;
+        if (nameEl) nameEl.textContent = profile.name || accountName;
         
         const idEl = currentRoom.querySelector("p:nth-of-type(1)");
         if (idEl) idEl.textContent = "@" + (profile.id || "userid");
@@ -1357,21 +1363,21 @@ function showProfile() {
         const bioEl = currentRoom.querySelector("p:nth-of-type(2)");
         if (bioEl) bioEl.textContent = profile.bio || "プロフィール未設定";
         
-        // 投稿数を計算して反映
-        const userPosts = posts.filter(post => post.account === currentAccount);
+        // 投稿数
         const countEl = currentRoom.querySelector("p:nth-of-type(3)");
         if (countEl) countEl.textContent = "投稿数 " + userPosts.length;
 
-        // そのアカウントの投稿だけを、その部屋のタイムラインに表示する
+        // その部屋のアカウント専用のタイムラインを表示する
         const roomTimeline = currentRoom.querySelector("#profileTimeline");
         if (roomTimeline) {
             roomTimeline.innerHTML = ""; // 一度リセット
             
-            // プロフィール専用の並び替え（固定ピンを上にする）
+            // タブの選択状態（posts か likes か）に合わせて投稿をフィルタリング
             const targetPosts = profileMode === "posts" 
                 ? userPosts 
-                : posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
+                : posts.filter(post => post.likedBy && post.likedBy.includes(accountName));
 
+            // ピン留めを上にするソート処理
             const sortedPosts = [...targetPosts].sort((a, b) => {
                 if ((a.pinned || false) !== (b.pinned || false)) {
                     return (b.pinned || false) - (a.pinned || false);
@@ -1379,12 +1385,12 @@ function showProfile() {
                 return b.time - a.time;
             });
 
-            // タイムラインに投稿を追加していく
+            // その部屋のタイムラインに投稿を追加
             for (const post of sortedPosts) {
                 addPostToTimeline(post, roomTimeline);
             }
         }
-    }
+    });
 
     // 全体画面の切り替え
     timeline.style.display = "none";
