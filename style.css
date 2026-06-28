@@ -1252,7 +1252,7 @@ top: -0px;
     margin-top: 8px;
     white-space: pre-wrap;
     word-break: break-word;
-    padding: 0px 15px;   /* 上下左右に12pxの内側余白を作る */
+    padding: 15px 0px;   /* 上下左右に12pxの内側余白を作る */
     box-sizing: border-box;   /* 余白を作っても全体の横幅がはみ出さないようにする記述 */
 
     
