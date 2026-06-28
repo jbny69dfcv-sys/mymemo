@@ -1265,3 +1265,8 @@ top: -0px;
     position: relative;
     overflow-x: hidden; /* 横にはみ出た部分を隠す（超重要） */
 }
+
+#profileContent {
+    will-change: transform;
+    backface-visibility: hidden;
+}
