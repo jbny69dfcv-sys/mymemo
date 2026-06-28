@@ -796,22 +796,28 @@ function renderAccounts() {
                 }"
             >
         `;
-        accountDiv.addEventListener("click", () => {
-            const targetIndex = accounts.indexOf(account);
-            currentAccount = account;
-            localStorage.setItem("currentAccount", currentAccount);
-            localStorage.setItem("currentAccountIndex", targetIndex);
+accountDiv.addEventListener("click", () => {
+            // タップされたアカウントが、すでに現在選択中のアカウントかどうかを判定
+            if (account === currentAccount) {
+                // 【すでに選択中なら】いつでもプロフィール画面を表示する
+                showProfile();
+            } else {
+                // 【違うアカウントなら】1回目は切り替え処理だけを行う
+                const targetIndex = accounts.indexOf(account);
+                currentAccount = account;
+                localStorage.setItem("currentAccount", currentAccount);
+                localStorage.setItem("currentAccountIndex", targetIndex);
 
-            renderAccounts();
-            renderTimeline();
+                // アカウントの選択状態（見た目）を更新
+                renderAccounts();
+                renderTimeline();
 
-            // ✨【修正】アイコンを押したときは、プロフィール画面を表示するように変更
-            showProfile(); 
-
-            const container = document.getElementById("profileContainer");
-            if (container) {
-                container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
-                container.style.transform = `translateX(-${targetIndex * 100}%)`;
+                // プロフィール表示用の事前スライド位置を計算してセット（画面は切り替えない）
+                const container = document.getElementById("profileContainer");
+                if (container) {
+                    container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+                    container.style.transform = `translateX(-${targetIndex * 100}%)`;
+                }
             }
         });
         accountsContainer.appendChild(
