@@ -795,7 +795,7 @@ function renderAccounts() {
         `;
 accountDiv.addEventListener("click", () => {
     if (currentAccount === account) {
-        // 同じアイコンなら何もしない、または画面を上までスクロール
+        // 同じアカウントなら何もしない
     } else {
         const targetIndex = accounts.indexOf(account);
         currentAccount = account;
@@ -804,10 +804,13 @@ accountDiv.addEventListener("click", () => {
         renderAccounts();
         renderTimeline();
 
-        // X（Twitter）方式：巨大なステージを、選んだアカウントの番号分だけ左にスライドさせる！
+        // 1. まず元の処理を呼び出して、いつも通りプロフィール画面を最新に更新する
+        showProfile(); 
+
+        // 2. その上で、横並びのステージをスライドさせる！
         const container = document.getElementById("profileContainer");
         if (container && profilePage.style.display !== "none") {
-            // 例：2番目のアカウント（index: 1）なら、-100% 左にずらす
+            // X（Twitter）方式でスライド！
             container.style.transform = `translateX(-${targetIndex * 100}%)`;
         }
     }
@@ -2509,40 +2512,6 @@ function setAppHeight() {
 
 }
 
-// 全てのアカウントのプロフィール画面を、あらかじめ横一列に一括で組み立てる関数
-function setupAllProfiles() {
-    const container = document.getElementById("profileContainer");
-    if (!container) return;
-    
-    container.innerHTML = ""; // 一度リセット
-
-    // 全てのアカウント分、プロフィール画面のHTMLを作って横に並べる
-    accounts.forEach((account) => {
-        const profile = profiles[account] || {};
-        const profileDiv = document.createElement("div");
-        profileDiv.className = "single-profile";
-
-        // 元のHTMLにあった中身をここに移植します
-        profileDiv.innerHTML = `
-            <div class="profile-header">
-                <img class="header-image" src="${profile.header || ''}">
-                <button class="edit-header-button">✏️</button>
-            </div>
-            <div class="profile-info">
-                <img class="profile-icon" src="${profile.icon || 'https://via.placeholder.com/60'}">
-                <h2>${profile.name || account}</h2>
-                <p>@${profile.id || account}</p>
-                <p>${profile.bio || ''}</p>
-                <div class="profile-tabs">
-                    <button class="profile-tab active">投稿</button>
-                    <button class="profile-tab">スキ</button>
-                </div>
-                <div class="profile-timeline-placeholder"></div>
-            </div>
-        `;
-        container.appendChild(profileDiv);
-    });
-}
 
 window.addEventListener(
     "resize",
