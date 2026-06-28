@@ -834,31 +834,30 @@ if (
         renderTimeline();
         showProfile(); // ここで本物の箱の中身が一瞬で新しくなる
 
-        // 3. アニメーションの向きの準備
+ // 3. アニメーションの向きの準備
         const isNext = targetIndex > currentIndex;
         
         // 新しい箱のスタート位置を画面外（右か左）にセット
         profileContent.style.transition = "none";
         profileContent.style.transform = isNext ? "translateX(100%)" : "translateX(-100%)";
 
-// 4. 遅延をなくして、押した瞬間にスライドを開始させる！
-        profileContent.style.transition = "transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)";
-        
-        // 残像も同じタイミングで動き出させる
-        oldContent.style.transition = "transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)";
-
+        // 4. 【修正】1回だけ優しく待って、2つの画面を同時にスライド開始！
         requestAnimationFrame(() => {
-            // 新しい箱は元の位置(0)へ、残像は画面外へスッっと移動
+            // ここで一瞬だけアニメーションの設定をONにする
+            profileContent.style.transition = "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
+            oldContent.style.transition = "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
+            
+            // 同時に動かす！
             profileContent.style.transform = "translateX(0)";
             oldContent.style.transform = isNext ? "translateX(-100%)" : "translateX(100%)";
         });
 
-        // 5. アニメーションが終わったら残像を消す（時間を0.35秒に合わせたので 350 に変更）
+        // 5. アニメーションが終わったら残像を消す
         setTimeout(() => {
             if (oldContent.parentNode) oldContent.remove();
             profileContent.style.transition = "";
             profileContent.style.transform = "";
-        }, 350);
+        }, 400); // 0.4秒後に削除
 
     } else {
         // プロフィール画面を開いていない時は、普通にデータだけ切り替える
