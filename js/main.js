@@ -888,7 +888,7 @@ addButton.addEventListener("click", () => {
             newRoom.innerHTML = `
                 <div class="profile-header">
                     <img class="header-image" src="" id="headerImage">
-                    <button class="edit-profile-btn" id="editHeaderButton">✏️</button>
+                   <button class="edit-profile-btn edit-header-button">✏️</button>
                 </div>
                 <div class="profile-info">
                     <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
@@ -1397,7 +1397,7 @@ function initializeProfileRooms() {
         newRoom.innerHTML = `
             <div class="profile-header">
                 <img class="header-image" src="" id="headerImage">
-                <button class="edit-profile-btn" id="editHeaderButton">✏️</button>
+               <button class="edit-profile-btn edit-header-button">✏️</button>
             </div>
             <div class="profile-info">
                 <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
