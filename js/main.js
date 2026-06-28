@@ -158,12 +158,8 @@ const iconUpload =
 const headerUpload =
     document.getElementById("headerUpload");
 
-const editHeaderButton = document.getElementById("editHeaderButton");
-
-const editProfileModal =
-    document.getElementById(
-        "editProfileModal"
-    );
+// ✨ 画面のどこにあるモーダルかを直接指定できるようにします（これに置き換え）
+const editProfileModal = document.getElementById("editProfileModal");
 const editHeaderPreview =
     document.getElementById(
         "editHeaderPreview"
@@ -275,33 +271,38 @@ cancelProfileButton.addEventListener(
 );
  
  
-// ✨ これに貼り替えます！
-// ✨ どの部屋の編集ボタンを押しても、現在のアカウントを編集できるようにする（これに差し替えます！）
+// ✨ どの部屋の編集ボタンを押しても、変数エラーにならずにモーダルを確実に開く処理
 document.addEventListener("click", (e) => {
-    // クリックされたボタンが「edit-profile-btn」クラス、またはIDが「editHeaderButton」の場合
+    // クリックされたボタンが「✏️」ボタン（クラス名やID、テキストで判定）の場合
     if (e.target.classList.contains("edit-profile-btn") || e.target.id === "editHeaderButton" || e.target.innerText === "✏️") {
         e.stopPropagation();
 
-        // 現在スライドして表示している（選択中の）アカウントのデータを取得
+        // 現在選択中のアカウントデータを取得
         const profile = profiles[currentAccount] || {};
 
-        // プレビュー画像に現在のデータをセット
-        editHeaderPreview.src = profile.header || "";
-        editIconPreview.src = profile.icon || "https://via.placeholder.com/60";
+        // 各プレビューや入力欄の要素を、その場で新しく取得してセットする
+        const previewHeader = document.getElementById("editHeaderPreview");
+        const previewIcon = document.getElementById("editIconPreview");
+        const inputName = document.getElementById("editName");
+        const inputId = document.getElementById("editId");
+        const inputBio = document.getElementById("editBio");
+        const modal = document.getElementById("editProfileModal");
 
-        // 入力欄に現在のデータをセット
-        editName.value = profile.name || currentAccount;
-        editId.value = profile.id || "";
-        editBio.value = profile.bio || "";
+        if (previewHeader) previewHeader.src = profile.header || "";
+        if (previewIcon) previewIcon.src = profile.icon || "https://via.placeholder.com/60";
+        if (inputName) inputName.value = profile.name || currentAccount;
+        if (inputId) inputId.value = profile.id || "";
+        if (inputBio) inputBio.value = profile.bio || "";
 
         console.log("プロフィール編集押された（選択中アカウント:" + currentAccount + "）");
 
-        // 一時保存用変数にデータをキープ
         tempIcon = profile.icon || null;
         tempHeader = profile.header || null;
         
         // 編集画面（モーダル）を開く
-        editProfileModal.style.display = "block";
+        if (modal) {
+            modal.style.display = "block";
+        }
     }
 });
 
