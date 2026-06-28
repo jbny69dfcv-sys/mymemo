@@ -1594,93 +1594,41 @@ modalPostButton.addEventListener(
 
         // ===== 編集 =====
 
-        if (editingPost) {
+if (editingPost) {
+            editingPost.text = text;
 
-            editingPost.text =
-                text;
+            const files = [...postImageUpload.files];
 
-            const files =
-                [...postImageUpload.files];
+            // 共通の終了処理（保存が完全に終わってから画面を動かす）
+            const finalizeEdit = () => {
+                const transaction = db.transaction(["posts"], "readwrite");
+                const store = transaction.objectStore("posts");
+                const request = store.put(editingPost);
 
-            if (
-                files.length > 0
-            ) {
+                request.onsuccess = () => {
+                    // 最新データをデータベースから再読み込みして画面を更新
+                    loadPosts();
 
-                const reader =
-                    new FileReader();
+                    // 各種入力欄やモーダルのリセット
+                    modalPostInput.value = "";
+                    postImageUpload.value = "";
+                    postImagePreview.src = "";
+                    document.querySelector(".preview-container").style.display = "none";
+                    editingPost = null;
+                    modalPostButton.textContent = "投稿";
+                    postModal.style.display = "none";
+                };
+            };
 
-                reader.onload =
-                    () => {
-
-                        editingPost.image =
-                            reader.result;
-
-                        savePostToDB(
-                            editingPost
-                        );
-
-                        renderTimeline();
-                        renderProfilePosts();
-
-                        modalPostInput.value =
-                            "";
-
-                        postImageUpload.value =
-                            "";
-
-                        postImagePreview.src =
-                            "";
-
-                        document.querySelector(
-                            ".preview-container"
-                        ).style.display =
-                            "none";
-
-                        editingPost =
-                            null;
-
-                        modalPostButton.textContent =
-                            "投稿";
-
-                        postModal.style.display =
-                            "none";
-                    };
-
-                reader.readAsDataURL(
-                    files[0]
-                );
-
+            if (files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    editingPost.image = reader.result;
+                    finalizeEdit();
+                };
+                reader.readAsDataURL(files[0]);
             } else {
-
-                savePostToDB(
-                    editingPost
-                );
-
-                renderTimeline();
-                renderProfilePosts();
-
-                modalPostInput.value =
-                    "";
-
-                postImageUpload.value =
-                    "";
-
-                postImagePreview.src =
-                    "";
-
-                document.querySelector(
-                    ".preview-container"
-                ).style.display =
-                    "none";
-
-                editingPost =
-                    null;
-
-                modalPostButton.textContent =
-                    "投稿";
-
-                postModal.style.display =
-                    "none";
+                finalizeEdit();
             }
 
             return;
