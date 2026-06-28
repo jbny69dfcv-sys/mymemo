@@ -1377,19 +1377,16 @@ const sortedPosts =
     }
 }
 
-// ✨ ページを読み込んだ瞬間に、保存されているアカウントの数だけHTMLの部屋を自動生成する関数
+// ✨ ここからコピーして貼り付けてください！
 function initializeProfileRooms() {
     const container = document.getElementById("profileContainer");
     if (!container) return;
 
-    // 一旦コンテナの中身を空っぽにする
     container.innerHTML = "";
 
-    // ローカルストレージから最新のアカウント一覧を取得
     const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
 
-    // アカウントの数だけ正しいHTML構造の「部屋」を生成
-    savedAccounts.forEach((accName) => {
+    savedAccounts.forEach((accName, index) => {
         const newRoom = document.createElement("div");
         newRoom.className = "single-profile";
         
@@ -1404,7 +1401,7 @@ function initializeProfileRooms() {
                 <p id="profileId">@userid</p>
                 <p id="profileBio">プロフィール未設定</p>
                 <p id="postCount">投稿数 0</p>
-                <button id="deleteAccountButton" class="deleteAccountButton">アカウント削除</button>
+                <button class="deleteAccountButton" data-index="${index}">アカウント削除</button>
                 <div class="follow-counts">
                     <span id="followingCount">0</span> フォロー
                     <span id="followerCount">0</span> フォロワー
@@ -1420,6 +1417,30 @@ function initializeProfileRooms() {
     });
 }
 
+// 削除ボタンを動かすための命令（これも一緒に貼り付けておいてください！）
+document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("deleteAccountButton") || e.target.id === "deleteAccountButton") {
+        const index = e.target.getAttribute("data-index");
+        
+        const confirmDelete = confirm("本当にこのアカウントを削除しますか？");
+        if (!confirmDelete) return;
+
+        let savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
+        
+        if (index !== null && savedAccounts[index]) {
+            savedAccounts.splice(index, 1);
+            localStorage.setItem("accounts", JSON.stringify(savedAccounts));
+            accounts = savedAccounts;
+
+            initializeProfileRooms();
+            if (typeof renderAccounts === "function") renderAccounts();
+            if (typeof showProfile === "function") showProfile();
+            
+            location.reload(); // 画面をスッキリ更新！
+        }
+    }
+});
+// ✨ コピーここまで！
 // 🚀 ページが読み込まれたとき（一番最初）に実行する処理を書き換える
 // 元々ある renderAccounts() や showProfile() の呼び出し部分を以下のように並び替えてください
 document.addEventListener("DOMContentLoaded", () => {
