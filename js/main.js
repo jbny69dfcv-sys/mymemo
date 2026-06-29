@@ -871,58 +871,57 @@ function addPostToTimeline(
     post.className =
         "post";
 
-    const profile =
-        profiles[
-            postData.account
-        ] || {};
+// ✨ プロフィールが未設定（初期状態）でもエラーにならないように安全に書き換え
+const profile = (profiles && profiles[postData.account]) ? profiles[postData.account] : {};
 
-    post.innerHTML = `
-        <div class="post-header">
-            <img class="post-icon" src="${profile.icon || "https://via.placeholder.com/50"}">
-            <div class="post-user">
-                <div>
-                    ${profile.name || postData.account}
-                    <span class="post-id">@${profile.id || "userid"}</span>
-                </div>
-                <div class="post-time">${formatTime(postData.time)}</div>
+post.innerHTML = `
+    <div class="post-header">
+        <img class="post-icon" src="${profile.icon || "https://via.placeholder.com/50"}">
+        <div class="post-user">
+            <div>
+                ${profile.name || postData.account}
+                <span class="post-id">@${profile.id || "userid"}</span>
             </div>
-            <div class="post-buttons">
-                <button class="pin-button">${postData.pinned ? "📍" : "📌"}</button>
-                <button class="edit-button">✏️</button>
-                <button class="delete-button">✕</button>
-            </div>
+            <div class="post-time">${formatTime(postData.time)}</div>
         </div>
-
-        <div class="post-body">
-            <div class="post-text">${postData.text}</div>
-            
-            ${
-                postData.images && postData.images.length > 0
-                ? `
-                <div class="post-images ${
-                    postData.images.length === 1 ? "one" : 
-                    postData.images.length === 2 ? "two" : 
-                    postData.images.length === 3 ? "three" : "four"
-                }">
-                    ${postData.images.map(image => `<img src="${image}" class="post-image clickable-image">`).join("")}
-                </div>
-                `
-                : postData.image
-                ? `<img src="${postData.image}" class="post-image clickable-image">`
-                : ""
-            }
-
-            <div class="post-actions">
-                <button class="like-button">
-                    ${postData.likedBy && postData.likedBy.includes(currentAccount) ? "❤️" : "🤍"}
-                    ${postData.likes || 0}
-                </button>
-                <button class="comment-button">
-                    💬 ${postData.comments ? postData.comments.length : 0}
-                </button>
-            </div>
+        <!-- 💡 消えてしまっていたボタンの塊を、元の位置に完全復活させました！ -->
+        <div class="post-buttons">
+            <button class="pin-button">${postData.pinned ? "📍" : "📌"}</button>
+            <button class="edit-button">✏️</button>
+            <button class="delete-button">✕</button>
         </div>
-    `;
+    </div>
+
+    <div class="post-body">
+        <div class="post-text">${postData.text}</div>
+        
+        ${
+            postData.images && postData.images.length > 0
+            ? `
+            <div class="post-images ${
+                postData.images.length === 1 ? "one" : 
+                postData.images.length === 2 ? "two" : 
+                postData.images.length === 3 ? "three" : "four"
+            }">
+                ${postData.images.map(image => `<img src="${image}" class="post-image clickable-image">`).join("")}
+            </div>
+            `
+            : postData.image
+            ? `<img src="${postData.image}" class="post-image clickable-image">`
+            : ""
+        }
+
+        <div class="post-actions">
+            <button class="like-button">
+                ${postData.likedBy && postData.likedBy.includes(currentAccount) ? "❤️" : "🤍"}
+                ${postData.likes || 0}
+            </button>
+            <button class="comment-button">
+                💬 ${postData.comments ? postData.comments.length : 0}
+            </button>
+        </div>
+    </div>
+`;
 
     const pinButton =
         post.querySelector(
