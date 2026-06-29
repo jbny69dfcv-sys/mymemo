@@ -75,8 +75,8 @@ body {
 }
 
 .post-body {
-    padding: 30px;
-
+    padding: 20px;
+    min-height: 200px;
 }
 .new-post {
     background: white;
@@ -676,11 +676,6 @@ cursor: pointer;
     gap: 20px;
 
     margin: 20px 0;
-
-    display: flex;
-    justify-content: space-around; /* または space-between */
-    width: 100%;
-    border-bottom: 1px solid #eee; /* 好みで下線を入れるとさらに綺麗になります */
 }
 
 .profile-tab {
@@ -694,10 +689,6 @@ cursor: pointer;
     font-weight: bold;
 
     cursor: pointer;
-
-    flex: 1;            /* 2つのボタンを50%ずつの等幅にする */
-    text-align: center; /* 文字を中央寄せにする */
-    padding: 10px 0;    /* 上下に少し余白を作って押しやすくする */
 }
 
 .profile-tab.active {
@@ -1268,49 +1259,4 @@ top: -0px;
     /* 親要素のFlexboxの影響を打ち消して左端に寄せる */
     align-self: flex-start; 
     width: 100%; /* 横幅いっぱいに広げる */
-}
-
-#profilePage {
-    position: relative;
-    overflow-x: hidden; /* 横にはみ出た部分を隠す（超重要） */
-}
-
-#profileContent {
-    will-change: transform;
-    backface-visibility: hidden;
-}
-
-#profilePage {
-    /* タイムラインボタンは固定したいので position は relative か static に */
-    position: relative; 
-}
-
-/* 一瞬でスッと動く、X（Twitter）と全く同じ加速感のクラス */
-.slide-active {
-    transition: transform 0.3s cubic-bezier(0.35, 0, 0.25, 1) !important;
-}
-
-/* 画面の幅だけを見せる窓 */
-.profile-window {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-}
-
-/* アカウントを横一列に並べるステージ（Xと全く同じ加速感） */
-#profileContainer {
-    display: flex;
-    width: 100%;
-    transition: transform 0.3s cubic-bezier(0.35, 0, 0.25, 1);
-}
-
-/* 1画面分のサイズを固定 */
-.single-profile {
-    min-width: 100%;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-html, body {
-    touch-action: manipulation;
 }
