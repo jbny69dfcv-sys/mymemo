@@ -920,57 +920,39 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function showProfile() {
-    const container = document.getElementById("profileContainer");
-    if (!container) return;
-    
-    const rooms = container.getElementsByClassName("single-profile");
-    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
+    // profileContainer を探す処理をやめ、HTMLに実在する要素に直接データを入れます
+    const profile = profiles[currentAccount] || {};
+    const userPosts = posts.filter(post => post.account === currentAccount);
 
-    savedAccounts.forEach((accountName, index) => {
-        const currentRoom = rooms[index];
-        if (!currentRoom) return;
+    if (headerImage) headerImage.src = profile.header || "";
+    if (profileIcon) profileIcon.src = profile.icon || "https://via.placeholder.com/60";
+    if (profileName) profileName.textContent = profile.name || currentAccount;
+    if (profileId) profileId.textContent = "@" + (profile.id || "userid");
+    if (profileBio) profileBio.textContent = profile.bio || "プロフィール未設定";
+    if (postCount) postCount.textContent = "投稿数 " + userPosts.length;
 
-        const profile = profiles[accountName] || {};
-        const userPosts = posts.filter(post => post.account === accountName);
-
-        const headerEl = currentRoom.querySelector(".header-image");
-        if (headerEl) headerEl.src = profile.header || "";
-
-        const iconEl = currentRoom.querySelector(".profile-icon");
-        if (iconEl) iconEl.src = profile.icon || "https://via.placeholder.com/60";
+    if (profileTimeline) {
+        profileTimeline.innerHTML = ""; 
         
-        const nameEl = currentRoom.querySelector("h2");
-        if (nameEl) nameEl.textContent = profile.name || accountName;
-        
-        const idEl = currentRoom.querySelector("p:nth-of-type(1)");
-        if (idEl) idEl.textContent = "@" + (profile.id || "userid");
-        
-        const bioEl = currentRoom.querySelector("p:nth-of-type(2)");
-        if (bioEl) bioEl.textContent = profile.bio || "プロフィール未設定";
-        
-        const countEl = currentRoom.querySelector("p:nth-of-type(3)");
-        if (countEl) countEl.textContent = "投稿数 " + userPosts.length;
+        const targetPosts = profileMode === "posts" 
+            ? userPosts 
+            : posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
 
-        const roomTimeline = currentRoom.querySelector(".timeline") || currentRoom.querySelector("#profileTimeline");
-        if (roomTimeline) {
-            roomTimeline.innerHTML = ""; 
-            
-            const targetPosts = profileMode === "posts" 
-                ? userPosts 
-                : posts.filter(post => post.likedBy && post.likedBy.includes(accountName));
+        const sortedPosts = [...targetPosts].sort((a, b) => {
+            if ((a.pinned || false) !== (b.pinned || false)) {
+                return (b.pinned || false) - (a.pinned || false);
+            }
+            return b.time - a.time;
+        });
 
-            const sortedPosts = [...targetPosts].sort((a, b) => {
-                if ((a.pinned || false) !== (b.pinned || false)) {
-                    return (b.pinned || false) - (a.pinned || false);
-                }
-                return b.time - a.time;
-            });
-
+        if (sortedPosts.length === 0) {
+            profileTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">${profileMode === "likes" ? "スキした投稿はありません" : "投稿はありません"}</div>`;
+        } else {
             for (const post of sortedPosts) {
-                addPostToTimeline(post, roomTimeline);
+                addPostToTimeline(post, profileTimeline);
             }
         }
-    });
+    }
 
     if (timeline) timeline.style.display = "none";
     if (profilePage) profilePage.style.display = "block";

@@ -1260,3 +1260,15 @@ top: -0px;
     align-self: flex-start; 
     width: 100%; /* 横幅いっぱいに広げる */
 }
+
+/* アカウント切り替えの横移動用スタイル */
+#profileContainer {
+    display: flex;
+    transition: transform 0.3s cubic-bezier(0.35, 0, 0.25, 1);
+}
+
+.single-profile {
+    width: 100vw; /* 画面1枚分の横幅 */
+    flex-shrink: 0;
+    box-sizing: border-box;
+}

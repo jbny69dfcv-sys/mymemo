@@ -61,92 +61,19 @@
 
     <div id="timeline"></div>
 
-    <div id="profilePage" style="display:none;">
+<div id="profilePage" style="display:none;">
 
         <button id="backButton">
             ← タイムライン
         </button>
 
- <div class="profile-header">
-
-    <img
-        id="headerImage"
-        class="header-image"
-        src=""
-    >
-
-    <button
-        id="editHeaderButton"
-        class="edit-header-button"
-    >
-        ✏️
-    </button>
-
-</div>
-
-        <div class="profile-info">
-
-            <img
-                id="profileIcon"
-                class="profile-icon"
-                src=""
-            >
-
-            <h2 id="profileName"></h2>
-            <p id="profileId"></p>
-            <p id="profileBio"></p>
-            <p id="postCount"></p>
-            <button id="deleteAccountButton">
-    アカウント削除
-</button>
-<div class="follow-stats">
-
-    <span id="followingCount">
-        0 フォロー中
-    </span>
-
-    <span id="followerCount">
-        0 フォロワー
-    </span>
-
-</div>
-       
-<input
-    type="file"
-    id="headerUpload"
-    accept="image/*"
-    style="display:none;"
->
-
-          <input
-    type="file"
-    id="iconUpload"
-    accept="image/*"
-    style="display:none;"
->
-
- <div class="profile-tabs">
-
-    <button
-        id="postsTab"
-        class="profile-tab active"
-    >
-        投稿
-    </button>
-
-    <button
-        id="likesTab"
-        class="profile-tab"
-    >
-        スキ
-    </button>
-
-</div>
-
-<div id="profileTimeline"></div>
-    
-
+        <!-- 👇 ここからスライドの土台を追加しました -->
+        <div id="profileWrapper" style="width: 100%; overflow: hidden;">
+            <div id="profileContainer">
+                <!-- ここにJavaScript（main_2.js）がアカウントごとのプロフィール画面を自動で作ります -->
+            </div>
         </div>
+        <!-- 👆 ここまで -->
 
     </div>
 
