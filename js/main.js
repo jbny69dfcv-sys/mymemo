@@ -126,19 +126,12 @@ if (detailCommentButton) {
         renderTimeline();
         renderProfilePosts();
 
-        // コメントエリア内の最下部へスムーズにスクロール
+        // コメント送信後、最新のコメント位置へスムーズにスクロール
         setTimeout(() => {
-         // スクロールエリアを新しく作った「.detail-main-content」に指定する
-const scrollArea = postDetailPage.querySelector(".detail-main-content");
-if (scrollArea) {
-    scrollArea.scrollTop = scrollArea.scrollHeight;
-}
-            if (scrollArea) {
-                scrollArea.scrollTo({
-                    top: scrollArea.scrollHeight,
-                    behavior: "smooth"
-                });
-            }
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth"
+            });
         }, 100);
     });
 }
@@ -1034,47 +1027,49 @@ function renderComments() {
     }
 }
 
-// 詳細画面を開く直前の状態を記憶する変数（上部の変数宣言の近くに置くと綺麗です）
-let detailBackTarget = "timeline";
+// コメント詳細を開いたときの処理
+function openPostDetail(postData) {
+    currentDetailPost = postData;
 
-// コメントマークなどを押して詳細画面に移動する処理の中
-function openPostDetail(post) {
-    currentDetailPost = post;
-    
-    // 他のメイン画面を非表示にする
-    timelinePage.style.display = "none"; 
-    
-    // 詳細画面を表示する
-    postDetailPage.style.display = "flex";
-    
-    // 詳細画面の中身をレンダリングする
-    renderDetailPost(); // 詳細の投稿本体を表示する関数
-    renderDetailComments(); // コメント欄を表示する関数
+    if (timeline) timeline.style.display = "none";
+    if (profilePage) profilePage.style.display = "none";
+    if (postDetailPage) postDetailPage.style.display = "block";
+
+    if (postButton) postButton.style.display = "none";
+    if (searchButton) searchButton.style.display = "none";
+
+    if (detailPost) detailPost.innerHTML = "";
+
+    addPostToTimeline(postData, detailPost);
+    renderDetailComments();
+
+    setTimeout(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+    }, 50);
 }
 
 // コメント詳細から戻るときの処理
 if (backFromDetailButton) {
-// 「戻る」ボタンのクリックイベント
-backFromDetailButton.addEventListener("click", () => {
-    // 詳細画面を非表示にする
-    postDetailPage.style.display = "none";
-    
-    // タイムライン画面（または直前の画面）を表示する
-    timelinePage.style.display = "block"; // お使いのメイン画面のIDや要素に合わせてください
-    
-    // 画面の一番上に戻す
-    window.scrollTo(0, 0);
-});
+    backFromDetailButton.addEventListener("click", () => {
+            if (postDetailPage) postDetailPage.style.display = "none";
+            if (timeline) timeline.style.display = "block";
+
+            if (postButton) postButton.style.display = "block";
+            if (searchButton) searchButton.style.display = "block";
+        }
+    );
 }
 
 function renderDetailComments() {
-    // 投稿の中ではなく、HTML側にある専用の「detailComments」エリアを毎回クリアする
-    if (!detailComments) return;
-    detailComments.innerHTML = "";
+    if (!detailPost) return;
+    const oldComments = detailPost.querySelector(".post-comments");
+    if (oldComments) oldComments.remove();
 
     if (!currentDetailPost || !currentDetailPost.comments || currentDetailPost.comments.length === 0) return;
 
-    // コメント用のボックスを作成
+    const postCard = detailPost.querySelector(".post");
+    if (!postCard) return;
+
     const commentBox = document.createElement("div");
     commentBox.className = "post-comments";
 
@@ -1141,9 +1136,9 @@ function renderDetailComments() {
         });
     });
 
-    // 投稿本体(postCard)ではなく、独立したコメント表示エリアに追加する
-    detailComments.appendChild(commentBox);
+    postCard.appendChild(commentBox);
 }
+
 function renderSearchHistory() {
     if (!searchHistory) return;
     searchHistory.innerHTML = "";
@@ -1236,6 +1231,7 @@ if (searchInput) {
             searchHistoryData = [];
         }
 
+        // 保存上限を20件に変更
         searchHistoryData = searchHistoryData.filter(item => item !== keyword);
         searchHistoryData.unshift(keyword);
 
@@ -1342,6 +1338,7 @@ function initializeProfileRooms() {
 // 4. 初期実行処理
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
+    // データベース接続
     const indexedDBRequest = indexedDB.open("MyMemoDB", 1);
 
     indexedDBRequest.onupgradeneeded = event => {
@@ -1372,6 +1369,54 @@ document.addEventListener("DOMContentLoaded", () => {
             container.style.transform = `translateX(-${savedIndex * 100}%)`;
         }
     }
+
+    // 自動CSSインジェクション（入力欄完全固定＆検索履歴の部分スクロール化）
+    const style = document.createElement("style");
+    style.innerHTML = `
+        /* コメント詳細画面の余白を多めに確保 */
+        #postDetailPage {
+            padding-bottom: 90px !important;
+            position: relative !important;
+        }
+
+        /* コメント入力エリアの完全固定（スマホ幅に合わせ、親要素の中央に配置） */
+        .detail-comment-input-area {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 100% !important;
+            max-width: 500px !important; /* アプリ全体の最大幅に合わせて適宜調整してください */
+            background: #fff !important;
+            border-top: 1px solid #eee !important;
+            padding: 12px 15px !important;
+            box-sizing: border-box !important;
+            z-index: 9999 !important;
+            display: flex !important;
+            gap: 10px !important;
+        }
+
+        /* 検索履歴コンテナの制限（5件分程度の高さで中身をスクロール） */
+        #searchHistory {
+            max-height: 220px !important;
+            overflow-y: auto !important;
+            border: 1px solid #eee !important;
+            border-radius: 8px !important;
+            background: #fafafa !important;
+            margin: 10px 0 !important;
+            padding: 5px !important;
+        }
+
+        /* スクロールバーを見やすく細めに調整 */
+        #searchHistory::-webkit-scrollbar {
+            width: 5px !important;
+        }
+        #searchHistory::-webkit-scrollbar-thumb {
+            background: #ccc !important;
+            border-radius: 10px !important;
+        }
+    `;
+    document.head.appendChild(style);
 
     window.addEventListener("resize", setAppHeight);
     setAppHeight();
