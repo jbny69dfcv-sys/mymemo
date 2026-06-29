@@ -1047,10 +1047,11 @@ function openPostDetail(postData) {
     renderDetailComments();
 
     setTimeout(() => {
-        const scrollArea = postDetailPage.querySelector("*:not(.detail-comment-input-area)");
-        if (scrollArea) {
-            scrollArea.scrollTop = scrollArea.scrollHeight;
-        }
+// 例：スクロールエリアを新しく作った「.detail-main-content」に指定する
+const scrollArea = postDetailPage.querySelector(".detail-main-content");
+if (scrollArea) {
+    scrollArea.scrollTop = scrollArea.scrollHeight;
+}
     }, 50);
 }
 

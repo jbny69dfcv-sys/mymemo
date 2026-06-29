@@ -1373,29 +1373,53 @@ html, body {
 }
 
 /* ==========================================
-   コメント詳細画面の完全固定レイアウト（修正版）
+   コメント詳細画面の完全固定レイアウト（決定版）
    ========================================== */
 
-/* ページ全体の高さをJavaScriptの計算値（--app-height）に完全に一致させる */
+/* ページ全体の高さを画面に固定し、縦並び（Flex）にする */
 #postDetailPage {
-    display: flex;
-    flex-direction: column;
-    height: var(--app-height, 100vh); /* 100vhから修正してズレを防止 */
-    position: relative;
-    box-sizing: border-box;
-    overflow: hidden;
-    background: #ffffff;
+    display: flex !important;
+    flex-direction: column !important;
+    height: var(--app-height, 100vh) !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important; /* 画面全体のハミ出しスクロールを禁止 */
+    background: #ffffff !important;
 }
 
-/* タイムラインやコメント一覧のエリア：残りのスペースをすべて使い、ここだけをスクロールさせる */
-#postDetailPage > *:not(.detail-comment-input-area) {
-    flex: 1;
-    overflow-y: auto;
-    box-sizing: border-box;
+/* 【上部固定】ヘッダー：アカウント並びのように一番上に固定されます */
+.detail-header {
+    flex-shrink: 0 !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #eeeeee !important;
+    padding: 10px 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    z-index: 100 !important;
 }
 
-/* コメント入力欄：flex構造により、画面の最下部にピタッと自動で収まります */
+/* 戻るボタンが巨大化しないようにサイズを適正化 */
+#backFromDetailButton {
+    padding: 6px 12px !important;
+    font-size: 14px !important;
+    color: black !important;
+    background: #e9ecf3 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+}
+
+/* 【中央スクロール】ここだけが自在にスクロールします */
+.detail-main-content {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    padding-bottom: 10px !important;
+}
+
+/* 【下部固定】入力欄：flex構造により、画面の最下部にピタッと自動固定されます */
 .detail-comment-input-area {
+    flex-shrink: 0 !important;
     display: flex !important;
     gap: 10px !important;
     padding: 12px 15px !important;
@@ -1403,11 +1427,7 @@ html, body {
     border-top: 1px solid #eeeeee !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    
-    /* 余計な位置固定を排除して高さを安定させる */
-    position: relative !important; 
-    bottom: auto !important;
-    z-index: 10;
+    z-index: 100 !important;
 }
 
 /* ==========================================
