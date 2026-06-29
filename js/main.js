@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 変数・要素の宣言（エラー防止のためすべて最上部に集約）
+// 1. 変数・要素の宣言
 // ==========================================
 let searchHistoryData = JSON.parse(localStorage.getItem("searchHistory")) || [];
 let tempIcon = null;
@@ -126,12 +126,15 @@ if (detailCommentButton) {
         renderTimeline();
         renderProfilePosts();
 
-        // コメント送信後、最新のコメント位置へスムーズにスクロール
+        // コメントエリア内の最下部へスムーズにスクロール
         setTimeout(() => {
-            window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: "smooth"
-            });
+            const scrollArea = postDetailPage.querySelector("*:not(.detail-comment-input-area)");
+            if (scrollArea) {
+                scrollArea.scrollTo({
+                    top: scrollArea.scrollHeight,
+                    behavior: "smooth"
+                });
+            }
         }, 100);
     });
 }
@@ -1027,15 +1030,14 @@ function renderComments() {
     }
 }
 
-// コメント詳細を開いたときの処理（ボタン非表示化を追加）
+// コメント詳細を開いたときの処理
 function openPostDetail(postData) {
     currentDetailPost = postData;
 
     if (timeline) timeline.style.display = "none";
     if (profilePage) profilePage.style.display = "none";
-    if (postDetailPage) postDetailPage.style.display = "block";
+    if (postDetailPage) postDetailPage.style.display = "flex"; // ここをflex構造に変更
 
-    // 邪魔になっていた投稿ボタンと検索ボタンを非表示にする
     if (postButton) postButton.style.display = "none";
     if (searchButton) searchButton.style.display = "none";
 
@@ -1044,19 +1046,21 @@ function openPostDetail(postData) {
     addPostToTimeline(postData, detailPost);
     renderDetailComments();
 
-    // 既存のコメントがある場合は、自動的に一番下まで最初からスクロールさせておく
     setTimeout(() => {
-        window.scrollTo(0, document.body.scrollHeight);
+// 例：スクロールエリアを新しく作った「.detail-main-content」に指定する
+const scrollArea = postDetailPage.querySelector(".detail-main-content");
+if (scrollArea) {
+    scrollArea.scrollTop = scrollArea.scrollHeight;
+}
     }, 50);
 }
 
-// コメント詳細から戻るときの処理（ボタン再表示を追加）
+// コメント詳細から戻るときの処理
 if (backFromDetailButton) {
     backFromDetailButton.addEventListener("click", () => {
             if (postDetailPage) postDetailPage.style.display = "none";
             if (timeline) timeline.style.display = "block";
 
-            // タイムラインに戻ったら、非表示にしていたボタンを復活させる
             if (postButton) postButton.style.display = "block";
             if (searchButton) searchButton.style.display = "block";
         }
@@ -1237,7 +1241,7 @@ if (searchInput) {
         searchHistoryData = searchHistoryData.filter(item => item !== keyword);
         searchHistoryData.unshift(keyword);
 
-        if (searchHistoryData.length > 10) {
+        if (searchHistoryData.length > 20) {
             searchHistoryData.pop();
         }
 
@@ -1337,10 +1341,9 @@ function initializeProfileRooms() {
 }
 
 // ==========================================
-// 4. 初期実行処理（DOM読み込み完了を待って動かす）
+// 4. 初期実行処理
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-    // データベース接続
     const indexedDBRequest = indexedDB.open("MyMemoDB", 1);
 
     indexedDBRequest.onupgradeneeded = event => {
@@ -1371,28 +1374,6 @@ document.addEventListener("DOMContentLoaded", () => {
             container.style.transform = `translateX(-${savedIndex * 100}%)`;
         }
     }
-
-    // CSSを自動適用して、コメント入力欄を最前面・画面最下部に完全固定する
-    const style = document.createElement("style");
-    style.innerHTML = `
-        #postDetailPage {
-            padding-bottom: 80px !important;
-        }
-        .detail-comment-input-area {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            background: #fff !important;
-            border-top: 1px solid #eee !important;
-            padding: 10px 15px !important;
-            box-sizing: border-box !important;
-            z-index: 9999 !important;
-            display: flex !important;
-            gap: 10px !important;
-        }
-    `;
-    document.head.appendChild(style);
 
     window.addEventListener("resize", setAppHeight);
     setAppHeight();
