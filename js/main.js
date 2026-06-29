@@ -1,221 +1,157 @@
-let searchHistoryData =
-    JSON.parse(
-        localStorage.getItem(
-            "searchHistory"
-        )
-    ) || [];
-
+// ==========================================
+// 1. 変数・要素の宣言（エラー防止のためすべて最上部に集約）
+// ==========================================
+let searchHistoryData = JSON.parse(localStorage.getItem("searchHistory")) || [];
 let tempIcon = null;
-
 let tempHeader = null;
-
 let editingPost = null;
-
 let profileMode = "posts";
+let currentDetailPost = null;
+let currentCommentPost = null;
 
-let currentDetailPost =
-    null;
+let accounts = JSON.parse(localStorage.getItem("accounts")) || ["今の垢", "他の垢", "創作垢"];
+let currentAccount = localStorage.getItem("currentAccount") || accounts[0];
+let posts = [];
+let profiles = JSON.parse(localStorage.getItem("profiles")) || {};
+let db;
+let cropper = null;
+let cropTarget = null;
 
-let currentCommentPost =
-    null;
+// DOM要素の取得
+const postsTab = document.getElementById("postsTab");
+const likesTab = document.getElementById("likesTab");
+const deleteAccountButton = document.getElementById("deleteAccountButton");
+const searchInput = document.getElementById("searchInput");
+const accountsContainer = document.getElementById("accounts");
+const timeline = document.getElementById("timeline");
+const postDetailPage = document.getElementById("postDetailPage");
+const detailPost = document.getElementById("detailPost");
+const detailComments = document.getElementById("detailComments");
+const detailCommentInput = document.getElementById("detailCommentInput");
+const detailCommentButton = document.getElementById("detailCommentButton");
+const backFromDetailButton = document.getElementById("backFromDetailButton");
+const profilePage = document.getElementById("profilePage");
+const profileName = document.getElementById("profileName");
+const followingCount = document.getElementById("followingCount");
+const followerCount = document.getElementById("followerCount");
+const profileId = document.getElementById("profileId");
+const profileBio = document.getElementById("profileBio");
+const profileIcon = document.getElementById("profileIcon");
+const headerImage = document.getElementById("headerImage");
+const profileTimeline = document.getElementById("profileTimeline");
+const postCount = document.getElementById("postCount");
+const backButton = document.getElementById("backButton");
+const iconUpload = document.getElementById("iconUpload");
+const headerUpload = document.getElementById("headerUpload");
+const editProfileModal = document.getElementById("editProfileModal");
+const editHeaderPreview = document.getElementById("editHeaderPreview");
+const editIconPreview = document.getElementById("editIconPreview");
+const cancelProfileButton = document.getElementById("cancelProfileButton");
+const saveProfileButton = document.getElementById("saveProfileButton");
+const searchButton = document.getElementById("searchButton");
+const searchPage = document.getElementById("searchPage");
+const backSearchButton = document.getElementById("backSearchButton");
+const searchHistory = document.getElementById("searchHistory");
+const postButton = document.getElementById("postButton");
+const headerModal = document.getElementById("headerModal");
+const headerModalImage = document.getElementById("headerModalImage");
+const profileHeaderImage = document.getElementById("headerImage");
+const cropModal = document.getElementById("cropModal");
+const cropImage = document.getElementById("cropImage");
+const cropConfirmButton = document.getElementById("cropConfirmButton");
+const cropCancelButton = document.getElementById("cropCancelButton");
+const searchResults = document.getElementById("searchResults");
+const postModal = document.getElementById("postModal");
+const modalPostInput = document.getElementById("modalPostInput");
+const postImageUpload = document.getElementById("postImageUpload");
+const postImagePreview = document.getElementById("postImagePreview");
+const removePostImageButton = document.getElementById("removePostImageButton");
+const modalPostButton = document.getElementById("modalPostButton");
+const closeModalButton = document.getElementById("closeModalButton");
+const imageModal = document.getElementById("imageModal");
+const modalImage = document.getElementById("modalImage");
+const videoModal = document.getElementById("videoModal");
+const modalVideo = document.getElementById("modalVideo");
+const editName = document.getElementById("editName");
+const editId = document.getElementById("editId");
+const editBio = document.getElementById("editBio");
+const postUserIcon = document.getElementById("postUserIcon");
+const commentModal = document.getElementById("commentModal");
+const closeCommentButton = document.getElementById("closeCommentButton");
+const commentList = document.getElementById("commentList");
+const commentInput = document.getElementById("commentInput");
+const sendCommentButton = document.getElementById("sendCommentButton");
 
-const postsTab =
-    document.getElementById(
-        "postsTab"
-    );
-
-const likesTab =
-    document.getElementById(
-        "likesTab"
-    );
-
-const deleteAccountButton =
-    document.getElementById(
-        "deleteAccountButton"
-    );
+// ==========================================
+// 2. イベントリスナー・メイン処理
+// ==========================================
 
 if (postsTab) {
-    postsTab.addEventListener(
-        "click",
-        () => {
-            profileMode = "posts";
-            postsTab.classList.add("active");
-            if (likesTab) likesTab.classList.remove("active");
-            renderProfilePosts();
-        }
-    );
+    postsTab.addEventListener("click", () => {
+        profileMode = "posts";
+        postsTab.classList.add("active");
+        if (likesTab) likesTab.classList.remove("active");
+        renderProfilePosts();
+    });
 }
 
 if (likesTab) {
-    likesTab.addEventListener(
-        "click",
-        () => {
-            profileMode = "likes";
-            likesTab.classList.add("active");
-            if (postsTab) postsTab.classList.remove("active");
-            renderProfilePosts();
-        }
-    );
+    likesTab.addEventListener("click", () => {
+        profileMode = "likes";
+        likesTab.classList.add("active");
+        if (postsTab) postsTab.classList.remove("active");
+        renderProfilePosts();
+    });
 }
 
-const searchInput =
-    document.getElementById(
-        "searchInput"
-    );
-const accountsContainer =
-    document.getElementById("accounts");
-
-const timeline =
-    document.getElementById("timeline");
-
-const postDetailPage =
-    document.getElementById(
-        "postDetailPage"
-    );
-
-const detailPost =
-    document.getElementById(
-        "detailPost"
-    );
-
-const detailComments =
-    document.getElementById(
-        "detailComments"
-    );
-
-const detailCommentInput =
-    document.getElementById(
-        "detailCommentInput"
-    );
-
-const detailCommentButton =
-    document.getElementById(
-        "detailCommentButton"
-    );
-
-const backFromDetailButton =
-    document.getElementById(
-        "backFromDetailButton"
-    );
-
-const profilePage =
-    document.getElementById("profilePage");
-
-const profileName =
-    document.getElementById("profileName");
-
-const followingCount =
-    document.getElementById(
-        "followingCount"
-    );
-
-const followerCount =
-    document.getElementById(
-        "followerCount"
-    );
-
-const profileId =
-    document.getElementById("profileId");
-
-const profileBio =
-    document.getElementById("profileBio");
-
-const profileIcon =
-    document.getElementById("profileIcon");
-
-const headerImage =
-    document.getElementById("headerImage");
-
-const profileTimeline =
-    document.getElementById("profileTimeline");
-
-const postCount =
-    document.getElementById("postCount");
-
-const backButton =
-    document.getElementById("backButton");
-
-const iconUpload =
-    document.getElementById("iconUpload");
-
-const headerUpload =
-    document.getElementById("headerUpload");
-
-const editProfileModal = document.getElementById("editProfileModal");
-const editHeaderPreview =
-    document.getElementById(
-        "editHeaderPreview"
-    );
-
-const editIconPreview =
-    document.getElementById(
-        "editIconPreview"
-    );
-
+// コメント送信時の処理（自動スクロール付き）
 if (detailCommentButton) {
-    detailCommentButton.addEventListener(
-        "click",
-        () => {
-            if (!currentDetailPost) return;
-            if (detailCommentInput.value.trim() === "") return;
+    detailCommentButton.addEventListener("click", () => {
+        if (!currentDetailPost) return;
+        if (detailCommentInput.value.trim() === "") return;
 
-            if (!currentDetailPost.comments) {
-                currentDetailPost.comments = [];
-            }
-
-            currentDetailPost.comments.push({
-                account: currentAccount,
-                text: detailCommentInput.value,
-                time: Date.now()
-            });
-
-            savePostToDB(currentDetailPost);
-            detailCommentInput.value = "";
-            renderDetailComments();
-            renderTimeline();
-            renderProfilePosts();
+        if (!currentDetailPost.comments) {
+            currentDetailPost.comments = [];
         }
-    );
+
+        currentDetailPost.comments.push({
+            account: currentAccount,
+            text: detailCommentInput.value,
+            time: Date.now()
+        });
+
+        savePostToDB(currentDetailPost);
+        detailCommentInput.value = "";
+        renderDetailComments();
+        renderTimeline();
+        renderProfilePosts();
+
+        // コメント送信後、最新のコメント位置へスムーズにスクロール
+        setTimeout(() => {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth"
+            });
+        }, 100);
+    });
 }
 
 if (editHeaderPreview) {
-    editHeaderPreview.addEventListener(
-        "click",
-        () => {
-            if (headerUpload) headerUpload.click();
-        }
-    );
+    editHeaderPreview.addEventListener("click", () => {
+        if (headerUpload) headerUpload.click();
+    });
 }
 
 if (editIconPreview) {
-    editIconPreview.addEventListener(
-        "click",
-        () => {
-            if (iconUpload) iconUpload.click();
-        }
-    );
+    editIconPreview.addEventListener("click", () => {
+        if (iconUpload) iconUpload.click();
+    });
 }
 
-const cancelProfileButton =
-    document.getElementById(
-        "cancelProfileButton"
-    );
-
-const saveProfileButton =
-    document.getElementById(
-        "saveProfileButton"
-    );
-
-console.log("cancel:", cancelProfileButton);
-console.log("modal:", editProfileModal);
-
 if (cancelProfileButton) {
-    cancelProfileButton.addEventListener(
-        "click",
-        () => {
-            if (editProfileModal) editProfileModal.style.display = "none";
-        }
-    );
+    cancelProfileButton.addEventListener("click", () => {
+        if (editProfileModal) editProfileModal.style.display = "none";
+    });
 }
  
 document.addEventListener("click", (e) => {
@@ -237,8 +173,6 @@ document.addEventListener("click", (e) => {
         if (inputId) inputId.value = profile.id || "";
         if (inputBio) inputBio.value = profile.bio || "";
 
-        console.log("プロフィール編集押された（選択中アカウント:" + currentAccount + "）");
-
         tempIcon = profile.icon || null;
         tempHeader = profile.header || null;
         
@@ -249,347 +183,137 @@ document.addEventListener("click", (e) => {
 });
 
 if (saveProfileButton) {
-    saveProfileButton.addEventListener(
-        "click",
-        () => {
-            const profile = profiles[currentAccount] || {};
+    saveProfileButton.addEventListener("click", () => {
+        const profile = profiles[currentAccount] || {};
 
-            if (editName) profile.name = editName.value;
-            if (editId) profile.id = editId.value;
-            if (editBio) profile.bio = editBio.value;
-            profile.icon = tempIcon;
-            profile.header = tempHeader;
+        if (editName) profile.name = editName.value;
+        if (editId) profile.id = editId.value;
+        if (editBio) profile.bio = editBio.value;
+        profile.icon = tempIcon;
+        profile.header = tempHeader;
 
-            profiles[currentAccount] = profile;
+        profiles[currentAccount] = profile;
 
-            saveProfiles();
-            showProfile();
+        saveProfiles();
+        showProfile();
 
-            if (editProfileModal) editProfileModal.style.display = "none";
-        }
-    );
+        if (editProfileModal) editProfileModal.style.display = "none";
+    });
 }
 
-const searchButton =
-    document.getElementById(
-        "searchButton"
-    );
-
-const searchPage =
-    document.getElementById(
-        "searchPage"
-    );
-
-const backSearchButton =
-    document.getElementById(
-        "backSearchButton"
-    );
-
-const searchHistory =
-    document.getElementById(
-        "searchHistory"
-    );
-
 if (searchButton) {
-    searchButton.addEventListener(
-        "click",
-        () => {
-            if (timeline) timeline.style.display = "none";
-            if (profilePage) profilePage.style.display = "none";
-            if (postDetailPage) postDetailPage.style.display = "none";
-            if (searchPage) searchPage.style.display = "block";
+    searchButton.addEventListener("click", () => {
+        if (timeline) timeline.style.display = "none";
+        if (profilePage) profilePage.style.display = "none";
+        if (postDetailPage) postDetailPage.style.display = "none";
+        if (searchPage) searchPage.style.display = "block";
 
-            if (searchInput) searchInput.value = "";
-            if (searchResults) searchResults.innerHTML = "";
+        if (searchInput) searchInput.value = "";
+        if (searchResults) searchResults.innerHTML = "";
 
-            renderSearchHistory();
-        }
-    );
+        renderSearchHistory();
+    });
 }
 
 if (backSearchButton) {
-    backSearchButton.addEventListener(
-        "click",
-        () => {
-            if (searchPage) searchPage.style.display = "none";
-            if (timeline) timeline.style.display = "block";
-        }
-    );
+    backSearchButton.addEventListener("click", () => {
+        if (searchPage) searchPage.style.display = "none";
+        if (timeline) timeline.style.display = "block";
+    });
 }
 
-const postButton =
-    document.getElementById("postButton");
-
-const headerModal =
-    document.getElementById(
-        "headerModal"
-    );
-
-const headerModalImage =
-    document.getElementById(
-        "headerModalImage"
-    );
-
-const profileHeaderImage =
-    document.getElementById(
-        "headerImage"
-    );
-
-const cropModal =
-    document.getElementById(
-        "cropModal"
-    );
-
-const cropImage =
-    document.getElementById(
-        "cropImage"
-    );
-
-const cropConfirmButton =
-    document.getElementById(
-        "cropConfirmButton"
-    );
-
-const cropCancelButton =
-    document.getElementById(
-        "cropCancelButton"
-    );
-
-let cropper = null;
-let cropTarget = null;
-
 if (profileHeaderImage) {
-    profileHeaderImage.addEventListener(
-        "click",
-        () => {
-            if (headerModalImage) headerModalImage.src = profileHeaderImage.src;
-            if (headerModal) headerModal.style.display = "flex";
-        }
-    );
+    profileHeaderImage.addEventListener("click", () => {
+        if (headerModalImage) headerModalImage.src = profileHeaderImage.src;
+        if (headerModal) headerModal.style.display = "flex";
+    });
 }
 
 if (profileIcon) {
-    profileIcon.addEventListener(
-        "click",
-        () => {
-            if (headerModalImage) headerModalImage.src = profileIcon.src;
-            if (headerModal) headerModal.style.display = "flex";
-        }
-    );
+    profileIcon.addEventListener("click", () => {
+        if (headerModalImage) headerModalImage.src = profileIcon.src;
+        if (headerModal) headerModal.style.display = "flex";
+    });
 }
 
 if (headerModal) {
-    headerModal.addEventListener(
-        "click",
-        () => {
-            headerModal.style.display = "none";
-        }
-    );
+    headerModal.addEventListener("click", () => {
+        headerModal.style.display = "none";
+    });
 }
 
-const searchResults =
-    document.getElementById(
-        "searchResults"
-    );
-
-const postModal =
-    document.getElementById("postModal");
-
-const modalPostInput =
-    document.getElementById(
-        "modalPostInput"
-    );
-
-const postImageUpload =
-    document.getElementById(
-        "postImageUpload"
-    );
-
-const postImagePreview =
-    document.getElementById(
-        "postImagePreview"
-    );
-
-const removePostImageButton =
-    document.getElementById(
-        "removePostImageButton"
-    );
-
 if (postImageUpload) {
-    postImageUpload.addEventListener(
-        "change",
-        () => {
-            const file = postImageUpload.files[0];
-            if (!file) return;
+    postImageUpload.addEventListener("change", () => {
+        const file = postImageUpload.files[0];
+        if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (postImagePreview) {
-                    postImagePreview.src = reader.result;
-                    postImagePreview.style.display = "block";
-                }
-                if (removePostImageButton) removePostImageButton.style.display = "inline-block";
-            };
-            reader.readAsDataURL(file);
-        }
-    );
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (postImagePreview) {
+                postImagePreview.src = reader.result;
+                postImagePreview.style.display = "block";
+            }
+            if (removePostImageButton) removePostImageButton.style.display = "inline-block";
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 if (removePostImageButton) {
-    removePostImageButton.addEventListener(
-        "click",
-        () => {
-            if (postImageUpload) postImageUpload.value = "";
-            if (postImagePreview) {
-                postImagePreview.src = "";
-                postImagePreview.style.display = "none";
-            }
-            removePostImageButton.style.display = "none";
+    removePostImageButton.addEventListener("click", () => {
+        if (postImageUpload) postImageUpload.value = "";
+        if (postImagePreview) {
+            postImagePreview.src = "";
+            postImagePreview.style.display = "none";
+        }
+        removePostImageButton.style.display = "none";
 
-            if (editingPost) {
-                editingPost.text = modalPostInput ? modalPostInput.value : "";
-                const files = postImageUpload ? [...postImageUpload.files] : [];
+        if (editingPost) {
+            editingPost.text = modalPostInput ? modalPostInput.value : "";
+            const files = postImageUpload ? [...postImageUpload.files] : [];
 
-                const finalizeEdit = () => {
-                    const postIndex = posts.findIndex(p => p.id === editingPost.id);
-                    if (postIndex !== -1) {
-                        posts[postIndex] = editingPost;
-                    }
-
-                    savePostToDB(editingPost);
-                    renderTimeline();
-                    renderProfilePosts();
-
-                    if (modalPostInput) modalPostInput.value = "";
-                    if (postImageUpload) postImageUpload.value = "";
-                    if (postImagePreview) postImagePreview.src = "";
-                    
-                    const previewCont = document.querySelector(".preview-container");
-                    if (previewCont) previewCont.style.display = "none";
-                    
-                    editingPost = null;
-                    if (modalPostButton) modalPostButton.textContent = "投稿";
-                    if (postModal) postModal.style.display = "none";
-                };
-
-                if (files.length > 0) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        editingPost.image = reader.result;
-                        finalizeEdit();
-                    };
-                    reader.readAsDataURL(files[0]);
-                } else {
-                    finalizeEdit();
+            const finalizeEdit = () => {
+                const postIndex = posts.findIndex(p => p.id === editingPost.id);
+                if (postIndex !== -1) {
+                    posts[postIndex] = editingPost;
                 }
+
+                savePostToDB(editingPost);
+                renderTimeline();
+                renderProfilePosts();
+
+                if (modalPostInput) modalPostInput.value = "";
+                if (postImageUpload) postImageUpload.value = "";
+                if (postImagePreview) postImagePreview.src = "";
+                
+                const previewCont = document.querySelector(".preview-container");
+                if (previewCont) previewCont.style.display = "none";
+                
+                editingPost = null;
+                if (modalPostButton) modalPostButton.textContent = "投稿";
+                if (postModal) postModal.style.display = "none";
+            };
+
+            if (files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    editingPost.image = reader.result;
+                    finalizeEdit();
+                };
+                reader.readAsDataURL(files[0]);
+            } else {
+                finalizeEdit();
             }
         }
-    );
+    });
 }
 
-const modalPostButton =
-    document.getElementById(
-        "modalPostButton"
-    );
-
-const closeModalButton =
-    document.getElementById(
-        "closeModalButton"
-    );
-
-const imageModal =
-    document.getElementById(
-        "imageModal"
-    );
-
-const modalImage =
-    document.getElementById(
-        "modalImage"
-    );
-const videoModal =
-    document.getElementById(
-        "videoModal"
-    );
-
-const modalVideo =
-    document.getElementById(
-        "modalVideo"
-    );
-
-const editName =
-    document.getElementById(
-        "editName"
-    );
-
-const editId =
-    document.getElementById(
-        "editId"
-    );
-
-const editBio =
-    document.getElementById(
-        "editBio"
-    );
-
-const postUserIcon =
-    document.getElementById(
-        "postUserIcon"
-    );
-
-const commentModal =
-    document.getElementById(
-        "commentModal"
-    );
-
-const closeCommentButton =
-    document.getElementById(
-        "closeCommentButton"
-    );
-
-const commentList =
-    document.getElementById(
-        "commentList"
-    );
-
-const commentInput =
-    document.getElementById(
-        "commentInput"
-    );
-
-const sendCommentButton =
-    document.getElementById(
-        "sendCommentButton"
-    );
-
-let accounts =
-    JSON.parse(
-        localStorage.getItem(
-            "accounts"
-        )
-    ) || [
-        "今の垢",
-        "他の垢",
-        "創作垢"
-    ];
-
-let currentAccount =
-    localStorage.getItem(
-        "currentAccount"
-    ) || accounts[0];
-
-let posts = [];
-let profiles =
-    JSON.parse(
-        localStorage.getItem(
-            "profiles"
-        )
-    ) || {};
+// ==========================================
+// 3. 各種関数定義
+// ==========================================
 
 function savePosts() {
-    localStorage.setItem(
-        "posts",
-        JSON.stringify(posts)
-    );
+    localStorage.setItem("posts", JSON.stringify(posts));
 }
 
 function saveProfiles() {
@@ -597,31 +321,15 @@ function saveProfiles() {
 }
 
 function saveAccounts() {
-    localStorage.setItem(
-        "accounts",
-        JSON.stringify(accounts)
-    );
+    localStorage.setItem("accounts", JSON.stringify(accounts));
 }
 
 function formatTime(time) {
     if (!time) return "";
     const date = new Date(time);
     return (
-        date.getFullYear() +
-        "/" +
-        (date.getMonth() + 1) +
-        "/" +
-        date.getDate() +
-        " " +
-        date
-            .getHours()
-            .toString()
-            .padStart(2, "0") +
-        ":" +
-        date
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")
+        date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate() + " " +
+        date.getHours().toString().padStart(2, "0") + ":" + date.getMinutes().toString().padStart(2, "0")
     );
 }
 
@@ -640,10 +348,7 @@ function renderAccounts() {
         const profile = profiles[account] || {};
 
         accountDiv.innerHTML = `
-            <img
-                class="account-icon"
-                src="${profile.icon || "https://via.placeholder.com/60"}"
-            >
+            <img class="account-icon" src="${profile.icon || "https://via.placeholder.com/60"}">
         `;
 
         const handleAccountClick = (e) => {
@@ -863,7 +568,6 @@ function renderTimeline() {
     }
 }
 
-// 💡 4つのタブ表示の切り替えロジック
 function renderProfilePosts() {
     const targetIndex = accounts.indexOf(currentAccount);
     const rooms = document.querySelectorAll(".single-profile");
@@ -907,25 +611,6 @@ function renderProfilePosts() {
         addPostToTimeline(post, profTimeline);
     }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    initializeProfileRooms(); 
-    renderAccounts();         
-
-    if (timeline) timeline.style.display = "block";
-    if (profilePage) profilePage.style.display = "none";
-    if (postDetailPage) postDetailPage.style.display = "none";
-    if (searchPage) searchPage.style.display = "none";
-
-    const savedIndex = localStorage.getItem("currentAccountIndex");
-    if (savedIndex !== null) {
-        const container = document.getElementById("profileContainer");
-        if (container) {
-            container.style.transition = "none";
-            container.style.transform = `translateX(-${savedIndex * 100}%)`;
-        }
-    }
-});
 
 function showProfile() {
     const container = document.getElementById("profileContainer");
@@ -992,28 +677,25 @@ function showProfile() {
 }
 
 if (postButton) {
-    postButton.addEventListener(
-        "click",
-        () => {
-            const profile = profiles[currentAccount] || {};
-            if (postUserIcon) postUserIcon.src = profile.icon || "https://via.placeholder.com/60";
+    postButton.addEventListener("click", () => {
+        const profile = profiles[currentAccount] || {};
+        if (postUserIcon) postUserIcon.src = profile.icon || "https://via.placeholder.com/60";
 
-            if (modalPostInput) modalPostInput.value = "";
-            if (postImageUpload) postImageUpload.value = "";
-            if (postImagePreview) postImagePreview.src = "";
+        if (modalPostInput) modalPostInput.value = "";
+        if (postImageUpload) postImageUpload.value = "";
+        if (postImagePreview) postImagePreview.src = "";
 
-            const prevContainer = document.querySelector(".preview-container");
-            if (prevContainer) prevContainer.style.display = "none";
+        const prevContainer = document.querySelector(".preview-container");
+        if (prevContainer) prevContainer.style.display = "none";
 
-            editingPost = null;
-            if (modalPostButton) modalPostButton.textContent = "投稿";
-            if (postModal) postModal.style.display = "block";
+        editingPost = null;
+        if (modalPostButton) modalPostButton.textContent = "投稿";
+        if (postModal) postModal.style.display = "block";
 
-            requestAnimationFrame(() => {
-                if (modalPostInput) modalPostInput.focus();
-            });
-        }
-    );
+        requestAnimationFrame(() => {
+            if (modalPostInput) modalPostInput.focus();
+        });
+    });
 }
 
 if (closeModalButton) {
@@ -1029,240 +711,219 @@ if (closeCommentButton) {
 }
 
 if (sendCommentButton) {
-    sendCommentButton.addEventListener(
-        "click",
-        () => {
-            if (!currentCommentPost) return;
-            if (commentInput && commentInput.value.trim() === "") return;
+    sendCommentButton.addEventListener("click", () => {
+        if (!currentCommentPost) return;
+        if (commentInput && commentInput.value.trim() === "") return;
 
-            if (!currentCommentPost.comments) {
-                currentCommentPost.comments = [];
-            }
-
-            currentCommentPost.comments.push({
-                account: currentAccount,
-                text: commentInput.value,
-                time: Date.now()
-            });
-
-            savePostToDB(currentCommentPost);
-            renderComments();
-
-            if (commentInput) commentInput.value = "";
-            if (commentModal) commentModal.style.display = "none";
-
-            renderTimeline();
-            renderProfilePosts();
+        if (!currentCommentPost.comments) {
+            currentCommentPost.comments = [];
         }
-    );
+
+        currentCommentPost.comments.push({
+            account: currentAccount,
+            text: commentInput.value,
+            time: Date.now()
+        });
+
+        savePostToDB(currentCommentPost);
+        renderComments();
+
+        if (commentInput) commentInput.value = "";
+        if (commentModal) commentModal.style.display = "none";
+
+        renderTimeline();
+        renderProfilePosts();
+    });
 }
 
 if (modalPostButton) {
-    modalPostButton.addEventListener(
-        "click",
-        () => {
-            const text = modalPostInput ? modalPostInput.value : "";
-            if (text.trim() === "") return;
+    modalPostButton.addEventListener("click", () => {
+        const text = modalPostInput ? modalPostInput.value : "";
+        if (text.trim() === "") return;
 
-            if (editingPost) {
-                editingPost.text = text;
-                const files = postImageUpload ? [...postImageUpload.files] : [];
-
-                const finalizeEdit = () => {
-                    const transaction = db.transaction(["posts"], "readwrite");
-                    const store = transaction.objectStore("posts");
-                    const request = store.put(editingPost);
-
-                    request.onsuccess = () => {
-                        loadPosts();
-                        if (modalPostInput) modalPostInput.value = "";
-                        if (postImageUpload) postImageUpload.value = "";
-                        if (postImagePreview) postImagePreview.src = "";
-                        const prevCont = document.querySelector(".preview-container");
-                        if (prevCont) prevCont.style.display = "none";
-                        editingPost = null;
-                        modalPostButton.textContent = "投稿";
-                        if (postModal) postModal.style.display = "none";
-                    };
-                };
-
-                if (files.length > 0) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        editingPost.image = reader.result;
-                        finalizeEdit();
-                    };
-                    reader.readAsDataURL(files[0]);
-                } else {
-                    finalizeEdit();
-                }
-                return;
-            }
-
+        if (editingPost) {
+            editingPost.text = text;
             const files = postImageUpload ? [...postImageUpload.files] : [];
 
+            const finalizeEdit = () => {
+                const transaction = db.transaction(["posts"], "readwrite");
+                const store = transaction.objectStore("posts");
+                const request = store.put(editingPost);
+
+                request.onsuccess = () => {
+                    loadPosts();
+                    if (modalPostInput) modalPostInput.value = "";
+                    if (postImageUpload) postImageUpload.value = "";
+                    if (postImagePreview) postImagePreview.src = "";
+                    const prevCont = document.querySelector(".preview-container");
+                    if (prevCont) prevCont.style.display = "none";
+                    editingPost = null;
+                    modalPostButton.textContent = "投稿";
+                    if (postModal) postModal.style.display = "none";
+                };
+            };
+
             if (files.length > 0) {
-                const newPost = {
-                    account: currentAccount,
-                    text: text,
-                    images: [],
-                    time: Date.now(),
-                    likes: 0,
-                    likedBy: [],
-                    pinned: false
+                const reader = new FileReader();
+                reader.onload = () => {
+                    editingPost.image = reader.result;
+                    finalizeEdit();
                 };
-
-                let loaded = 0;
-                files.forEach((file, index) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        newPost.images[index] = reader.result;
-                        loaded++;
-
-                        if (loaded === files.length) {
-                            posts.push(newPost);
-                            savePostToDB(newPost);
-
-                            if (modalPostInput) modalPostInput.value = "";
-                            if (postImageUpload) postImageUpload.value = "";
-                            const prevCont = document.querySelector(".preview-container");
-                            if (prevCont) prevCont.style.display = "none";
-                            if (postModal) postModal.style.display = "none";
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                });
+                reader.readAsDataURL(files[0]);
             } else {
-                const newPost = {
-                    account: currentAccount,
-                    text: text,
-                    image: null,
-                    time: Date.now(),
-                    likes: 0,
-                    likedBy: [],
-                    pinned: false
-                };
-
-                posts.push(newPost);
-                savePostToDB(newPost);
-
-                renderTimeline();
-                if (modalPostInput) modalPostInput.value = "";
-                if (postModal) postModal.style.display = "none";
+                finalizeEdit();
             }
+                return;
         }
-    );
+
+        const files = postImageUpload ? [...postImageUpload.files] : [];
+
+        if (files.length > 0) {
+            const newPost = {
+                account: currentAccount,
+                text: text,
+                images: [],
+                time: Date.now(),
+                likes: 0,
+                likedBy: [],
+                pinned: false
+            };
+
+            let loaded = 0;
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    newPost.images[index] = reader.result;
+                    loaded++;
+
+                    if (loaded === files.length) {
+                        posts.push(newPost);
+                        savePostToDB(newPost);
+
+                        if (modalPostInput) modalPostInput.value = "";
+                        if (postImageUpload) postImageUpload.value = "";
+                        const prevCont = document.querySelector(".preview-container");
+                        if (prevCont) prevCont.style.display = "none";
+                        if (postModal) postModal.style.display = "none";
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            const newPost = {
+                account: currentAccount,
+                text: text,
+                image: null,
+                time: Date.now(),
+                likes: 0,
+                likedBy: [],
+                pinned: false
+            };
+
+            posts.push(newPost);
+            savePostToDB(newPost);
+
+            renderTimeline();
+            if (modalPostInput) modalPostInput.value = "";
+            if (postModal) postModal.style.display = "none";
+        }
+    });
 }
 
 if (backButton) {
-    backButton.addEventListener(
-        "click",
-        () => {
-            if (profilePage) profilePage.style.display = "none";
-            if (timeline) timeline.style.display = "block";
-        }
-    );
+    backButton.addEventListener("click", () => {
+        if (profilePage) profilePage.style.display = "none";
+        if (timeline) timeline.style.display = "block";
+    });
 }
 
 if (headerUpload) {
-    headerUpload.addEventListener(
-        "change",
-        () => {
-            const file = headerUpload.files[0];
-            if (!file) return;
+    headerUpload.addEventListener("change", () => {
+        const file = headerUpload.files[0];
+        if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = () => {
-                cropTarget = "header";
-                if (cropImage) cropImage.src = reader.result;
-                if (cropModal) cropModal.style.display = "block";
+        const reader = new FileReader();
+        reader.onload = () => {
+            cropTarget = "header";
+            if (cropImage) cropImage.src = reader.result;
+            if (cropModal) cropModal.style.display = "block";
 
-                if (cropImage) {
-                    cropImage.onload = () => {
-                        if (cropper) cropper.destroy();
-                        cropper = new Cropper(cropImage, {
-                            aspectRatio: 3,
-                            viewMode: 1,
-                            dragMode: "move",
-                            cropBoxMovable: false,
-                            cropBoxResizable: false
-                        });
-                    };
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    );
+            if (cropImage) {
+                cropImage.onload = () => {
+                    if (cropper) cropper.destroy();
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 3,
+                        viewMode: 1,
+                        dragMode: "move",
+                        cropBoxMovable: false,
+                        cropBoxResizable: false
+                    });
+                };
+            }
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 if (iconUpload) {
-    iconUpload.addEventListener(
-        "change",
-        () => {
-            const file = iconUpload.files[0];
-            if (!file) return;
+    iconUpload.addEventListener("change", () => {
+        const file = iconUpload.files[0];
+        if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = () => {
-                cropTarget = "icon";
-                if (cropImage) cropImage.src = reader.result;
-                if (cropModal) cropModal.style.display = "block";
+        const reader = new FileReader();
+        reader.onload = () => {
+            cropTarget = "icon";
+            if (cropImage) cropImage.src = reader.result;
+            if (cropModal) cropModal.style.display = "block";
 
-                if (cropImage) {
-                    cropImage.onload = () => {
-                        if (cropper) cropper.destroy();
-                        cropper = new Cropper(cropImage, {
-                            aspectRatio: 1,
-                            viewMode: 1,
-                            dragMode: "move",
-                            cropBoxMovable: false,
-                            cropBoxResizable: false
-                        });
-                    };
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    );
+            if (cropImage) {
+                cropImage.onload = () => {
+                    if (cropper) cropper.destroy();
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        dragMode: "move",
+                        cropBoxMovable: false,
+                        cropBoxResizable: false
+                    });
+                };
+            }
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 if (cropCancelButton) {
-    cropCancelButton.addEventListener(
-        "click",
-        () => {
-            if (cropModal) cropModal.style.display = "none";
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-                if (cropImage) cropImage.src = "";
-            }
+    cropCancelButton.addEventListener("click", () => {
+        if (cropModal) cropModal.style.display = "none";
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+            if (cropImage) cropImage.src = "";
         }
-    );
+    });
 }
 
 if (cropConfirmButton) {
-    cropConfirmButton.addEventListener(
-        "click",
-        () => {
-            if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas();
-            const croppedImage = canvas.toDataURL("image/png");
+    cropConfirmButton.addEventListener("click", () => {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas();
+        const croppedImage = canvas.toDataURL("image/png");
 
-            if (cropTarget === "icon") {
-                tempIcon = croppedImage;
-                if (editIconPreview) editIconPreview.src = croppedImage;
-            }
-
-            if (cropTarget === "header") {
-                tempHeader = croppedImage;
-                if (editHeaderPreview) editHeaderPreview.src = croppedImage;
-            }
-
-            cropper.destroy();
-            cropper = null;
-            if (cropModal) cropModal.style.display = "none";
+        if (cropTarget === "icon") {
+            tempIcon = croppedImage;
+            if (editIconPreview) editIconPreview.src = croppedImage;
         }
-    );
+
+        if (cropTarget === "header") {
+            tempHeader = croppedImage;
+            if (editHeaderPreview) editHeaderPreview.src = croppedImage;
+        }
+
+        cropper.destroy();
+        cropper = null;
+        if (cropModal) cropModal.style.display = "none";
+    });
 }
 
 if (imageModal) {
@@ -1277,21 +938,6 @@ if (videoModal) {
         videoModal.style.display = "none";
     });
 }
-
-let db;
-const indexedDBRequest = indexedDB.open("MyMemoDB", 1);
-
-indexedDBRequest.onupgradeneeded = event => {
-    db = event.target.result;
-    if (!db.objectStoreNames.contains("posts")) {
-        db.createObjectStore("posts", { keyPath: "id", autoIncrement: true });
-    }
-};
-
-indexedDBRequest.onsuccess = event => {
-    db = event.target.result;
-    loadPosts();
-};
 
 function savePostToDB(post) {
     if (!db) return;
@@ -1316,9 +962,7 @@ function loadPosts() {
 }
 
 if (deleteAccountButton) {
-    deleteAccountButton.addEventListener(
-        "click",
-        () => {
+    deleteAccountButton.addEventListener("click", () => {
             if (!confirm("このアカウントを削除しますか？")) return;
 
             delete profiles[currentAccount];
@@ -1383,6 +1027,7 @@ function renderComments() {
     }
 }
 
+// コメント詳細を開いたときの処理（ボタン非表示化を追加）
 function openPostDetail(postData) {
     currentDetailPost = postData;
 
@@ -1390,18 +1035,30 @@ function openPostDetail(postData) {
     if (profilePage) profilePage.style.display = "none";
     if (postDetailPage) postDetailPage.style.display = "block";
 
+    // 邪魔になっていた投稿ボタンと検索ボタンを非表示にする
+    if (postButton) postButton.style.display = "none";
+    if (searchButton) searchButton.style.display = "none";
+
     if (detailPost) detailPost.innerHTML = "";
 
     addPostToTimeline(postData, detailPost);
     renderDetailComments();
+
+    // 既存のコメントがある場合は、自動的に一番下まで最初からスクロールさせておく
+    setTimeout(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+    }, 50);
 }
 
+// コメント詳細から戻るときの処理（ボタン再表示を追加）
 if (backFromDetailButton) {
-    backFromDetailButton.addEventListener(
-        "click",
-        () => {
+    backFromDetailButton.addEventListener("click", () => {
             if (postDetailPage) postDetailPage.style.display = "none";
             if (timeline) timeline.style.display = "block";
+
+            // タイムラインに戻ったら、非表示にしていたボタンを復活させる
+            if (postButton) postButton.style.display = "block";
+            if (searchButton) searchButton.style.display = "block";
         }
     );
 }
@@ -1567,49 +1224,39 @@ function searchPosts(keyword) {
 }
 
 if (searchInput) {
-    searchInput.addEventListener(
-        "keydown",
-        event => {
-            if (event.key !== "Enter") return;
+    searchInput.addEventListener("keydown", event => {
+        if (event.key !== "Enter") return;
 
-            const keyword = searchInput.value.trim();
-            if (keyword === "") return;
+        const keyword = searchInput.value.trim();
+        if (keyword === "") return;
 
-            if (!Array.isArray(searchHistoryData)) {
-                searchHistoryData = [];
-            }
-
-            searchHistoryData = searchHistoryData.filter(item => item !== keyword);
-            searchHistoryData.unshift(keyword);
-
-            if (searchHistoryData.length > 10) {
-                searchHistoryData.pop();
-            }
-
-            localStorage.setItem("searchHistory", JSON.stringify(searchHistoryData));
-            renderSearchHistory();
-            searchPosts(keyword);
-            
-            searchInput.blur();
+        if (!Array.isArray(searchHistoryData)) {
+            searchHistoryData = [];
         }
-    );
 
-    searchInput.addEventListener(
-        "input",
-        () => {
-            searchPosts(searchInput.value);
+        searchHistoryData = searchHistoryData.filter(item => item !== keyword);
+        searchHistoryData.unshift(keyword);
+
+        if (searchHistoryData.length > 10) {
+            searchHistoryData.pop();
         }
-    );
+
+        localStorage.setItem("searchHistory", JSON.stringify(searchHistoryData));
+        renderSearchHistory();
+        searchPosts(keyword);
+        
+        searchInput.blur();
+    });
+
+    searchInput.addEventListener("input", () => {
+        searchPosts(searchInput.value);
+    });
 }
 
 function setAppHeight() {
-    document.documentElement.style.setProperty(
-        "--app-height",
-        `${window.innerHeight}px`
-    );
+    document.documentElement.style.setProperty("--app-height", `${window.innerHeight}px`);
 }
 
-// 💡 画像に合わせた完璧な並び順とタブ名「投稿 → メディア → 返信 → スキ」に設定しました
 function initializeProfileRooms() {
     const container = document.getElementById("profileContainer");
     if (!container) return;
@@ -1689,6 +1336,64 @@ function initializeProfileRooms() {
     });
 }
 
-window.addEventListener("resize", setAppHeight);
-setAppHeight();
-renderAccounts();
+// ==========================================
+// 4. 初期実行処理（DOM読み込み完了を待って動かす）
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // データベース接続
+    const indexedDBRequest = indexedDB.open("MyMemoDB", 1);
+
+    indexedDBRequest.onupgradeneeded = event => {
+        db = event.target.result;
+        if (!db.objectStoreNames.contains("posts")) {
+            db.createObjectStore("posts", { keyPath: "id", autoIncrement: true });
+        }
+    };
+
+    indexedDBRequest.onsuccess = event => {
+        db = event.target.result;
+        loadPosts();
+    };
+
+    initializeProfileRooms(); 
+    renderAccounts();         
+
+    if (timeline) timeline.style.display = "block";
+    if (profilePage) profilePage.style.display = "none";
+    if (postDetailPage) postDetailPage.style.display = "none";
+    if (searchPage) searchPage.style.display = "none";
+
+    const savedIndex = localStorage.getItem("currentAccountIndex");
+    if (savedIndex !== null) {
+        const container = document.getElementById("profileContainer");
+        if (container) {
+            container.style.transition = "none";
+            container.style.transform = `translateX(-${savedIndex * 100}%)`;
+        }
+    }
+
+    // CSSを自動適用して、コメント入力欄を最前面・画面最下部に完全固定する
+    const style = document.createElement("style");
+    style.innerHTML = `
+        #postDetailPage {
+            padding-bottom: 80px !important;
+        }
+        .detail-comment-input-area {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            background: #fff !important;
+            border-top: 1px solid #eee !important;
+            padding: 10px 15px !important;
+            box-sizing: border-box !important;
+            z-index: 9999 !important;
+            display: flex !important;
+            gap: 10px !important;
+        }
+    `;
+    document.head.appendChild(style);
+
+    window.addEventListener("resize", setAppHeight);
+    setAppHeight();
+});
