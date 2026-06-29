@@ -1037,57 +1037,34 @@ function renderComments() {
 // 詳細画面を開く直前の状態を記憶する変数（上部の変数宣言の近くに置くと綺麗です）
 let detailBackTarget = "timeline";
 
-// コメント詳細を開いたときの処理
-function openPostDetail(postData) {
-    currentDetailPost = postData;
-
-    // どちらの画面から詳細を開いたかを判定して記憶する
-    if (profilePage && profilePage.style.display === "block") {
-        detailBackTarget = "profile";
-    } else if (searchPage && searchPage.style.display === "block") {
-        detailBackTarget = "search";
-    } else {
-        detailBackTarget = "timeline";
-    }
-
-    if (timeline) timeline.style.display = "none";
-    if (profilePage) profilePage.style.display = "none";
-    if (searchPage) searchPage.style.display = "none"; // 検索画面も隠す
-    if (postDetailPage) postDetailPage.style.display = "flex";
-
-    if (postButton) postButton.style.display = "none";
-    if (searchButton) searchButton.style.display = "none";
-
-    if (detailPost) detailPost.innerHTML = "";
-
-    addPostToTimeline(postData, detailPost);
-    renderDetailComments();
-
-    setTimeout(() => {
-        const scrollArea = postDetailPage.querySelector(".detail-main-content");
-        if (scrollArea) {
-            scrollArea.scrollTop = scrollArea.scrollHeight;
-        }
-    }, 50);
+// コメントマークなどを押して詳細画面に移動する処理の中
+function openPostDetail(post) {
+    currentDetailPost = post;
+    
+    // 他のメイン画面を非表示にする
+    timelinePage.style.display = "none"; 
+    
+    // 詳細画面を表示する
+    postDetailPage.style.display = "flex";
+    
+    // 詳細画面の中身をレンダリングする
+    renderDetailPost(); // 詳細の投稿本体を表示する関数
+    renderDetailComments(); // コメント欄を表示する関数
 }
 
 // コメント詳細から戻るときの処理
 if (backFromDetailButton) {
-    backFromDetailButton.addEventListener("click", () => {
-        if (postDetailPage) postDetailPage.style.display = "none";
-
-        // 記憶していた元の画面だけを表示に戻す
-        if (detailBackTarget === "profile") {
-            if (profilePage) profilePage.style.display = "block";
-        } else if (detailBackTarget === "search") {
-            if (searchPage) searchPage.style.display = "block";
-        } else {
-            if (timeline) timeline.style.display = "block";
-            // タイムラインに戻るときだけ、下部の固定ボタンを表示させる
-            if (postButton) postButton.style.display = "block";
-            if (searchButton) searchButton.style.display = "block";
-        }
-    });
+// 「戻る」ボタンのクリックイベント
+backFromDetailButton.addEventListener("click", () => {
+    // 詳細画面を非表示にする
+    postDetailPage.style.display = "none";
+    
+    // タイムライン画面（または直前の画面）を表示する
+    timelinePage.style.display = "block"; // お使いのメイン画面のIDや要素に合わせてください
+    
+    // 画面の一番上に戻す
+    window.scrollTo(0, 0);
+});
 }
 
 function renderDetailComments() {
