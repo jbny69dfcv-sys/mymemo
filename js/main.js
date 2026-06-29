@@ -871,10 +871,8 @@ function addPostToTimeline(
     post.className =
         "post";
 
-    const profile =
-        profiles[
-            postData.account
-        ] || {};
+// ✨ プロフィールが未設定（初期状態）でもエラーにならないように安全に書き換え
+    const profile = (profiles && profiles[postData.account]) ? profiles[postData.account] : {};
 
     post.innerHTML = `
         <div class="post-header">
@@ -882,6 +880,10 @@ function addPostToTimeline(
             <div class="post-user">
                 <div>
                     ${profile.name || postData.account}
+                    <span class="post-id">@${profile.id || "userid"}</span>
+                </div>
+                <div class="post-time">${formatTime(postData.time)}</div>
+            </div>
                     <span class="post-id">@${profile.id || "userid"}</span>
                 </div>
                 <div class="post-time">${formatTime(postData.time)}</div>
