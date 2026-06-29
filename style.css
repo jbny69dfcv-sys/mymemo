@@ -1444,3 +1444,15 @@ html, body {
     background: #cccccc !important;
     border-radius: 10px !important;
 }
+
+#postDetailPage {
+    position: fixed; /* 画面全体に固定して被せる */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white; /* タイムラインが透けないように背景を白にする */
+    z-index: 100; /* 他の画面より確実に手前に表示する */
+    display: flex;
+    flex-direction: column;
+}
