@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 変数・要素の宣言（エラー防止のためすべて最上部に集約）
+// 1. 変数・要素の宣言
 // ==========================================
 let searchHistoryData = JSON.parse(localStorage.getItem("searchHistory")) || [];
 let tempIcon = null;
@@ -1027,7 +1027,7 @@ function renderComments() {
     }
 }
 
-// コメント詳細を開いたときの処理（ボタン非表示化を追加）
+// コメント詳細を開いたときの処理
 function openPostDetail(postData) {
     currentDetailPost = postData;
 
@@ -1035,7 +1035,6 @@ function openPostDetail(postData) {
     if (profilePage) profilePage.style.display = "none";
     if (postDetailPage) postDetailPage.style.display = "block";
 
-    // 邪魔になっていた投稿ボタンと検索ボタンを非表示にする
     if (postButton) postButton.style.display = "none";
     if (searchButton) searchButton.style.display = "none";
 
@@ -1044,19 +1043,17 @@ function openPostDetail(postData) {
     addPostToTimeline(postData, detailPost);
     renderDetailComments();
 
-    // 既存のコメントがある場合は、自動的に一番下まで最初からスクロールさせておく
     setTimeout(() => {
         window.scrollTo(0, document.body.scrollHeight);
     }, 50);
 }
 
-// コメント詳細から戻るときの処理（ボタン再表示を追加）
+// コメント詳細から戻るときの処理
 if (backFromDetailButton) {
     backFromDetailButton.addEventListener("click", () => {
             if (postDetailPage) postDetailPage.style.display = "none";
             if (timeline) timeline.style.display = "block";
 
-            // タイムラインに戻ったら、非表示にしていたボタンを復活させる
             if (postButton) postButton.style.display = "block";
             if (searchButton) searchButton.style.display = "block";
         }
@@ -1234,10 +1231,11 @@ if (searchInput) {
             searchHistoryData = [];
         }
 
+        // 保存上限を20件に変更
         searchHistoryData = searchHistoryData.filter(item => item !== keyword);
         searchHistoryData.unshift(keyword);
 
-        if (searchHistoryData.length > 10) {
+        if (searchHistoryData.length > 20) {
             searchHistoryData.pop();
         }
 
@@ -1337,7 +1335,7 @@ function initializeProfileRooms() {
 }
 
 // ==========================================
-// 4. 初期実行処理（DOM読み込み完了を待って動かす）
+// 4. 初期実行処理
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
     // データベース接続
@@ -1372,24 +1370,50 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // CSSを自動適用して、コメント入力欄を最前面・画面最下部に完全固定する
+    // 自動CSSインジェクション（入力欄完全固定＆検索履歴の部分スクロール化）
     const style = document.createElement("style");
     style.innerHTML = `
+        /* コメント詳細画面の余白を多めに確保 */
         #postDetailPage {
-            padding-bottom: 80px !important;
+            padding-bottom: 90px !important;
+            position: relative !important;
         }
+
+        /* コメント入力エリアの完全固定（スマホ幅に合わせ、親要素の中央に配置） */
         .detail-comment-input-area {
             position: fixed !important;
             bottom: 0 !important;
-            left: 0 !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
             width: 100% !important;
+            max-width: 500px !important; /* アプリ全体の最大幅に合わせて適宜調整してください */
             background: #fff !important;
             border-top: 1px solid #eee !important;
-            padding: 10px 15px !important;
+            padding: 12px 15px !important;
             box-sizing: border-box !important;
             z-index: 9999 !important;
             display: flex !important;
             gap: 10px !important;
+        }
+
+        /* 検索履歴コンテナの制限（5件分程度の高さで中身をスクロール） */
+        #searchHistory {
+            max-height: 220px !important;
+            overflow-y: auto !important;
+            border: 1px solid #eee !important;
+            border-radius: 8px !important;
+            background: #fafafa !important;
+            margin: 10px 0 !important;
+            padding: 5px !important;
+        }
+
+        /* スクロールバーを見やすく細めに調整 */
+        #searchHistory::-webkit-scrollbar {
+            width: 5px !important;
+        }
+        #searchHistory::-webkit-scrollbar-thumb {
+            background: #ccc !important;
+            border-radius: 10px !important;
         }
     `;
     document.head.appendChild(style);
