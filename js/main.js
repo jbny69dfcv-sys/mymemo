@@ -1034,13 +1034,26 @@ function renderComments() {
     }
 }
 
+// 詳細画面を開く直前の状態を記憶する変数（上部の変数宣言の近くに置くと綺麗です）
+let detailBackTarget = "timeline";
+
 // コメント詳細を開いたときの処理
 function openPostDetail(postData) {
     currentDetailPost = postData;
 
+    // どちらの画面から詳細を開いたかを判定して記憶する
+    if (profilePage && profilePage.style.display === "block") {
+        detailBackTarget = "profile";
+    } else if (searchPage && searchPage.style.display === "block") {
+        detailBackTarget = "search";
+    } else {
+        detailBackTarget = "timeline";
+    }
+
     if (timeline) timeline.style.display = "none";
     if (profilePage) profilePage.style.display = "none";
-    if (postDetailPage) postDetailPage.style.display = "flex"; // ここをflex構造に変更
+    if (searchPage) searchPage.style.display = "none"; // 検索画面も隠す
+    if (postDetailPage) postDetailPage.style.display = "flex";
 
     if (postButton) postButton.style.display = "none";
     if (searchButton) searchButton.style.display = "none";
@@ -1051,24 +1064,30 @@ function openPostDetail(postData) {
     renderDetailComments();
 
     setTimeout(() => {
-// 例：スクロールエリアを新しく作った「.detail-main-content」に指定する
-const scrollArea = postDetailPage.querySelector(".detail-main-content");
-if (scrollArea) {
-    scrollArea.scrollTop = scrollArea.scrollHeight;
-}
+        const scrollArea = postDetailPage.querySelector(".detail-main-content");
+        if (scrollArea) {
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+        }
     }, 50);
 }
 
 // コメント詳細から戻るときの処理
 if (backFromDetailButton) {
     backFromDetailButton.addEventListener("click", () => {
-            if (postDetailPage) postDetailPage.style.display = "none";
-            if (timeline) timeline.style.display = "block";
+        if (postDetailPage) postDetailPage.style.display = "none";
 
+        // 記憶していた元の画面だけを表示に戻す
+        if (detailBackTarget === "profile") {
+            if (profilePage) profilePage.style.display = "block";
+        } else if (detailBackTarget === "search") {
+            if (searchPage) searchPage.style.display = "block";
+        } else {
+            if (timeline) timeline.style.display = "block";
+            // タイムラインに戻るときだけ、下部の固定ボタンを表示させる
             if (postButton) postButton.style.display = "block";
             if (searchButton) searchButton.style.display = "block";
         }
-    );
+    });
 }
 
 function renderDetailComments() {

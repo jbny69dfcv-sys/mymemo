@@ -1327,12 +1327,6 @@ html, body {
     overflow: hidden; /* ページ全体のスクロールを禁止 */
 }
 
-/* 戻るボタンや投稿本体、コメント一覧が含まれるエリアだけをスクロールさせる */
-#postDetailPage > *:not(.detail-comment-input-area) {
-    overflow-y: auto;
-    flex: 1;
-    padding-bottom: 20px; /* 入力欄に被らないための余白 */
-}
 
 /* コメント入力欄を一番下に完全に固定（スクロールしても絶対動かない） */
 .detail-comment-input-area {
