@@ -1091,15 +1091,13 @@ if (backFromDetailButton) {
 }
 
 function renderDetailComments() {
-    if (!detailPost) return;
-    const oldComments = detailPost.querySelector(".post-comments");
-    if (oldComments) oldComments.remove();
+    // 投稿の中ではなく、HTML側にある専用の「detailComments」エリアを毎回クリアする
+    if (!detailComments) return;
+    detailComments.innerHTML = "";
 
     if (!currentDetailPost || !currentDetailPost.comments || currentDetailPost.comments.length === 0) return;
 
-    const postCard = detailPost.querySelector(".post");
-    if (!postCard) return;
-
+    // コメント用のボックスを作成
     const commentBox = document.createElement("div");
     commentBox.className = "post-comments";
 
@@ -1166,9 +1164,9 @@ function renderDetailComments() {
         });
     });
 
-    postCard.appendChild(commentBox);
+    // 投稿本体(postCard)ではなく、独立したコメント表示エリアに追加する
+    detailComments.appendChild(commentBox);
 }
-
 function renderSearchHistory() {
     if (!searchHistory) return;
     searchHistory.innerHTML = "";

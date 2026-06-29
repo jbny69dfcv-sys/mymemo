@@ -1328,18 +1328,16 @@ html, body {
 }
 
 
-/* コメント入力欄を一番下に完全に固定（スクロールしても絶対動かない） */
 .detail-comment-input-area {
-    position: shrink-to-fit;
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
     background: #ffffff !important;
     border-top: 1px solid #eeeeee !important;
     padding: 12px 15px !important;
     box-sizing: border-box !important;
-    z-index: 9999 !important; /* コメントより必ず上に表示 */
+    z-index: 9999 !important;
     display: flex !important;
     gap: 10px !important;
 }
