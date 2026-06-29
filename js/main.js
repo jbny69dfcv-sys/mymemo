@@ -863,7 +863,7 @@ function renderTimeline() {
     }
 }
 
-// 💡 4つのタブ表示の切り替えロジック
+// 🛠️ 1. renderProfilePosts 関数の差し替え
 function renderProfilePosts() {
     const targetIndex = accounts.indexOf(currentAccount);
     const rooms = document.querySelectorAll(".single-profile");
@@ -876,13 +876,19 @@ function renderProfilePosts() {
     profTimeline.innerHTML = "";
 
     let targetPosts = [];
+    
+    // 💡 profileMode の値によって、表示する投稿を4パターンに分岐させます
     if (profileMode === "likes") {
+        // スキ（いいね）した投稿
         targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
     } else if (profileMode === "images") {
+        // 自分自身のアカウントで、かつ画像がある投稿（単一画像 or 複数画像）
         targetPosts = posts.filter(post => post.account === currentAccount && (post.image || (post.images && post.images.length > 0)));
     } else if (profileMode === "comments") {
+        // このアカウントがコメントを残した投稿（他人の投稿でも自分がコメントしていれば表示）
         targetPosts = posts.filter(post => post.comments && post.comments.some(comment => comment.account === currentAccount));
     } else {
+        // 通常の投稿一覧
         targetPosts = posts.filter(post => post.account === currentAccount);
     }
 
@@ -896,8 +902,8 @@ function renderProfilePosts() {
     if (sortedPosts.length === 0) {
         let noMsg = "投稿はありません";
         if (profileMode === "likes") noMsg = "スキした投稿はありません";
-        if (profileMode === "images") noMsg = "メディアつきの投稿はありません";
-        if (profileMode === "comments") noMsg = "返信した投稿はありません";
+        if (profileMode === "images") noMsg = "画像つきの投稿はありません";
+        if (profileMode === "comments") noMsg = "コメントした投稿はありません";
         
         profTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">${noMsg}</div>`;
         return;
@@ -908,24 +914,154 @@ function renderProfilePosts() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    initializeProfileRooms(); 
-    renderAccounts();         
+// 🛠️ 2. showProfile 関数の差し替え
+function showProfile() {
+    const container = document.getElementById("profileContainer");
+    if (!container) return;
+    
+    const rooms = container.getElementsByClassName("single-profile");
+    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
 
-    if (timeline) timeline.style.display = "block";
-    if (profilePage) profilePage.style.display = "none";
-    if (postDetailPage) postDetailPage.style.display = "none";
-    if (searchPage) searchPage.style.display = "none";
+    savedAccounts.forEach((accountName, index) => {
+        const currentRoom = rooms[index];
+        if (!currentRoom) return;
 
-    const savedIndex = localStorage.getItem("currentAccountIndex");
-    if (savedIndex !== null) {
-        const container = document.getElementById("profileContainer");
-        if (container) {
-            container.style.transition = "none";
-            container.style.transform = `translateX(-${savedIndex * 100}%)`;
+        const profile = profiles[accountName] || {};
+        const userPosts = posts.filter(post => post.account === accountName);
+
+        const headerEl = currentRoom.querySelector(".header-image");
+        if (headerEl) headerEl.src = profile.header || "";
+
+        const iconEl = currentRoom.querySelector(".profile-icon");
+        if (iconEl) iconEl.src = profile.icon || "https://via.placeholder.com/60";
+        
+        const nameEl = currentRoom.querySelector("h2");
+        if (nameEl) nameEl.textContent = profile.name || accountName;
+        
+        const idEl = currentRoom.querySelector("p:nth-of-type(1)");
+        if (idEl) idEl.textContent = "@" + (profile.id || "userid");
+        
+        const bioEl = currentRoom.querySelector("p:nth-of-type(2)");
+        if (bioEl) bioEl.textContent = profile.bio || "プロフィール未設定";
+        
+        const countEl = currentRoom.querySelector("p:nth-of-type(3)");
+        if (countEl) countEl.textContent = "投稿数 " + userPosts.length;
+
+        const roomTimeline = currentRoom.querySelector(".timeline") || currentRoom.querySelector("#profileTimeline");
+        if (roomTimeline) {
+            roomTimeline.innerHTML = ""; 
+            
+            // 💡 ここも同様に4つのタブに対応させます
+            let targetPosts = [];
+            if (profileMode === "likes") {
+                targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(accountName));
+            } else if (profileMode === "images") {
+                targetPosts = posts.filter(post => post.account === accountName && (post.image || (post.images && post.images.length > 0)));
+            } else if (profileMode === "comments") {
+                targetPosts = posts.filter(post => post.comments && post.comments.some(comment => comment.account === accountName));
+            } else {
+                targetPosts = userPosts;
+            }
+
+            const sortedPosts = [...targetPosts].sort((a, b) => {
+                if ((a.pinned || false) !== (b.pinned || false)) {
+                    return (b.pinned || false) - (a.pinned || false);
+                }
+                return b.time - a.time;
+            });
+
+            for (const post of sortedPosts) {
+                addPostToTimeline(post, roomTimeline);
+            }
         }
-    }
-});
+    });
+
+    if (timeline) timeline.style.display = "none";
+    if (profilePage) profilePage.style.display = "block";
+}
+
+// 🛠️ 3. initializeProfileRooms 関数の差し替え
+function initializeProfileRooms() {
+    const container = document.getElementById("profileContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
+
+    savedAccounts.forEach((accName, index) => {
+        const newRoom = document.createElement("div");
+        newRoom.className = "single-profile";
+        
+        // 💡 HTML部分に「画像」と「コメント」のタブを生成するように変更
+        newRoom.innerHTML = `
+            <div class="profile-header">
+                <img class="header-image" src="" id="headerImage">
+                <button class="edit-profile-btn edit-header-button">✏️</button>
+            </div>
+            <div class="profile-info">
+                <img class="profile-icon" src="https://via.placeholder.com/60" id="profileIcon">
+                <h2 id="profileName">${accName}</h2>
+                <p id="profileId">@userid</p>
+                <p id="profileBio">プロフィール未設定</p>
+                <p id="postCount">投稿数 0</p>
+                <button class="deleteAccountButton" data-index="${index}">アカウント削除</button>
+                <div class="follow-counts">
+                    <span id="followingCount">0</span> フォロー
+                    <span id="followerCount">0</span> フォロワー
+                </div>
+            </div>
+            <div class="profile-tabs">
+                <div class="profile-tab active room-posts-tab">投稿</div>
+                <div class="profile-tab room-images-tab">画像</div>
+                <div class="profile-tab room-comments-tab">コメント</div>
+                <div class="profile-tab room-likes-tab">スキ</div>
+            </div>
+            <div class="timeline" id="profileTimeline"></div>
+        `;
+
+        const pTab = newRoom.querySelector(".room-posts-tab");
+        const iTab = newRoom.querySelector(".room-images-tab");
+        const cTab = newRoom.querySelector(".room-comments-tab");
+        const lTab = newRoom.querySelector(".room-likes-tab");
+
+        // 💡 4つのタブすべてにクリックイベントを設定
+        if (pTab && iTab && cTab && lTab) {
+            const tabs = [pTab, iTab, cTab, lTab];
+            const clearActive = () => tabs.forEach(t => t.classList.remove("active"));
+
+            pTab.addEventListener("click", () => {
+                profileMode = "posts";
+                clearActive();
+                pTab.classList.add("active");
+                renderProfilePosts();
+            });
+
+            iTab.addEventListener("click", () => {
+                profileMode = "images";
+                clearActive();
+                iTab.classList.add("active");
+                renderProfilePosts();
+            });
+
+            cTab.addEventListener("click", () => {
+                profileMode = "comments";
+                clearActive();
+                cTab.classList.add("active");
+                renderProfilePosts();
+            });
+
+            lTab.addEventListener("click", () => {
+                profileMode = "likes";
+                clearActive();
+                lTab.classList.remove("active"); // もしバグ回避するなら clearActiveがあるのでlTab.classList.add("active")でOKです
+                lTab.classList.add("active");
+                renderProfilePosts();
+            });
+        }
+
+        container.appendChild(newRoom);
+    });
+}
 
 function showProfile() {
     const container = document.getElementById("profileContainer");
@@ -1609,7 +1745,6 @@ function setAppHeight() {
     );
 }
 
-// 💡 画像に合わせた完璧な並び順とタブ名「投稿 → メディア → 返信 → スキ」に設定しました
 function initializeProfileRooms() {
     const container = document.getElementById("profileContainer");
     if (!container) return;
@@ -1621,6 +1756,7 @@ function initializeProfileRooms() {
         const newRoom = document.createElement("div");
         newRoom.className = "single-profile";
         
+        // 💡 タブをご希望の順番「投稿 → 画像 → コメント → スキ」に並び替えました
         newRoom.innerHTML = `
             <div class="profile-header">
                 <img class="header-image" src="" id="headerImage">
@@ -1640,8 +1776,8 @@ function initializeProfileRooms() {
             </div>
             <div class="profile-tabs">
                 <div class="profile-tab active room-posts-tab">投稿</div>
-                <div class="profile-tab room-images-tab">メディア</div>
-                <div class="profile-tab room-comments-tab">返信</div>
+                <div class="profile-tab room-images-tab">画像</div>
+                <div class="profile-tab room-comments-tab">コメント</div>
                 <div class="profile-tab room-likes-tab">スキ</div>
             </div>
             <div class="timeline" id="profileTimeline"></div>
@@ -1652,6 +1788,7 @@ function initializeProfileRooms() {
         const cTab = newRoom.querySelector(".room-comments-tab");
         const lTab = newRoom.querySelector(".room-likes-tab");
 
+        // 💡 すべてのタブのクリックイベントを設定（スッキリ整理しました）
         if (pTab && iTab && cTab && lTab) {
             const tabs = [pTab, iTab, cTab, lTab];
             const clearActive = () => tabs.forEach(t => t.classList.remove("active"));
