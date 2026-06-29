@@ -152,7 +152,6 @@ const editIconPreview =
         "editIconPreview"
     );
 
-// 💡 コメント送信時の処理（自動スクロール付き）
 if (detailCommentButton) {
     detailCommentButton.addEventListener(
         "click",
@@ -175,14 +174,6 @@ if (detailCommentButton) {
             renderDetailComments();
             renderTimeline();
             renderProfilePosts();
-
-            // 💡 コメント送信後、最新のコメント位置へスムーズにスクロール
-            setTimeout(() => {
-                window.scrollTo({
-                    top: document.body.scrollHeight,
-                    behavior: "smooth"
-                });
-            }, 100);
         }
     );
 }
@@ -872,6 +863,7 @@ function renderTimeline() {
     }
 }
 
+// 💡 4つのタブ表示の切り替えロジック
 function renderProfilePosts() {
     const targetIndex = accounts.indexOf(currentAccount);
     const rooms = document.querySelectorAll(".single-profile");
@@ -933,28 +925,6 @@ document.addEventListener("DOMContentLoaded", () => {
             container.style.transform = `translateX(-${savedIndex * 100}%)`;
         }
     }
-
-    // 💡 CSSを自動適用して、コメント入力欄を最前面・画面最下部に完全固定する
-    const style = document.createElement("style");
-    style.innerHTML = `
-        #postDetailPage {
-            padding-bottom: 80px !important; /* 下部が隠れないように余白を確保 */
-        }
-        .detail-comment-input-area {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            background: #fff !important;
-            border-top: 1px solid #eee !important;
-            padding: 10px 15px !important;
-            box-sizing: border-box !important;
-            z-index: 9999 !important; /* 絶対に一番上に来るように設定 */
-            display: flex !important;
-            gap: 10px !important;
-        }
-    `;
-    document.head.appendChild(style);
 });
 
 function showProfile() {
@@ -1413,7 +1383,6 @@ function renderComments() {
     }
 }
 
-// 💡 コメント詳細を開いたときの処理（ボタン非表示化を追加）
 function openPostDetail(postData) {
     currentDetailPost = postData;
 
@@ -1421,32 +1390,18 @@ function openPostDetail(postData) {
     if (profilePage) profilePage.style.display = "none";
     if (postDetailPage) postDetailPage.style.display = "block";
 
-    // 💡 邪魔になっていた投稿ボタンと検索ボタンを非表示にする
-    if (postButton) postButton.style.display = "none";
-    if (searchButton) searchButton.style.display = "none";
-
     if (detailPost) detailPost.innerHTML = "";
 
     addPostToTimeline(postData, detailPost);
     renderDetailComments();
-
-    // 💡 既存のコメントがある場合は、自動的に一番下まで最初からスクロールさせておく
-    setTimeout(() => {
-        window.scrollTo(0, document.body.scrollHeight);
-    }, 50);
 }
 
-// 💡 コメント詳細から戻るときの処理（ボタン再表示を追加）
 if (backFromDetailButton) {
     backFromDetailButton.addEventListener(
         "click",
         () => {
             if (postDetailPage) postDetailPage.style.display = "none";
             if (timeline) timeline.style.display = "block";
-
-            // 💡 タイムラインに戻ったら、非表示にしていたボタンを復活させる
-            if (postButton) postButton.style.display = "block";
-            if (searchButton) searchButton.style.display = "block";
         }
     );
 }
@@ -1654,6 +1609,7 @@ function setAppHeight() {
     );
 }
 
+// 💡 画像に合わせた完璧な並び順とタブ名「投稿 → メディア → 返信 → スキ」に設定しました
 function initializeProfileRooms() {
     const container = document.getElementById("profileContainer");
     if (!container) return;
