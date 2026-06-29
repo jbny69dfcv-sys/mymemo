@@ -1396,25 +1396,7 @@ document.addEventListener("DOMContentLoaded", () => {
             gap: 10px !important;
         }
 
-        /* 検索履歴コンテナの制限（5件分程度の高さで中身をスクロール） */
-        #searchHistory {
-            max-height: 220px !important;
-            overflow-y: auto !important;
-            border: 1px solid #eee !important;
-            border-radius: 8px !important;
-            background: #fafafa !important;
-            margin: 10px 0 !important;
-            padding: 5px !important;
-        }
 
-        /* スクロールバーを見やすく細めに調整 */
-        #searchHistory::-webkit-scrollbar {
-            width: 5px !important;
-        }
-        #searchHistory::-webkit-scrollbar-thumb {
-            background: #ccc !important;
-            border-radius: 10px !important;
-        }
     `;
     document.head.appendChild(style);
 
