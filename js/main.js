@@ -128,11 +128,7 @@ if (detailCommentButton) {
 
         // コメントエリア内の最下部へスムーズにスクロール
         setTimeout(() => {
-         // スクロールエリアを新しく作った「.detail-main-content」に指定する
-const scrollArea = postDetailPage.querySelector(".detail-main-content");
-if (scrollArea) {
-    scrollArea.scrollTop = scrollArea.scrollHeight;
-}
+            const scrollArea = postDetailPage.querySelector("*:not(.detail-comment-input-area)");
             if (scrollArea) {
                 scrollArea.scrollTo({
                     top: scrollArea.scrollHeight,
@@ -1034,43 +1030,52 @@ function renderComments() {
     }
 }
 
-// 詳細画面を開く直前の状態を記憶する変数（上部の変数宣言の近くに置くと綺麗です）
-let detailBackTarget = "timeline";
+// コメント詳細を開いたときの処理
+function openPostDetail(postData) {
+    currentDetailPost = postData;
 
-// 🔎 main.js の中で詳細画面を開いている関数を探してください
-function openPostDetail(post) {
-    currentDetailPost = post;
-    
-    // 💡 ここが「flex」になっているか確認！
-    postDetailPage.style.display = "flex"; 
-    
-    renderDetailPost();
+    if (timeline) timeline.style.display = "none";
+    if (profilePage) profilePage.style.display = "none";
+    if (postDetailPage) postDetailPage.style.display = "flex"; // ここをflex構造に変更
+
+    if (postButton) postButton.style.display = "none";
+    if (searchButton) searchButton.style.display = "none";
+
+    if (detailPost) detailPost.innerHTML = "";
+
+    addPostToTimeline(postData, detailPost);
     renderDetailComments();
+
+    setTimeout(() => {
+        const scrollArea = postDetailPage.querySelector("*:not(.detail-comment-input-area)");
+        if (scrollArea) {
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+        }
+    }, 50);
 }
 
 // コメント詳細から戻るときの処理
 if (backFromDetailButton) {
-// 「戻る」ボタンのクリックイベント
-backFromDetailButton.addEventListener("click", () => {
-    // 詳細画面を非表示にする
-    postDetailPage.style.display = "none";
-    
-    // タイムライン画面（または直前の画面）を表示する
-    timelinePage.style.display = "block"; // お使いのメイン画面のIDや要素に合わせてください
-    
-    // 画面の一番上に戻す
-    window.scrollTo(0, 0);
-});
+    backFromDetailButton.addEventListener("click", () => {
+            if (postDetailPage) postDetailPage.style.display = "none";
+            if (timeline) timeline.style.display = "block";
+
+            if (postButton) postButton.style.display = "block";
+            if (searchButton) searchButton.style.display = "block";
+        }
+    );
 }
 
 function renderDetailComments() {
-    // 投稿の中ではなく、HTML側にある専用の「detailComments」エリアを毎回クリアする
-    if (!detailComments) return;
-    detailComments.innerHTML = "";
+    if (!detailPost) return;
+    const oldComments = detailPost.querySelector(".post-comments");
+    if (oldComments) oldComments.remove();
 
     if (!currentDetailPost || !currentDetailPost.comments || currentDetailPost.comments.length === 0) return;
 
-    // コメント用のボックスを作成
+    const postCard = detailPost.querySelector(".post");
+    if (!postCard) return;
+
     const commentBox = document.createElement("div");
     commentBox.className = "post-comments";
 
@@ -1137,9 +1142,9 @@ function renderDetailComments() {
         });
     });
 
-    // 投稿本体(postCard)ではなく、独立したコメント表示エリアに追加する
-    detailComments.appendChild(commentBox);
+    postCard.appendChild(commentBox);
 }
+
 function renderSearchHistory() {
     if (!searchHistory) return;
     searchHistory.innerHTML = "";
