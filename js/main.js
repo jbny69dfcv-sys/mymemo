@@ -1037,19 +1037,15 @@ function renderComments() {
 // 詳細画面を開く直前の状態を記憶する変数（上部の変数宣言の近くに置くと綺麗です）
 let detailBackTarget = "timeline";
 
-// コメントマークなどを押して詳細画面に移動する処理の中
+// 🔎 main.js の中で詳細画面を開いている関数を探してください
 function openPostDetail(post) {
     currentDetailPost = post;
     
-    // 他のメイン画面を非表示にする
-    timelinePage.style.display = "none"; 
+    // 💡 ここが「flex」になっているか確認！
+    postDetailPage.style.display = "flex"; 
     
-    // 詳細画面を表示する
-    postDetailPage.style.display = "flex";
-    
-    // 詳細画面の中身をレンダリングする
-    renderDetailPost(); // 詳細の投稿本体を表示する関数
-    renderDetailComments(); // コメント欄を表示する関数
+    renderDetailPost();
+    renderDetailComments();
 }
 
 // コメント詳細から戻るときの処理
