@@ -117,40 +117,25 @@
 
             </div> </div> </div>
 
-<div
-    id="postDetailPage"
-    style="display:none;"
->
-
-    <button
-        id="backFromDetailButton"
-    >
-        ← 戻る
-    </button>
-
-<div class="detail-page">
-
-    <div id="detailPost"></div>
-
-    <div class="detail-comments-box">
-    <div id="detailComments"></div>
+<!-- コメント詳細画面 -->
+<div id="postDetailPage">
+    <!-- 【上部固定】ヘッダーエリア -->
+    <div class="detail-header">
+        <button id="backFromDetailButton">← 戻る</button>
     </div>
 
-    <div class="detail-comment-input">
-
-        <input
-            id="detailCommentInput"
-            placeholder="コメントを書く..."
-        >
-
-        <button id="detailCommentButton">
-            送信
-        </button>
-
+    <!-- 【中央スクロール】投稿とコメントのメインエリア -->
+    <div class="detail-main-content">
+        <div id="detailPost"></div>
+        <div id="detailComments"></div>
     </div>
 
+    <!-- 【下部固定】コメント入力エリア -->
+    <div class="detail-comment-input-area">
+        <input type="text" id="detailCommentInput" placeholder="コメントを入力...">
+        <button id="detailCommentButton">送信</button>
+    </div>
 </div>
-
 </div>
  <div id="postModal" class="modal">
 

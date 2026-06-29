@@ -1376,18 +1376,18 @@ html, body {
    コメント詳細画面の完全固定レイアウト（決定版）
    ========================================== */
 
-/* ページ全体の高さを画面に固定し、縦並び（Flex）にする */
+/* ページ全体を画面に固定 */
 #postDetailPage {
     display: flex !important;
     flex-direction: column !important;
     height: var(--app-height, 100vh) !important;
     position: relative !important;
     box-sizing: border-box !important;
-    overflow: hidden !important; /* 画面全体のハミ出しスクロールを禁止 */
+    overflow: hidden !important;
     background: #ffffff !important;
 }
 
-/* 【上部固定】ヘッダー：アカウント並びのように一番上に固定されます */
+/* 【上部固定】ヘッダー */
 .detail-header {
     flex-shrink: 0 !important;
     background: #ffffff !important;
@@ -1398,7 +1398,7 @@ html, body {
     z-index: 100 !important;
 }
 
-/* 戻るボタンが巨大化しないようにサイズを適正化 */
+/* 戻るボタンのサイズ適正化 */
 #backFromDetailButton {
     padding: 6px 12px !important;
     font-size: 14px !important;
@@ -1409,7 +1409,7 @@ html, body {
     cursor: pointer !important;
 }
 
-/* 【中央スクロール】ここだけが自在にスクロールします */
+/* 【中央スクロール】ここだけが動く */
 .detail-main-content {
     flex: 1 !important;
     overflow-y: auto !important;
@@ -1417,7 +1417,7 @@ html, body {
     padding-bottom: 10px !important;
 }
 
-/* 【下部固定】入力欄：flex構造により、画面の最下部にピタッと自動固定されます */
+/* 【下部固定】入力欄 */
 .detail-comment-input-area {
     flex-shrink: 0 !important;
     display: flex !important;
