@@ -1313,4 +1313,61 @@ top: -0px;
 
 html, body {
     touch-action: manipulation;
+}/* ==========================================
+   コメント詳細画面の完全固定レイアウト
+   ========================================== */
+
+/* コメント詳細ページ全体の高さを画面いっぱいにし、中身だけをスクロールさせる */
+#postDetailPage {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* 画面の高さぴったりに固定 */
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden; /* ページ全体のスクロールを禁止 */
+}
+
+/* 戻るボタンや投稿本体、コメント一覧が含まれるエリアだけをスクロールさせる */
+#postDetailPage > *:not(.detail-comment-input-area) {
+    overflow-y: auto;
+    flex: 1;
+    padding-bottom: 20px; /* 入力欄に被らないための余白 */
+}
+
+/* コメント入力欄を一番下に完全に固定（スクロールしても絶対動かない） */
+.detail-comment-input-area {
+    position: shrink-to-fit;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff !important;
+    border-top: 1px solid #eeeeee !important;
+    padding: 12px 15px !important;
+    box-sizing: border-box !important;
+    z-index: 9999 !important; /* コメントより必ず上に表示 */
+    display: flex !important;
+    gap: 10px !important;
+}
+
+/* ==========================================
+   検索履歴の部分スクロール化
+   ========================================== */
+#searchHistory {
+    max-height: 220px !important; /* 5件分ほどの高さ */
+    overflow-y: auto !important; /* 中身だけスクロール */
+    border: 1px solid #eeeeee !important;
+    border-radius: 8px !important;
+    background: #fafafa !important;
+    margin: 10px 0 !important;
+    padding: 5px !important;
+}
+
+/* 検索履歴のスクロールバーを細くスタイリッシュに */
+#searchHistory::-webkit-scrollbar {
+    width: 6px !important;
+}
+#searchHistory::-webkit-scrollbar-thumb {
+    background: #cccccc !important;
+    border-radius: 10px !important;
 }
