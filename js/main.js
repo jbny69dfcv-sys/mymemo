@@ -34,6 +34,7 @@ const deleteAccountButton =
         "deleteAccountButton"
     );
 
+// 💡 タブが存在する場合のみイベントを登録（エラー防止）
 if (postsTab) {
     postsTab.addEventListener(
         "click",
@@ -206,6 +207,7 @@ const saveProfileButton =
         "saveProfileButton"
     );
 
+// 💡 エラーの原因だった宣言なしのログを修正
 console.log("cancel:", cancelProfileButton);
 console.log("modal:", editProfileModal);
 
@@ -863,7 +865,6 @@ function renderTimeline() {
     }
 }
 
-// 💡 4つのタブ表示の切り替えロジック
 function renderProfilePosts() {
     const targetIndex = accounts.indexOf(currentAccount);
     const rooms = document.querySelectorAll(".single-profile");
@@ -878,10 +879,6 @@ function renderProfilePosts() {
     let targetPosts = [];
     if (profileMode === "likes") {
         targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
-    } else if (profileMode === "images") {
-        targetPosts = posts.filter(post => post.account === currentAccount && (post.image || (post.images && post.images.length > 0)));
-    } else if (profileMode === "comments") {
-        targetPosts = posts.filter(post => post.comments && post.comments.some(comment => comment.account === currentAccount));
     } else {
         targetPosts = posts.filter(post => post.account === currentAccount);
     }
@@ -894,12 +891,7 @@ function renderProfilePosts() {
     });
 
     if (sortedPosts.length === 0) {
-        let noMsg = "投稿はありません";
-        if (profileMode === "likes") noMsg = "スキした投稿はありません";
-        if (profileMode === "images") noMsg = "メディアつきの投稿はありません";
-        if (profileMode === "comments") noMsg = "返信した投稿はありません";
-        
-        profTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">${noMsg}</div>`;
+        profTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">${profileMode === "likes" ? "スキした投稿はありません" : "投稿はありません"}</div>`;
         return;
     }
 
@@ -963,16 +955,9 @@ function showProfile() {
         if (roomTimeline) {
             roomTimeline.innerHTML = ""; 
             
-            let targetPosts = [];
-            if (profileMode === "likes") {
-                targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(accountName));
-            } else if (profileMode === "images") {
-                targetPosts = posts.filter(post => post.account === accountName && (post.image || (post.images && post.images.length > 0)));
-            } else if (profileMode === "comments") {
-                targetPosts = posts.filter(post => post.comments && post.comments.some(comment => comment.account === accountName));
-            } else {
-                targetPosts = userPosts;
-            }
+            const targetPosts = profileMode === "posts" 
+                ? userPosts 
+                : posts.filter(post => post.likedBy && post.likedBy.includes(accountName));
 
             const sortedPosts = [...targetPosts].sort((a, b) => {
                 if ((a.pinned || false) !== (b.pinned || false)) {
@@ -1519,6 +1504,7 @@ function renderSearchHistory() {
     });
 }
 
+// 💡 日付検索機能を組み込んだ最新の searchPosts
 function searchPosts(keyword) {
     if (!searchResults) return;
     searchResults.innerHTML = "";
@@ -1531,6 +1517,7 @@ function searchPosts(keyword) {
     let result = [];
     const cleanWord = keyword.trim();
 
+    // 💡 カッコ「()」で囲まれているかチェックする（全角の（）にも対応）
     const isDateSearch = (cleanWord.startsWith("(") && cleanWord.endsWith(")")) || 
                          (cleanWord.startsWith("（") && cleanWord.endsWith("）"));
 
@@ -1545,8 +1532,8 @@ function searchPosts(keyword) {
             const month = String(postDate.getMonth() + 1).padStart(2, "0");
             const day = String(postDate.getDate()).padStart(2, "0");
 
-            const ymd = `${year}/${month}/${day}`;
-            const ym = `${year}/${month}`;
+            const ymd = `${year}/${month}/${day}`; // 例: "2026/06/24"
+            const ym = `${year}/${month}`;         // 例: "2026/06"
 
             return ymd.startsWith(dateString) || ym === dateString;
         });
@@ -1609,7 +1596,6 @@ function setAppHeight() {
     );
 }
 
-// 💡 画像に合わせた完璧な並び順とタブ名「投稿 → メディア → 返信 → スキ」に設定しました
 function initializeProfileRooms() {
     const container = document.getElementById("profileContainer");
     if (!container) return;
@@ -1640,47 +1626,26 @@ function initializeProfileRooms() {
             </div>
             <div class="profile-tabs">
                 <div class="profile-tab active room-posts-tab">投稿</div>
-                <div class="profile-tab room-images-tab">メディア</div>
-                <div class="profile-tab room-comments-tab">返信</div>
                 <div class="profile-tab room-likes-tab">スキ</div>
             </div>
             <div class="timeline" id="profileTimeline"></div>
         `;
 
         const pTab = newRoom.querySelector(".room-posts-tab");
-        const iTab = newRoom.querySelector(".room-images-tab");
-        const cTab = newRoom.querySelector(".room-comments-tab");
         const lTab = newRoom.querySelector(".room-likes-tab");
 
-        if (pTab && iTab && cTab && lTab) {
-            const tabs = [pTab, iTab, cTab, lTab];
-            const clearActive = () => tabs.forEach(t => t.classList.remove("active"));
-
+        if (pTab && lTab) {
             pTab.addEventListener("click", () => {
                 profileMode = "posts";
-                clearActive();
                 pTab.classList.add("active");
-                renderProfilePosts();
-            });
-
-            iTab.addEventListener("click", () => {
-                profileMode = "images";
-                clearActive();
-                iTab.classList.add("active");
-                renderProfilePosts();
-            });
-
-            cTab.addEventListener("click", () => {
-                profileMode = "comments";
-                clearActive();
-                cTab.classList.add("active");
+                lTab.classList.remove("active");
                 renderProfilePosts();
             });
 
             lTab.addEventListener("click", () => {
                 profileMode = "likes";
-                clearActive();
                 lTab.classList.add("active");
+                pTab.classList.remove("active");
                 renderProfilePosts();
             });
         }
