@@ -2303,40 +2303,32 @@ function searchPosts(
 }
 
 searchInput.addEventListener(
-    "keydown",
+"keydown",
     event => {
-
-        if (
-            event.key !== "Enter"
-        ) {
+        if (event.key !== "Enter") {
             return;
         }
 
-        const keyword =
-            searchInput.value.trim();
-
-        if (
-            keyword === ""
-        ) {
+        const keyword = searchInput.value.trim();
+        if (keyword === "") {
             return;
         }
 
-        searchHistoryData =
-            searchHistoryData.filter(
-                item =>
-                    item !== keyword
-            );
+        // 💡 安全ガード：もし何らかの理由で配列になっていなかったら自動で初期化する
+        if (!Array.isArray(searchHistoryData)) {
+            searchHistoryData = [];
+        }
+
+        searchHistoryData = searchHistoryData.filter(
+            item => item !== keyword
+        );
 
         searchHistoryData.unshift(
             keyword
         );
 
-        if (
-            searchHistoryData.length > 10
-        ) {
-
+        if (searchHistoryData.length > 10) {
             searchHistoryData.pop();
-
         }
 
         localStorage.setItem(
@@ -2348,10 +2340,13 @@ searchInput.addEventListener(
 
         renderSearchHistory();
 
+        // 💡 先ほど追加した「日付検索」もできる検索処理がここで無事に実行されます！
         searchPosts(
             keyword
         );
-
+        
+        // スマホで改行を押したときにキーボードを自動で閉じる
+        searchInput.blur();
     }
 );
 
