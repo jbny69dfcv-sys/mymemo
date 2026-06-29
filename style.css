@@ -1354,7 +1354,7 @@ html, body {
    検索履歴の部分スクロール化
    ========================================== */
 #searchHistory {
-    max-height: 100px !important; /* 5件分ほどの高さ */
+    max-height: 199px !important; /* 5件分ほどの高さ */
     overflow-y: auto !important; /* 中身だけスクロール */
     border: 1px solid #eeeeee !important;
     border-radius: 8px !important;
@@ -1364,6 +1364,65 @@ html, body {
 }
 
 /* 検索履歴のスクロールバーを細くスタイリッシュに */
+#searchHistory::-webkit-scrollbar {
+    width: 6px !important;
+}
+#searchHistory::-webkit-scrollbar-thumb {
+    background: #cccccc !important;
+    border-radius: 10px !important;
+}
+
+/* ==========================================
+   コメント詳細画面の完全固定レイアウト（修正版）
+   ========================================== */
+
+/* ページ全体の高さをJavaScriptの計算値（--app-height）に完全に一致させる */
+#postDetailPage {
+    display: flex;
+    flex-direction: column;
+    height: var(--app-height, 100vh); /* 100vhから修正してズレを防止 */
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+/* タイムラインやコメント一覧のエリア：残りのスペースをすべて使い、ここだけをスクロールさせる */
+#postDetailPage > *:not(.detail-comment-input-area) {
+    flex: 1;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* コメント入力欄：flex構造により、画面の最下部にピタッと自動で収まります */
+.detail-comment-input-area {
+    display: flex !important;
+    gap: 10px !important;
+    padding: 12px 15px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #eeeeee !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    
+    /* 余計な位置固定を排除して高さを安定させる */
+    position: relative !important; 
+    bottom: auto !important;
+    z-index: 10;
+}
+
+/* ==========================================
+   検索履歴の部分スクロール化
+   ========================================== */
+#searchHistory {
+    max-height: 90px !important;
+    overflow-y: auto !important;
+    border: 1px solid white !important;
+    border-radius: 8px !important;
+    background: #fafafa !important;
+    margin: 10px 0 !important;
+    padding: 5px !important;
+}
+
 #searchHistory::-webkit-scrollbar {
     width: 6px !important;
 }
