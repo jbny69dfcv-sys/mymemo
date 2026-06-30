@@ -1736,24 +1736,37 @@ function initializeProfileRooms() {
             <div class="timeline" id="profileTimeline"></div>
         `;
 
-        const pTab = newRoom.querySelector(".room-posts-tab");
-        const lTab = newRoom.querySelector(".room-likes-tab");
+// 4つのタブをそれぞれ取得
+        const pTab = newRoom.querySelector(".room-posts-tab") || newRoom.querySelector("[data-mode='posts']");
+        const rTab = newRoom.querySelector(".room-replies-tab") || newRoom.querySelector("[data-mode='replies']");
+        const mTab = newRoom.querySelector(".room-media-tab") || newRoom.querySelector("[data-mode='media']");
+        const lTab = newRoom.querySelector(".room-likes-tab") || newRoom.querySelector("[data-mode='likes']");
 
-        if (pTab && lTab) {
-            pTab.addEventListener("click", () => {
-                profileMode = "posts";
-                pTab.classList.add("active");
-                lTab.classList.remove("active");
-                renderProfilePosts();
-            });
+        // すべてのタブを配列にまとめて、クリック時の共通処理を作ります
+        const allTabs = [pTab, rTab, mTab, lTab];
 
-            lTab.addEventListener("click", () => {
-                profileMode = "likes";
-                lTab.classList.add("active");
-                pTab.classList.remove("active");
-                renderProfilePosts();
+        allTabs.forEach(tab => {
+            if (!tab) return; // ボタンが存在しない場合はスキップ
+
+            tab.addEventListener("click", (e) => {
+                // 1. クリックされたボタンに応じてモードを切り替える
+                if (tab === pTab) profileMode = "posts";
+                if (tab === rTab) profileMode = "replies";
+                if (tab === mTab) profileMode = "media";
+                if (tab === lTab) profileMode = "likes";
+
+                // 2. すべてのタブから一回 "active" クラスを消す
+                allTabs.forEach(t => { if (t) t.classList.remove("active"); });
+
+                // 3. クリックされたタブだけに "active" をつける
+                tab.classList.add("active");
+
+                // 4. 再描画する
+                if (typeof renderProfilePosts === "function") {
+                    renderProfilePosts();
+                }
             });
-        }
+        });
 
         container.appendChild(newRoom);
     });
