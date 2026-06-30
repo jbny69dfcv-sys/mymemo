@@ -581,6 +581,7 @@ let accounts =
         "創作垢"
     ];
 
+let detailFrom = "timeline";
 let currentAccount =
     localStorage.getItem(
         "currentAccount"
@@ -785,6 +786,9 @@ function addPostToTimeline(postData, container) {
 
     if (commentButton) {
         commentButton.addEventListener("click", (event) => {
+            detailFrom = container.id === "profileTimeline"
+    ? "profile"
+    : "timeline";
             event.stopPropagation();
             openPostDetail(postData);
         });
@@ -1560,13 +1564,38 @@ function openPostDetail(postData) {
 }
 
 if (backFromDetailButton) {
-    backFromDetailButton.addEventListener(
-        "click",
-        () => {
-            if (postDetailPage) postDetailPage.style.display = "none";
-            if (timeline) timeline.style.display = "block";
+    backFromDetailButton.addEventListener("click", () => {
+
+        if (postDetailPage) {
+            postDetailPage.style.display = "none";
         }
-    );
+
+        if (detailFrom === "profile") {
+
+            if (profilePage) {
+                profilePage.style.display = "block";
+            }
+
+            if (timeline) {
+                timeline.style.display = "none";
+            }
+
+            // 今開いていたプロフィールを再表示
+            showProfile();
+
+        } else {
+
+            if (timeline) {
+                timeline.style.display = "block";
+            }
+
+            if (profilePage) {
+                profilePage.style.display = "none";
+            }
+
+        }
+
+    });
 }
 
 function renderDetailComments() {
