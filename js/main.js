@@ -867,23 +867,38 @@ function renderTimeline() {
 }
 
 function renderProfilePosts() {
-    const targetIndex = accounts.indexOf(currentAccount);
-    const rooms = document.querySelectorAll(".single-profile");
-    const currentRoom = rooms[targetIndex];
+    // （前後のコード、タイムライン要素の取得やクリアなどはそのまま残してください）
+    // 例：const roomTimeline = currentRoom.querySelector(".timeline"); 
+    //    roomTimeline.innerHTML = "";
+
+    // 1. まず、そのアカウントの通常の投稿をベースにします
+    const userPosts = posts.filter(post => post.account === currentAccount);
     
-    if (!currentRoom) return;
-    const profTimeline = currentRoom.querySelector(".timeline") || currentRoom.querySelector("#profileTimeline");
-    if (!profTimeline) return;
-
-    profTimeline.innerHTML = "";
-
+    // 2. 表示する投稿を入れるための空の配列を用意します
     let targetPosts = [];
-    if (profileMode === "likes") {
+
+    // 3. 【ここを修正！】現在のモードに応じて、表示するデータを完全に切り分けます
+    if (profileMode === "posts") {
+        // 【投稿】そのアカウントの投稿すべて
+        targetPosts = userPosts;
+
+    } else if (profileMode === "replies") {
+        // 【返信】「全投稿」の中から、自分がコメント（返信）を残した元の投稿だけを引っ張ってくる
+        targetPosts = posts.filter(post => {
+            return post.comments && post.comments.some(comment => comment.account === currentAccount);
+        });
+
+    } else if (profileMode === "media") {
+        // 【メディア】そのアカウントの投稿の中で、「画像（image）」が添付されているものだけを絞り込む
+        // ※コードの仕様に合わせて post.image が配列なら .length > 0、文字列なら !== "" などに調整してください
+        targetPosts = userPosts.filter(post => post.image && post.image.length > 0);
+
+    } else if (profileMode === "likes") {
+        // 【スキ】「全投稿」の中から、自分のアカウント名が「likedBy（いいねした人リスト）」に含まれるものを絞り込む
         targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
-    } else {
-        targetPosts = posts.filter(post => post.account === currentAccount);
     }
 
+    // 4. 固定ピンや日付順の並び替え（ソート）処理
     const sortedPosts = [...targetPosts].sort((a, b) => {
         if ((a.pinned || false) !== (b.pinned || false)) {
             return (b.pinned || false) - (a.pinned || false);
@@ -891,13 +906,14 @@ function renderProfilePosts() {
         return b.time - a.time;
     });
 
+    // 5. 画面への描画処理
     if (sortedPosts.length === 0) {
-        profTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">${profileMode === "likes" ? "スキした投稿はありません" : "投稿はありません"}</div>`;
-        return;
-    }
-
-    for (const post of sortedPosts) {
-        addPostToTimeline(post, profTimeline);
+        roomTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">該当する投稿はありません</div>`;
+    } else {
+        for (const post of sortedPosts) {
+            // お家のコードにある、タイムラインに投稿を追加する関数を呼び出します
+            addPostToTimeline(post, roomTimeline); 
+        }
     }
 }
 
