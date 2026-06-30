@@ -76,7 +76,7 @@ body {
 
 .post-body {
     padding: 20px;
-    min-height: 200px;
+    min-height: 0px;
 }
 .new-post {
     background: white;
@@ -1272,3 +1272,22 @@ top: -0px;
     flex-shrink: 0;
     box-sizing: border-box;
 }
+
+#searchHistory {
+            max-height: 240px !important;       /* 💡 5件分くらいの高さに制限 */
+            overflow-y: auto !important;        /* 💡 5件を超えたら枠内でスクロール */
+            border: 1px solid #eee !important;  /* 見やすくするための枠線 */
+            border-radius: 8px !important;
+            background: #fff !important;
+            margin-top: 10px !important;
+        }
+        .history-item {
+            display: flex !important;
+            align-items: center !important;
+            padding: 10px 12px !important;
+            border-bottom: 1px solid #f9f9f9 !important;
+            cursor: pointer !important;
+        }
+        .history-item:last-child {
+            border-bottom: none !important;
+        }
