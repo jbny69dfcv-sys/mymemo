@@ -910,12 +910,48 @@ function renderProfilePosts() {
 
     profTimeline.innerHTML = "";
 
-    let targetPosts = [];
-    if (profileMode === "likes") {
-        targetPosts = posts.filter(post => post.likedBy && post.likedBy.includes(currentAccount));
-    } else {
-        targetPosts = posts.filter(post => post.account === currentAccount);
-    }
+let targetPosts = [];
+
+switch (profileMode) {
+
+    case "posts":
+        targetPosts = posts.filter(
+            post => post.account === currentAccount
+        );
+        break;
+
+    case "media":
+        targetPosts = posts.filter(post =>
+            post.account === currentAccount &&
+            (
+                (post.images && post.images.length > 0) ||
+                post.image
+            )
+        );
+        break;
+
+    case "likes":
+        targetPosts = posts.filter(post =>
+            post.likedBy &&
+            post.likedBy.includes(currentAccount)
+        );
+        break;
+
+    case "replies":
+        targetPosts = posts.filter(post =>
+            post.comments &&
+            post.comments.some(comment =>
+                comment.account === currentAccount
+            )
+        );
+        break;
+
+    default:
+        targetPosts = posts.filter(
+            post => post.account === currentAccount
+        );
+
+}
 
     const sortedPosts = [...targetPosts].sort((a, b) => {
         if ((a.pinned || false) !== (b.pinned || false)) {
