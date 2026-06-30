@@ -667,7 +667,7 @@ function renderAccounts() {
 
                 renderAccounts();
 renderTimeline();
-showProfile();
+
 
                 const container = document.getElementById("profileContainer");
                 if (container) {
