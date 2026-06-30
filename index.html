@@ -1,157 +1,399 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyMemo</title>
+
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+    >
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"
+    ></script>
 </head>
+<div id="imageModal" class="image-modal">
+<div
+    id="videoModal"
+    class="image-modal"
+>
+
+    <video
+        id="modalVideo"
+        class="modal-image"
+        controls
+    ></video>
+
+</div>
+    <img
+        id="modalImage"
+        class="modal-image"
+        src=""
+    >
+
+</div>
 <body>
 
-    <!-- 画像・動画のフルスクリーンモーダル -->
-    <div id="imageModal" class="image-modal">
-        <img id="modalImage" class="modal-image" src="">
-    </div>
-    <div id="videoModal" class="image-modal">
-        <video id="modalVideo" class="modal-image" controls></video>
-    </div>
-
-    <!-- 上部アカウントリスト -->
     <div class="accounts" id="accounts"></div>
 
-    <!-- フローティングボタンエリア（タイムライン用） -->
-    <div class="floating-buttons" id="timelineFloatingButtons">
-        <button id="searchButton">🔍</button>
-        <button id="postButton"></button>
-    </div>
+<div class="floating-buttons">
 
-    <!-- タイムライン表示エリア -->
+    <button
+        id="searchButton"
+    >
+        🔍
+    </button>
+
+    <button
+        id="postButton"
+    >
+    </button>
+
+</div>
+
     <div id="timeline"></div>
 
-    <!-- プロフィールページ -->
-    <div id="profilePage" style="display:none;">
-        <button id="backButton">← タイムライン</button>
+<div id="profilePage" style="display:none;">
+
+        <button id="backButton">
+            ← タイムライン
+        </button>
+
+        <!-- 👇 ここからスライドの土台を追加しました -->
         <div id="profileWrapper" style="width: 100%; overflow: hidden;">
             <div id="profileContainer">
-                <!-- JavaScript（main.js）がアカウントごとのプロフィール画面を自動生成します -->
+                <!-- ここにJavaScript（main_2.js）がアカウントごとのプロフィール画面を自動で作ります -->
             </div>
         </div>
+        <!-- 👆 ここまで -->
+
     </div>
 
-    <!-- 投稿詳細 ＆ コメントページ -->
-    <div id="postDetailPage" style="display:none;">
-        <button id="backFromDetailButton">← 戻る</button>
-        <div class="detail-page">
-            <div id="detailPost"></div>
-            <div class="detail-comments-box">
-                <div id="detailComments"></div>
-            </div>
-            
-            <!-- コメント入力エリア（画像添付機能付き！） -->
-            <div class="detail-comment-input-container">
-                <div id="commentImagePreviewArea" class="preview-container" style="display: none;">
-                    <img id="commentImagePreview" src="">
-                    <button id="removeCommentImageButton" type="button">×</button>
-                </div>
-                <div class="detail-comment-input">
-                    <label for="commentImageUpload" class="comment-upload-label">📷</label>
-                    <input type="file" id="commentImageUpload" accept="image/*" style="display: none;">
-                    <input id="detailCommentInput" placeholder="コメントを書く...">
-                    <button id="detailCommentButton">送信</button>
-                </div>
-            </div>
+<div
+    id="postDetailPage"
+    style="display:none;"
+>
+
+    <button
+        id="backFromDetailButton"
+    >
+        ← 戻る
+    </button>
+
+<div class="detail-page">
+
+    <div id="detailPost"></div>
+
+    <div class="detail-comments-box">
+    <div id="detailComments"></div>
+    </div>
+
+    <div class="detail-comment-input">
+
+        <input
+            id="detailCommentInput"
+            placeholder="コメントを書く..."
+        >
+
+        <button id="detailCommentButton">
+            送信
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+ <div id="postModal" class="modal">
+
+<div class="post-modal-content">
+
+    <div class="post-top-bar">
+
+        <button
+            id="closeModalButton"
+            class="top-button"
+        >
+            キャンセル
+        </button>
+
+        <button
+            id="modalPostButton"
+            class="top-button"
+        >
+            投稿
+        </button>
+
+    </div>
+<div class="post-content"></div>
+    <div class="post-user-area">
+
+        <img
+            id="postUserIcon"
+            class="post-user-icon"
+            src=""
+        >
+
+        <textarea
+            id="modalPostInput"
+            placeholder="いまなにしてる？"
+        ></textarea>
+
+    </div>
+
+<input
+    type="file"
+    id="postImageUpload"
+    accept="image/*,video/*"
+    multiple
+>
+
+    <div id="postImagePreviewArea">
+
+        <div class="preview-container">
+
+            <img
+                id="postImagePreview"
+            >
+
+            <button
+                id="removePostImageButton"
+                type="button"
+            >
+                ×
+            </button>
+
         </div>
+
     </div>
 
-    <!-- 新規投稿モーダル -->
-    <div id="postModal" class="modal">
-        <div class="post-modal-content">
-            <div class="post-top-bar">
-                <button id="closeModalButton" class="top-button">キャンセル</button>
-                <button id="modalPostButton" class="top-button">投稿</button>
-            </div>
-            <div class="post-content">
-                <div class="post-user-area">
-                    <img id="postUserIcon" class="post-user-icon" src="">
-                    <textarea id="modalPostInput" placeholder="いまなにしてる？"></textarea>
-                </div>
-                <input type="file" id="postImageUpload" accept="image/*,video/*" multiple>
-                <div id="postImagePreviewArea">
-                    <div class="preview-container" id="postPreviewContainer">
-                        <img id="postImagePreview">
-                        <button id="removePostImageButton" type="button">×</button>
-                    </div>
-                </div>
-            </div>
+    </div> <!-- postImagePreviewArea -->
+
+</div> <!-- post-content -->
+
+</div> <!-- post-modal-content -->
+
+</div> <!-- postModal -->
+   
+
+<div
+    id="editProfileModal"
+    class="modal"
+    style="
+        display:none;
+        z-index:10000;
+    "
+>
+
+    <div class="modal-content">
+
+        <button
+            id="saveProfileButton"
+        >
+            保存
+        </button>
+
+        <button
+            id="cancelProfileButton"
+        >
+            キャンセル
+        </button>
+
+        <h2>
+            プロフィール編集
+        </h2>
+
+        <div class="edit-header-area">
+
+            <img
+                id="editHeaderPreview"
+                class="edit-header-preview"
+                src=""
+            >
+
         </div>
-    </div>
 
-    <!-- プロフィール編集モーダル -->
-    <div id="editProfileModal" class="modal" style="display:none; z-index:10000;">
-        <div class="modal-content" style="width: 100%; height: 100%; margin: 0; padding: 0; border-radius: 0;">
-            <div class="edit-top-bar">
-                <button id="cancelProfileButton">✕</button>
-                <h2>プロフィール編集</h2>
-                <button id="saveProfileButton">保存</button>
-            </div>
-            <div class="edit-header-area">
-                <img id="editHeaderPreview" class="edit-header-preview" src="">
-            </div>
-            <div class="edit-icon-area">
-                <img id="editIconPreview" class="edit-icon-preview" src="">
-            </div>
-            <div class="edit-field">
-                <label>名前</label>
-                <input type="text" id="editName">
-            </div>
-            <div class="edit-field">
-                <label>ID</label>
-                <input type="text" id="editId">
-            </div>
-            <div class="edit-field">
-                <label>自己紹介</label>
-                <textarea id="editBio"></textarea>
-            </div>
-            <div class="edit-field" style="border: none; margin-top: 20px;">
-                <button id="deleteAccountButton" style="color: red; border: 1px solid red; background: transparent; padding: 10px; border-radius: 5px; width: 100%; cursor: pointer;">アカウントを削除する</button>
-            </div>
+        <div class="edit-icon-area">
+
+            <img
+                id="editIconPreview"
+                class="edit-icon-preview"
+                src=""
+            >
+
         </div>
-    </div>
 
-    <!-- ヘッダー・アイコン拡大モーダル -->
-    <div id="headerModal" class="modal">
-        <img id="headerModalImage" class="modal-image">
-    </div>
+        <div class="edit-field">
 
-    <!-- 画像切り抜き（クロッパー）モーダル -->
-    <div id="cropModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <h2>画像を切り抜く</h2>
-            <img id="cropImage" style="max-width:100%; display:block;">
-            <div class="crop-buttons">
-                <button id="cropConfirmButton">決定</button>
-                <button id="cropCancelButton">キャンセル</button>
-            </div>
+            <label>
+                名前
+            </label>
+
+            <input
+                type="text"
+                id="editName"
+            >
+
         </div>
-    </div>
 
-    <!-- 検索ページ -->
-    <div id="searchPage" style="display:none;">
-        <div class="search-header">
-            <button id="backSearchButton">←</button>
-            <input id="searchInput" type="text" placeholder="検索">
+        <div class="edit-field">
+
+            <label>
+                ID
+            </label>
+
+            <input
+                type="text"
+                id="editId"
+            >
+
         </div>
-        <div id="searchHistory"></div>
-        <div id="searchResults"></div>
+
+        <div class="edit-field">
+
+            <label>
+                自己紹介
+            </label>
+
+            <textarea
+                id="editBio"
+            ></textarea>
+
+        </div>
+
     </div>
 
-    <input type="file" id="iconUpload" accept="image/*" style="display: none;">
-    <input type="file" id="headerUpload" accept="image/*" style="display: none;">
+<div
+    id="headerModal"
+    class="modal"
+>
 
-    <script src="main.js"></script>
+    <img
+        id="headerModalImage"
+        class="modal-image"
+    >
+
+</div>
+
+</div>
+
+<div
+    id="cropModal"
+    class="modal"
+    style="display:none;"
+>
+
+    <div class="modal-content">
+
+        <h2>
+            画像を切り抜く
+        </h2>
+
+<img
+    id="cropImage"
+    style="
+        max-width:100%;
+        display:block;
+    "
+>
+
+<div class="crop-buttons">
+
+    <button id="cropConfirmButton">
+        決定
+    </button>
+
+    <button id="cropCancelButton">
+        キャンセル
+    </button>
+
+</div>
+
+    </div>
+
+</div>
+
+<div
+    id="commentModal"
+    class="modal"
+    style="display:none;"
+>
+
+    <div class="modal-content">
+
+        <button
+            id="closeCommentButton"
+        >
+            閉じる
+        </button>
+
+        <h2>
+            コメント
+        </h2>
+
+        <div
+            id="commentList"
+        >
+        </div>
+
+        <textarea
+            id="commentInput"
+            placeholder="コメントを書く..."
+        ></textarea>
+
+        <button
+            id="sendCommentButton"
+        >
+            送信
+        </button>
+
+    </div>
+
+</div>
+
+<div
+    id="searchPage"
+    style="display:none;"
+>
+
+    <div class="search-header">
+
+        <button
+            id="backSearchButton"
+        >
+            ←
+        </button>
+
+        <input
+            id="searchInput"
+            type="text"
+            placeholder="検索"
+        >
+
+    </div>
+
+    <div
+        id="searchHistory"
+    >
+
+    </div>
+
+    <div
+    id="searchResults"
+></div>
+
+</div>
+
+<script src="js/main.js"></script>
+
 </body>
+
 </html>
