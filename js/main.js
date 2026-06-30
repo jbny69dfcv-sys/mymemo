@@ -1728,9 +1728,11 @@ function initializeProfileRooms() {
                 </div>
             </div>
             <div class="profile-tabs">
-                <div class="profile-tab active room-posts-tab">投稿</div>
-                <div class="profile-tab room-likes-tab">スキ</div>
-            </div>
+    <button class="profile-tab active" data-mode="posts">投稿</button>
+    <button class="profile-tab" data-mode="replies">返信</button>
+    <button class="profile-tab" data-mode="media">メディア</button>
+    <button class="profile-tab" data-mode="likes">スキ</button>
+</div>
             <div class="timeline" id="profileTimeline"></div>
         `;
 

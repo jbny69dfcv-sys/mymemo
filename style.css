@@ -1291,3 +1291,32 @@ top: -0px;
         .history-item:last-child {
             border-bottom: none !important;
         }
+
+/* タブの親要素：横並びにして、下線をつける */
+.profile-tabs {
+    display: flex;
+    justify-content: space-between; /* 均等に広げる */
+    border-bottom: 1px solid #ddd;
+    margin-top: 15px;
+    width: 100%;
+}
+
+/* タブ単体の設定：4等分（25%）にして文字を中央に */
+.profile-tab {
+    flex: 1;            /* 均等な幅に広げる */
+    width: 25%;         /* 4つの場合、1つあたり25% */
+    text-align: center; /* 文字を真ん中に */
+    background: none;
+    border: none;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+/* 選択されているタブの見た目（青い下線など） */
+.profile-tab.active {
+    color: #1d9bf0;
+    border-bottom: 3px solid #1d9bf0;
+}
