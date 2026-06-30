@@ -919,6 +919,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+console.log(currentAccount);
+console.log(profiles);
+console.log(profiles[currentAccount]);
+
 function showProfile() {
     // profileContainer を探す処理をやめ、HTMLに実在する要素に直接データを入れます
     const profile = profiles[currentAccount] || {};
