@@ -1557,6 +1557,10 @@ function openPostDetail(postData) {
     if (profilePage) profilePage.style.display = "none";
     if (postDetailPage) postDetailPage.style.display = "block";
 
+    if (floatingButtons) {
+        floatingButtons.style.display = "none";
+    }
+
     if (detailPost) detailPost.innerHTML = "";
 
     addPostToTimeline(postData, detailPost);
@@ -1569,6 +1573,10 @@ if (backFromDetailButton) {
         if (postDetailPage) {
             postDetailPage.style.display = "none";
         }
+
+        if (floatingButtons) {
+    floatingButtons.style.display = "flex";
+}
 
         if (detailFrom === "profile") {
 
