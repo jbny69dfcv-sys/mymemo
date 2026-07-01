@@ -19,6 +19,9 @@ let currentDetailPost =
 let currentCommentPost =
     null;
 
+const floatingButtons =
+    document.querySelector(".floating-buttons");
+
 const postsTab =
     document.getElementById(
         "postsTab"
