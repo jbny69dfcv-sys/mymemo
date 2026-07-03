@@ -1032,6 +1032,11 @@ function showProfile() {
     const currentIndex =
         accounts.indexOf(currentAccount);
 
+    console.log("accounts", accounts);
+console.log("currentAccount", currentAccount);
+console.log("currentIndex", currentIndex);
+console.log("rooms", rooms.length);
+
     const room =
         rooms[currentIndex];
 
@@ -1491,21 +1496,11 @@ function loadPosts() {
     const store = transaction.objectStore("posts");
     const storeRequest = store.getAll();
 
-    storeRequest.onsuccess = () => {
-
-        posts = storeRequest.result;
-
-        renderTimeline();
-
-        initializeProfileRooms();
-
-        renderAccounts();
-
-        renderProfilePosts();
-
-        showProfile();
-
-    };
+storeRequest.onsuccess = () => {
+    posts = storeRequest.result;
+    renderTimeline();
+    renderProfilePosts();
+};
 }
 
 if (deleteAccountButton) {
