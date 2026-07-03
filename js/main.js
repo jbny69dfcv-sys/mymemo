@@ -730,7 +730,19 @@ function addPostToTimeline(postData, container) {
         </div>
 
         <div class="post-body">
-            <div class="post-text">${postData.text || ""}</div>
+           <div class="post-text">
+${
+(postData.text || "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(
+ /(https?:\/\/[^\s]+)/g,
+ '<a href="$1" target="_blank">$1</a>'
+)
+.replace(/\n/g,"<br>")
+}
+</div>
             
             ${
                 postData.images && postData.images.length > 0
@@ -1145,16 +1157,19 @@ function showProfile() {
 
     }
 
-    container.style.transform =
-        `translateX(-${currentIndex * 100}%)`;
+container.style.transform =
+    `translateX(-${currentIndex * 100}%)`;
 
-    if (timeline) {
-        timeline.style.display = "none";
-    }
+// ←追加
+renderProfilePosts();
 
-    if (profilePage) {
-        profilePage.style.display = "block";
-    }
+if (timeline) {
+    timeline.style.display = "none";
+}
+
+if (profilePage) {
+    profilePage.style.display = "block";
+}
 
 }
 if (postButton) {
