@@ -1137,6 +1137,8 @@ function showProfile() {
                     profileTimeline
                 );
 
+            showProfile();
+
             });
 
         }
