@@ -1014,7 +1014,6 @@ console.log(profiles[currentAccount]);
 
 function showProfile() {
 
-    renderProfilePosts();
     const profile = profiles[currentAccount] || {};
     const userPosts = posts.filter(
         post => post.account === currentAccount
@@ -1143,16 +1142,9 @@ function showProfile() {
 
         } else {
 
-            sortedPosts.forEach(post => {
-
-                addPostToTimeline(
-                    post,
-                    profileTimeline
-                );
-
-            showProfile();
-
-            });
+sortedPosts.forEach(post => {
+    addPostToTimeline(post, profileTimeline);
+});
 
         }
 
@@ -1161,8 +1153,7 @@ function showProfile() {
 container.style.transform =
     `translateX(-${currentIndex * 100}%)`;
 
-// ←追加
-renderProfilePosts();
+
 
 if (timeline) {
     timeline.style.display = "none";
@@ -1178,7 +1169,7 @@ if (postButton) {
         "click",
         () => {
             const profile = profiles[currentAccount] || {};
-            if (postUserIcon) postUserIcon.src = profile.icon || "https://via.placeholder.com/60";
+            if (postUserIcon) postUserIcon.src = profile.icon ||"default-icon.png"
 
             if (modalPostInput) modalPostInput.value = "";
             if (postImageUpload) postImageUpload.value = "";
@@ -1896,7 +1887,7 @@ function initializeProfileRooms() {
 
                 // 4. 再描画する
                 if (typeof renderProfilePosts === "function") {
-                    renderProfilePosts();
+                    renderProfilePosts();// renderProfilePosts();
                 }
             });
         });
