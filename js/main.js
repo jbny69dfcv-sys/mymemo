@@ -1486,13 +1486,25 @@ function savePostToDB(post) {
 
 function loadPosts() {
     if (!db) return;
+
     const transaction = db.transaction(["posts"], "readonly");
     const store = transaction.objectStore("posts");
     const storeRequest = store.getAll();
+
     storeRequest.onsuccess = () => {
+
         posts = storeRequest.result;
+
         renderTimeline();
+
+        initializeProfileRooms();
+
+        renderAccounts();
+
         renderProfilePosts();
+
+        showProfile();
+
     };
 }
 
@@ -1893,6 +1905,32 @@ function initializeProfileRooms() {
                 }
             });
         });
+
+        const deleteButton = newRoom.querySelector(".deleteAccountButton");
+
+deleteButton.addEventListener("click", () => {
+
+    if (!confirm("このアカウントを削除しますか？")) return;
+
+    delete profiles[currentAccount];
+    accounts = accounts.filter(acc => acc !== currentAccount);
+
+    saveAccounts();
+    saveProfiles();
+
+    if (accounts.length > 0) {
+        currentAccount = accounts[0];
+        localStorage.setItem("currentAccount", currentAccount);
+
+        initializeProfileRooms();
+        renderAccounts();
+        renderTimeline();
+        showProfile();
+    } else {
+        profilePage.style.display = "none";
+    }
+
+});
 
         container.appendChild(newRoom);
     });
