@@ -1019,6 +1019,7 @@ function showProfile() {
 
     console.log("showProfile開始");
     const profile = profiles[currentAccount] || {};
+    console.log(profile);
     const userPosts = posts.filter(
         post => post.account === currentAccount
     );
