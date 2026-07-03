@@ -200,6 +200,18 @@ if (editIconPreview) {
     );
 }
 
+if (editIconPreview) {
+    editIconPreview.addEventListener("click", () => {
+        console.log("アイコン押された");
+        if (iconUpload) {
+            console.log("iconUploadある");
+            iconUpload.click();
+        } else {
+            console.log("iconUploadない");
+        }
+    });
+}
+
 const cancelProfileButton =
     document.getElementById(
         "cancelProfileButton"
