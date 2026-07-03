@@ -1234,6 +1234,10 @@ if (sendCommentButton) {
             if (commentModal) commentModal.style.display = "none";
 
             renderTimeline();
+            console.log("headerImage", headerImage);
+console.log("profileIcon", profileIcon);
+console.log("profileName", profileName);
+console.log("profileTimeline", profileTimeline);
             renderProfilePosts();
         }
     );
