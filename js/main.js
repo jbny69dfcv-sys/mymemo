@@ -661,51 +661,32 @@ function renderAccounts() {
             >
         `;
 
-        const handleAccountClick = (e) => {
-            e.preventDefault();
-            if (account === currentAccount) {
-                showProfile();
-            } else {
-const container = document.getElementById("profileContainer");
-if (container) {
-    container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
-    container.style.transform = `translateX(-${targetIndex * 100}%)`;
-}
+ const handleAccountClick = (e) => {
+    e.preventDefault();
 
-console.log("profilePage:", profilePage.style.display);
-console.log("timeline:", timeline.style.display);
-
-                const container = document.getElementById("profileContainer");
-                if (container) {
-                    container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
-                    container.style.transform = `translateX(-${targetIndex * 100}%)`;
-                }
-            }
-        };
-
-        accountDiv.addEventListener("touchstart", handleAccountClick, { passive: false });
-        accountDiv.addEventListener("click", handleAccountClick);
-        accountsContainer.appendChild(accountDiv);
-    }
-
-    const addButton = document.createElement("div");
-    addButton.className = "account";
-    addButton.textContent = "＋";
-
-    addButton.addEventListener("click", () => {
-        const name = prompt("アカウント名を入力してください");
-        if (!name) return;
-
-        accounts.push(name);
-        localStorage.setItem("accounts", JSON.stringify(accounts));
-
-        initializeProfileRooms();
-        renderAccounts();
+    if (account === currentAccount) {
         showProfile();
-    });
+    } else {
 
-    accountsContainer.appendChild(addButton);
-}
+        const targetIndex = accounts.indexOf(account);
+        currentAccount = account;
+
+        localStorage.setItem("currentAccount", currentAccount);
+        localStorage.setItem("currentAccountIndex", targetIndex);
+
+        renderAccounts();
+        renderTimeline();
+
+        const container = document.getElementById("profileContainer");
+        if (container) {
+            container.style.transition =
+                "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+
+            container.style.transform =
+                `translateX(-${targetIndex * 100}%)`;
+        }
+    }
+};
 
 function addPostToTimeline(postData, container) {
     if (!container) return;
