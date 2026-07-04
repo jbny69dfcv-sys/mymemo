@@ -695,16 +695,23 @@ const handleAccountClick = (e) => {
 
 renderAccounts();
 
+renderAccounts();
+
 const container = document.getElementById("profileContainer");
 if (container) {
     container.style.transition =
-        "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+        "transform 0.3s cubic-bezier(0.35,0,0.25,1)";
     container.style.transform =
         `translateX(-${targetIndex * 100}%)`;
 }
 
+const oldDisplay =
+    profilePage.style.display;
+
 showProfile();
-renderTimeline();
+
+profilePage.style.display =
+    oldDisplay;
     }
 };
 
@@ -1269,8 +1276,7 @@ if (sendCommentButton) {
             if (commentModal) commentModal.style.display = "none";
 
             renderTimeline();
-            console.log("headerImage", headerImage);
-console.log("profileIcon", profileIcon);
+
 console.log("profileName", profileName);
 console.log("profileTimeline", profileTimeline);
             renderProfilePosts();
@@ -1307,22 +1313,41 @@ if (modalPostButton) {
                     };
                 };
 
-                if (files.length > 0) {
-                    const reader = new FileReader();
-reader.onload = () => {
+if (files.length > 0) {
 
-    // images形式に統一
-    editingPost.images = [reader.result];
+    editingPost.images = [];
 
-    // 古いimageは削除
-    delete editingPost.image;
+    let loaded = 0;
+
+    files.forEach((file, index) => {
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+
+            editingPost.images[index] = reader.result;
+
+            loaded++;
+
+            if (loaded === files.length) {
+
+                delete editingPost.image;
+
+                finalizeEdit();
+
+            }
+
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+} else {
 
     finalizeEdit();
-};
-                    reader.readAsDataURL(files[0]);
-                } else {
-                    finalizeEdit();
-                }
+
+}
                 return;
             }
 
