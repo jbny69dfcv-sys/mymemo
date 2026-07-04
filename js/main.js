@@ -803,19 +803,16 @@ function addPostToTimeline(postData, container) {
         </div>
 
         <div class="post-body">
-        <div class="post-text">
-${
-(postData.text || "")
+<div class="post-text">${(postData.text || "")
 .replace(/&/g,"&amp;")
 .replace(/</g,"&lt;")
 .replace(/>/g,"&gt;")
 .replace(
- /(https?:\/\/[^\s]+)/g,
- '<a href="$1" target="_blank">$1</a>'
+    /(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank">$1</a>'
 )
 .replace(/\n/g,"<br>")
-}
-</div>
+}</div>
             
             ${
                 postData.images && postData.images.length > 0
