@@ -480,15 +480,33 @@ if (removePostImageButton) {
                 };
 
                 if (files.length > 0) {
-                    const reader = new FileReader();
-reader.onload = () => {
+editingPost.images = [];
 
-    editingPost.images = [reader.result];
-    delete editingPost.image;
+let loaded = 0;
 
-    finalizeEdit();
-};
-                    reader.readAsDataURL(files[0]);
+files.forEach((file,index)=>{
+
+    const reader = new FileReader();
+
+    reader.onload = ()=>{
+
+        editingPost.images[index] = reader.result;
+
+        loaded++;
+
+        if(loaded===files.length){
+
+            delete editingPost.image;
+
+            finalizeEdit();
+
+        }
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
 } else {
 
     editingPost.images = [];
@@ -583,8 +601,7 @@ let accounts =
     ) || [
         "今の垢",
         "他の垢",
-        "創作垢",
-        "夢垢"
+        "創作垢"
         
     ];
 
@@ -676,17 +693,18 @@ const handleAccountClick = (e) => {
         localStorage.setItem("currentAccount", currentAccount);
         localStorage.setItem("currentAccountIndex", targetIndex);
 
-        renderAccounts();
-        renderTimeline();
+renderAccounts();
 
-        const container = document.getElementById("profileContainer");
-        if (container) {
-            container.style.transition =
-                "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+const container = document.getElementById("profileContainer");
+if (container) {
+    container.style.transition =
+        "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+    container.style.transform =
+        `translateX(-${targetIndex * 100}%)`;
+}
 
-            container.style.transform =
-                `translateX(-${targetIndex * 100}%)`;
-        }
+showProfile();
+renderTimeline();
     }
 };
 
@@ -704,6 +722,15 @@ const handleAccountClick = (e) => {
         if (!name) return;
 
         accounts.push(name);
+        profiles[name] = {
+    name: name,
+    id: "",
+    bio: "",
+    icon: "",
+    header: ""
+};
+
+saveProfiles();
         localStorage.setItem("accounts", JSON.stringify(accounts));
 
         initializeProfileRooms();
@@ -1851,7 +1878,7 @@ function initializeProfileRooms() {
     if (!container) return;
 
     container.innerHTML = "";
-    const savedAccounts = JSON.parse(localStorage.getItem("accounts")) || accounts;
+    const savedAccounts = accounts;
 
     savedAccounts.forEach((accName, index) => {
         const newRoom = document.createElement("div");
