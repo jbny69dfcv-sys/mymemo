@@ -695,7 +695,6 @@ const handleAccountClick = (e) => {
 
 renderAccounts();
 
-renderAccounts();
 
 const container = document.getElementById("profileContainer");
 if (container) {
@@ -708,7 +707,7 @@ if (container) {
 const oldDisplay =
     profilePage.style.display;
 
-showProfile();
+showProfile(false);
 
 profilePage.style.display =
     oldDisplay;
@@ -1055,7 +1054,7 @@ console.log(currentAccount);
 console.log(profiles);
 console.log(profiles[currentAccount]);
 
-function showProfile() {
+function showProfile(open = true) {
 
 
     console.log("showProfile開始");
@@ -1206,12 +1205,16 @@ container.style.transform =
 
 
 
-if (timeline) {
-    timeline.style.display = "none";
-}
+if (open) {
 
-if (profilePage) {
-    profilePage.style.display = "block";
+    if (timeline) {
+        timeline.style.display = "none";
+    }
+
+    if (profilePage) {
+        profilePage.style.display = "block";
+    }
+
 }
 
 }
@@ -1330,11 +1333,8 @@ if (files.length > 0) {
             loaded++;
 
             if (loaded === files.length) {
-
                 delete editingPost.image;
-
                 finalizeEdit();
-
             }
 
         };
@@ -1348,7 +1348,8 @@ if (files.length > 0) {
     finalizeEdit();
 
 }
-                return;
+
+return;
             }
 
             const files = postImageUpload ? [...postImageUpload.files] : [];
