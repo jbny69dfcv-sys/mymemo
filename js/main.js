@@ -256,25 +256,35 @@ document.addEventListener("click", (e) => {
 });
 
 if (saveProfileButton) {
-    saveProfileButton.addEventListener(
-        "click",
-        () => {
-            const profile = profiles[currentAccount] || {};
+    saveProfileButton.addEventListener("click", () => {
 
-            if (editName) profile.name = editName.value;
-            if (editId) profile.id = editId.value;
-            if (editBio) profile.bio = editBio.value;
-            profile.icon = tempIcon;
-            profile.header = tempHeader;
+        console.log("保存開始");
 
-            profiles[currentAccount] = profile;
+        const profile = profiles[currentAccount] || {};
 
-            saveProfiles();
-            showProfile();
+        if (editName) profile.name = editName.value;
+        if (editId) profile.id = editId.value;
+        if (editBio) profile.bio = editBio.value;
 
-            if (editProfileModal) editProfileModal.style.display = "none";
+        profile.icon = tempIcon;
+        profile.header = tempHeader;
+
+        profiles[currentAccount] = profile;
+
+        console.log("saveProfiles前", profiles[currentAccount]);
+
+        saveProfiles();
+
+        console.log("saveProfiles後");
+
+        showProfile();
+
+        if (editProfileModal) {
+            editProfileModal.style.display = "none";
         }
-    );
+
+        console.log("保存終了");
+    });
 }
 
 const searchButton =
