@@ -666,14 +666,14 @@ function renderAccounts() {
             if (account === currentAccount) {
                 showProfile();
             } else {
-                const targetIndex = accounts.indexOf(account);
-                currentAccount = account;
-                localStorage.setItem("currentAccount", currentAccount);
-                localStorage.setItem("currentAccountIndex", targetIndex);
+const container = document.getElementById("profileContainer");
+if (container) {
+    container.style.transition = "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+    container.style.transform = `translateX(-${targetIndex * 100}%)`;
+}
 
-                renderAccounts();
-renderTimeline();
-
+console.log("profilePage:", profilePage.style.display);
+console.log("timeline:", timeline.style.display);
 
                 const container = document.getElementById("profileContainer");
                 if (container) {
