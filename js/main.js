@@ -19,6 +19,8 @@ let currentDetailPost =
 let currentCommentPost =
     null;
 
+let profiles = {};
+
 const floatingButtons =
     document.querySelector(".floating-buttons");
 
