@@ -661,7 +661,7 @@ function renderAccounts() {
             >
         `;
 
- const handleAccountClick = (e) => {
+const handleAccountClick = (e) => {
     e.preventDefault();
 
     if (account === currentAccount) {
@@ -687,6 +687,30 @@ function renderAccounts() {
         }
     }
 };
+
+        accountDiv.addEventListener("touchstart", handleAccountClick, { passive: false });
+        accountDiv.addEventListener("click", handleAccountClick);
+        accountsContainer.appendChild(accountDiv);
+    }
+
+    const addButton = document.createElement("div");
+    addButton.className = "account";
+    addButton.textContent = "＋";
+
+    addButton.addEventListener("click", () => {
+        const name = prompt("アカウント名を入力してください");
+        if (!name) return;
+
+        accounts.push(name);
+        localStorage.setItem("accounts", JSON.stringify(accounts));
+
+        initializeProfileRooms();
+        renderAccounts();
+        showProfile();
+    });
+
+    accountsContainer.appendChild(addButton);
+}
 
 function addPostToTimeline(postData, container) {
     if (!container) return;
