@@ -624,11 +624,13 @@ let currentAccount =
 let posts = [];
 
 
-function savePosts() {
-    localStorage.setItem(
-        "posts",
-        JSON.stringify(posts)
-    );
+function saveProfiles() {
+    try {
+        localStorage.setItem("profiles", JSON.stringify(profiles));
+        console.log("プロフィール保存成功");
+    } catch(e) {
+        console.error(e);
+    }
 }
 
 function saveProfiles() {
