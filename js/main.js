@@ -803,7 +803,7 @@ function addPostToTimeline(postData, container) {
         </div>
 
         <div class="post-body">
-           <div class="post-text">
+        <div class="post-text">
 ${
 (postData.text || "")
 .replace(/&/g,"&amp;")
