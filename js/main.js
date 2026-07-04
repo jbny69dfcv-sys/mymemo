@@ -999,22 +999,16 @@ switch (profileMode) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    initializeProfileRooms(); 
-    renderAccounts();         
-
-    if (timeline) timeline.style.display = "block";
-    if (profilePage) profilePage.style.display = "none";
-    if (postDetailPage) postDetailPage.style.display = "none";
-    if (searchPage) searchPage.style.display = "none";
+    initializeProfileRooms();
 
     const savedIndex = localStorage.getItem("currentAccountIndex");
     if (savedIndex !== null) {
-        const container = document.getElementById("profileContainer");
-        if (container) {
-            container.style.transition = "none";
-            container.style.transform = `translateX(-${savedIndex * 100}%)`;
-        }
+        currentAccount = accounts[savedIndex];
     }
+
+    renderAccounts();
+    renderTimeline();
+    showProfile();
 });
 
 console.log(currentAccount);
