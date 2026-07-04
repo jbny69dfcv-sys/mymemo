@@ -583,7 +583,9 @@ let accounts =
     ) || [
         "今の垢",
         "他の垢",
-        "創作垢"
+        "創作垢",
+        "夢垢"
+        
     ];
 
 let detailFrom = "timeline";
