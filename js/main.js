@@ -622,12 +622,7 @@ let currentAccount =
     ) || accounts[0];
 
 let posts = [];
-let profiles =
-    JSON.parse(
-        localStorage.getItem(
-            "profiles"
-        )
-    ) || {};
+
 
 function savePosts() {
     localStorage.setItem(
@@ -637,7 +632,29 @@ function savePosts() {
 }
 
 function saveProfiles() {
-    localStorage.setItem("profiles", JSON.stringify(profiles));
+
+    if (!db) return;
+
+    const transaction =
+        db.transaction(["profiles"], "readwrite");
+
+    const store =
+        transaction.objectStore("profiles");
+
+    store.clear();
+
+    for (const account in profiles) {
+
+        store.put({
+
+            account: account,
+
+            ...profiles[account]
+
+        });
+
+    }
+
 }
 
 function saveAccounts() {
@@ -1542,18 +1559,39 @@ if (videoModal) {
 }
 
 let db;
-const indexedDBRequest = indexedDB.open("MyMemoDB", 1);
+const indexedDBRequest = indexedDB.open("MyMemoDB", 2)
 
 indexedDBRequest.onupgradeneeded = event => {
     db = event.target.result;
+
     if (!db.objectStoreNames.contains("posts")) {
-        db.createObjectStore("posts", { keyPath: "id", autoIncrement: true });
+        db.createObjectStore("posts", {
+            keyPath: "id",
+            autoIncrement: true
+        });
+    }
+
+    if (!db.objectStoreNames.contains("profiles")) {
+        db.createObjectStore("profiles", {
+            keyPath: "account"
+        });
     }
 };
 
 indexedDBRequest.onsuccess = event => {
+
     db = event.target.result;
-    loadPosts();
+
+    loadProfiles(() => {
+
+        loadPosts();
+
+        renderAccounts();
+
+        showProfile(false);
+
+    });
+
 };
 
 function savePostToDB(post) {
@@ -2006,6 +2044,47 @@ deleteButton.addEventListener("click", () => {
 
         container.appendChild(newRoom);
     });
+}
+
+function loadProfiles(callback) {
+
+    if (!db) return;
+
+    const transaction =
+        db.transaction(["profiles"], "readonly");
+
+    const store =
+        transaction.objectStore("profiles");
+
+    const request =
+        store.getAll();
+
+    request.onsuccess = () => {
+
+        profiles = {};
+
+        request.result.forEach(profile => {
+
+            profiles[profile.account] = {
+
+                name: profile.name,
+
+                id: profile.id,
+
+                bio: profile.bio,
+
+                icon: profile.icon,
+
+                header: profile.header
+
+            };
+
+        });
+
+        if (callback) callback();
+
+    };
+
 }
 
 window.addEventListener("resize", setAppHeight);
