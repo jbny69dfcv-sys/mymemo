@@ -1172,68 +1172,7 @@ console.log("rooms", rooms.length);
             "投稿数 " + userPosts.length;
     }
 
-    if (profileTimeline) {
-
-        profileTimeline.innerHTML = "";
-
-        const targetPosts =
-            profileMode === "posts"
-
-            ? userPosts
-
-            : posts.filter(
-                post =>
-                    post.likedBy &&
-                    post.likedBy.includes(currentAccount)
-            );
-
-        const sortedPosts =
-            [...targetPosts].sort((a, b) => {
-
-                if (
-                    (a.pinned || false) !==
-                    (b.pinned || false)
-                ) {
-
-                    return (
-                        (b.pinned || false) -
-                        (a.pinned || false)
-                    );
-
-                }
-
-                return b.time - a.time;
-
-            });
-
-        if (sortedPosts.length === 0) {
-
-            profileTimeline.innerHTML = `
-                <div
-                    class="no-posts"
-                    style="
-                        text-align:center;
-                        padding:20px;
-                        color:#aaa;
-                    "
-                >
-                    ${
-                        profileMode === "likes"
-                        ? "スキした投稿はありません"
-                        : "投稿はありません"
-                    }
-                </div>
-            `;
-
-        } else {
-
-sortedPosts.forEach(post => {
-    addPostToTimeline(post, profileTimeline);
-});
-
-        }
-
-    }
+renderProfilePosts();
 
 container.style.transform =
     `translateX(-${currentIndex * 100}%)`;
