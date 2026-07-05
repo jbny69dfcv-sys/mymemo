@@ -729,7 +729,7 @@ if (account === currentAccount) {
         localStorage.setItem("currentAccountIndex", targetIndex);
 
         profileMode = "posts";
-        
+
 renderAccounts();
 
 
@@ -995,6 +995,7 @@ function renderTimeline() {
 }
 
 function renderProfilePosts() {
+    console.log("profileMode =", profileMode);
     const targetIndex = accounts.indexOf(currentAccount);
     const rooms = document.querySelectorAll(".single-profile");
     const currentRoom = rooms[targetIndex];
