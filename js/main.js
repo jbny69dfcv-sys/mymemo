@@ -714,9 +714,13 @@ function renderAccounts() {
 const handleAccountClick = (e) => {
     e.preventDefault();
 
-    if (account === currentAccount) {
-        showProfile();
-    } else {
+if (account === currentAccount) {
+
+    profileMode = "posts";
+
+    showProfile();
+
+} else {
 
         const targetIndex = accounts.indexOf(account);
         currentAccount = account;
@@ -724,6 +728,8 @@ const handleAccountClick = (e) => {
         localStorage.setItem("currentAccount", currentAccount);
         localStorage.setItem("currentAccountIndex", targetIndex);
 
+        profileMode = "posts";
+        
 renderAccounts();
 
 
