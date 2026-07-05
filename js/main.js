@@ -1172,6 +1172,7 @@ console.log("rooms", rooms.length);
             "投稿数 " + userPosts.length;
     }
 
+updateProfileTabs(room);
 renderProfilePosts();
 
 container.style.transform =
@@ -1940,28 +1941,19 @@ function initializeProfileRooms() {
         // すべてのタブを配列にまとめて、クリック時の共通処理を作ります
         const allTabs = [pTab, rTab, mTab, lTab];
 
-        allTabs.forEach(tab => {
-            if (!tab) return; // ボタンが存在しない場合はスキップ
+allTabs.forEach(tab => {
+    if (!tab) return;
 
-            tab.addEventListener("click", (e) => {
-                // 1. クリックされたボタンに応じてモードを切り替える
-                if (tab === pTab) profileMode = "posts";
-                if (tab === rTab) profileMode = "replies";
-                if (tab === mTab) profileMode = "media";
-                if (tab === lTab) profileMode = "likes";
+    tab.addEventListener("click", () => {
 
-                // 2. すべてのタブから一回 "active" クラスを消す
-                allTabs.forEach(t => { if (t) t.classList.remove("active"); });
+        profileMode = tab.dataset.mode;
 
-                // 3. クリックされたタブだけに "active" をつける
-                tab.classList.add("active");
+        updateProfileTabs(newRoom);
 
-                // 4. 再描画する
-                if (typeof renderProfilePosts === "function") {
-                    renderProfilePosts();// renderProfilePosts();
-                }
-            });
-        });
+        renderProfilePosts();
+
+    });
+});
 
         const deleteButton = newRoom.querySelector(".deleteAccountButton");
 
@@ -1991,6 +1983,21 @@ deleteButton.addEventListener("click", () => {
 
         container.appendChild(newRoom);
     });
+}
+
+function updateProfileTabs(room) {
+
+    if (!room) return;
+
+    room.querySelectorAll("[data-mode]").forEach(tab => {
+
+        tab.classList.toggle(
+            "active",
+            tab.dataset.mode === profileMode
+        );
+
+    });
+
 }
 
 function loadProfiles(callback) {
