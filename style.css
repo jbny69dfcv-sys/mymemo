@@ -1347,19 +1347,3 @@ top: -0px;
     display: inline-block;
 }
 
-.profile-tabs {
-    display: flex;
-    overflow-x: auto;
-    white-space: nowrap;
-    gap: 10px;
-
-    scrollbar-width: none;
-}
-
-.profile-tabs::-webkit-scrollbar {
-    display: none;
-}
-
-.profile-tab {
-    flex: 0 0 auto;
-}
