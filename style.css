@@ -1359,3 +1359,7 @@ top: -0px;
 .profile-tabs::-webkit-scrollbar {
     display: none;
 }
+
+.profile-tab {
+    flex: 0 0 auto;
+}
