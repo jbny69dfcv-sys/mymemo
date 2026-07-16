@@ -1346,3 +1346,16 @@ top: -0px;
 .post-text {
     display: inline-block;
 }
+
+.profile-tabs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 10px;
+
+    scrollbar-width: none;
+}
+
+.profile-tabs::-webkit-scrollbar {
+    display: none;
+}
