@@ -828,11 +828,13 @@ function addPostToTimeline(postData, container) {
                     postData.images.length === 2 ? "two" : 
                     postData.images.length === 3 ? "three" : "four"
                 }">
-                    ${postData.images.map(image => `<img src="${image}" class="post-image clickable-image">`).join("")}
+                    ${postData.images.map(image =>
+    `<img src="${image}" loading="lazy" decoding="async" class="post-image clickable-image">`
+).join("")}
                 </div>
                 `
                 : postData.image
-                ? `<img src="${postData.image}" class="post-image clickable-image">`
+               ? `<img src="${postData.image}" loading="lazy" decoding="async" class="post-image clickable-image">`
                 : ""
             }
 
