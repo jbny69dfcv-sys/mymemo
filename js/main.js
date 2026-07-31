@@ -1041,76 +1041,161 @@ window.addEventListener("scroll", () => {
 
 });
 
-function renderProfilePosts() {
-    console.log("profileMode =", profileMode);
-    const targetIndex = accounts.indexOf(currentAccount);
-    const rooms = document.querySelectorAll(".single-profile");
-    const currentRoom = rooms[targetIndex];
-    
-    if (!currentRoom) return;
-    const profTimeline = currentRoom.querySelector(".timeline") || currentRoom.querySelector("#profileTimeline");
-    if (!profTimeline) return;
+window.addEventListener("scroll", () => {
 
-    profTimeline.innerHTML = "";
-
-let targetPosts = [];
-
-switch (profileMode) {
-
-    case "posts":
-        targetPosts = posts.filter(
-            post => post.account === currentAccount
-        );
-        break;
-
-    case "media":
-        targetPosts = posts.filter(post =>
-            post.account === currentAccount &&
-            (
-                (post.images && post.images.length > 0) ||
-                post.image
-            )
-        );
-        break;
-
-    case "likes":
-        targetPosts = posts.filter(post =>
-            post.likedBy &&
-            post.likedBy.includes(currentAccount)
-        );
-        break;
-
-    case "replies":
-        targetPosts = posts.filter(post =>
-            post.comments &&
-            post.comments.some(comment =>
-                comment.account === currentAccount
-            )
-        );
-        break;
-
-    default:
-        targetPosts = posts.filter(
-            post => post.account === currentAccount
-        );
-
-}
-
-    const sortedPosts = [...targetPosts].sort((a, b) => {
-        if ((a.pinned || false) !== (b.pinned || false)) {
-            return (b.pinned || false) - (a.pinned || false);
-        }
-        return b.time - a.time;
-    });
-
-    if (sortedPosts.length === 0) {
-        profTimeline.innerHTML = `<div class="no-posts" style="text-align:center; padding:20px; color:#aaa;">${profileMode === "likes" ? "スキした投稿はありません" : "投稿はありません"}</div>`;
+    // プロフィール画面じゃなければ何もしない
+    if (!profilePage ||
+        profilePage.style.display === "none") {
         return;
     }
 
-    for (const post of sortedPosts) {
+    const scrollPosition =
+        window.innerHeight + window.scrollY;
+
+    const pageHeight =
+        document.documentElement.scrollHeight;
+
+
+    // ページ下部300px以内
+    if (scrollPosition >= pageHeight - 300) {
+
+        if (
+            profileShownCount <
+            profileSortedPosts.length
+        ) {
+            renderProfilePosts(false);
+        }
+    }
+
+});
+
+let profileSortedPosts = [];
+let profileShownCount = 0;
+
+const PROFILE_BATCH_SIZE = 30;
+
+function renderProfilePosts(reset = true) {
+    console.log("profileMode =", profileMode);
+
+    const targetIndex = accounts.indexOf(currentAccount);
+    const rooms = document.querySelectorAll(".single-profile");
+    const currentRoom = rooms[targetIndex];
+
+    if (!currentRoom) return;
+
+    const profTimeline =
+        currentRoom.querySelector(".timeline") ||
+        currentRoom.querySelector("#profileTimeline");
+
+    if (!profTimeline) return;
+
+
+    // 最初から表示し直す場合
+    if (reset) {
+
+        profTimeline.innerHTML = "";
+
+        let targetPosts = [];
+
+        switch (profileMode) {
+
+            case "posts":
+                targetPosts = posts.filter(
+                    post => post.account === currentAccount
+                );
+                break;
+
+            case "media":
+                targetPosts = posts.filter(post =>
+                    post.account === currentAccount &&
+                    (
+                        (post.images && post.images.length > 0) ||
+                        post.image
+                    )
+                );
+                break;
+
+            case "likes":
+                targetPosts = posts.filter(post =>
+                    post.likedBy &&
+                    post.likedBy.includes(currentAccount)
+                );
+                break;
+
+            case "replies":
+                targetPosts = posts.filter(post =>
+                    post.comments &&
+                    post.comments.some(comment =>
+                        comment.account === currentAccount
+                    )
+                );
+                break;
+
+            default:
+                targetPosts = posts.filter(
+                    post => post.account === currentAccount
+                );
+        }
+
+
+        profileSortedPosts = [...targetPosts].sort((a, b) => {
+
+            if (
+                (a.pinned || false) !==
+                (b.pinned || false)
+            ) {
+                return (
+                    (b.pinned || false) -
+                    (a.pinned || false)
+                );
+            }
+
+            return b.time - a.time;
+        });
+
+        profileShownCount = 0;
+
+
+        // 投稿がない場合
+        if (profileSortedPosts.length === 0) {
+
+            profTimeline.innerHTML = `
+                <div
+                    class="no-posts"
+                    style="
+                        text-align:center;
+                        padding:20px;
+                        color:#aaa;
+                    "
+                >
+                    ${
+                        profileMode === "likes"
+                        ? "スキした投稿はありません"
+                        : "投稿はありません"
+                    }
+                </div>
+            `;
+
+            return;
+        }
+    }
+
+
+    // 今回追加する投稿
+    const nextPosts =
+        profileSortedPosts.slice(
+            profileShownCount,
+            profileShownCount + PROFILE_BATCH_SIZE
+        );
+
+
+    // 投稿を追加
+    for (const post of nextPosts) {
         addPostToTimeline(post, profTimeline);
     }
+
+
+    profileShownCount += nextPosts.length;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
