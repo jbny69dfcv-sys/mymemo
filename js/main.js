@@ -985,14 +985,59 @@ if (postData.images && postData.images.length > 0) {
     container.appendChild(post);
 }
 
-function renderTimeline() {
+let timelineSortedPosts = [];
+let timelineShownCount = 0;
+
+const TIMELINE_BATCH_SIZE = 30;
+
+function renderTimeline(reset = true) {
     if (!timeline) return;
-    timeline.innerHTML = "";
-    const sortedPosts = [...posts].sort((a, b) => b.time - a.time);
-    for (const post of sortedPosts) {
+
+    // 最初から表示し直す場合
+    if (reset) {
+        timeline.innerHTML = "";
+
+        timelineSortedPosts = [...posts].sort(
+            (a, b) => b.time - a.time
+        );
+
+        timelineShownCount = 0;
+    }
+
+    const nextPosts = timelineSortedPosts.slice(
+        timelineShownCount,
+        timelineShownCount + TIMELINE_BATCH_SIZE
+    );
+
+    for (const post of nextPosts) {
         addPostToTimeline(post, timeline);
     }
+
+    timelineShownCount += nextPosts.length;
 }
+
+window.addEventListener("scroll", () => {
+
+    if (!timeline) return;
+
+    const scrollPosition =
+        window.innerHeight + window.scrollY;
+
+    const pageHeight =
+        document.documentElement.scrollHeight;
+
+    // ページ下部から300px以内に来たら追加
+    if (scrollPosition >= pageHeight - 300) {
+
+        if (
+            timelineShownCount <
+            timelineSortedPosts.length
+        ) {
+            renderTimeline(false);
+        }
+    }
+
+});
 
 function renderProfilePosts() {
     console.log("profileMode =", profileMode);
