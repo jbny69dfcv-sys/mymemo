@@ -1347,3 +1347,27 @@ top: -0px;
     display: inline-block;
 }
 
+.hidden-images {
+    position: relative;
+    overflow: hidden;
+    background: #aaa;
+}
+
+.hidden-images .post-image {
+    filter: grayscale(1);
+    opacity: 0;
+}
+
+.image-warning {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+
+    pointer-events: none;
+    white-space: nowrap;
+}

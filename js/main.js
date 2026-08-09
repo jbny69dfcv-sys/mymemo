@@ -786,6 +786,18 @@ saveProfiles();
 
 function addPostToTimeline(postData, container) {
     if (!container) return;
+
+        // 画像を隠すキーワード
+    const sensitiveWords = [
+        "ネタバレ",
+        "閲覧注意",
+        "r18"
+    ];
+
+    const hideImages = sensitiveWords.some(word =>
+        (postData.text || "").includes(word)
+    );
+
     const post = document.createElement("div");
     post.className = "post";
 
@@ -820,23 +832,50 @@ function addPostToTimeline(postData, container) {
 .replace(/\n/g,"<br>")
 }</div>
             
+${
+    postData.images && postData.images.length > 0
+    ? `
+    <div class="post-images ${
+        postData.images.length === 1 ? "one" : 
+        postData.images.length === 2 ? "two" : 
+        postData.images.length === 3 ? "three" : "four"
+    } ${hideImages ? "hidden-images" : ""}">
+        ${
+            postData.images.map(image =>
+                `<img
+                    src="${image}"
+                    loading="lazy"
+                    decoding="async"
+                    class="post-image clickable-image"
+                >`
+            ).join("")
+        }
+
+        ${
+            hideImages
+            ? `<div class="image-warning">タップで表示</div>`
+            : ""
+        }
+    </div>
+    `
+    : postData.image
+    ? `
+        <div class="post-images ${hideImages ? "hidden-images" : ""}">
+            <img
+                src="${postData.image}"
+                loading="lazy"
+                decoding="async"
+                class="post-image clickable-image"
+            >
             ${
-                postData.images && postData.images.length > 0
-                ? `
-                <div class="post-images ${
-                    postData.images.length === 1 ? "one" : 
-                    postData.images.length === 2 ? "two" : 
-                    postData.images.length === 3 ? "three" : "four"
-                }">
-                    ${postData.images.map(image =>
-    `<img src="${image}" loading="lazy" decoding="async" class="post-image clickable-image">`
-).join("")}
-                </div>
-                `
-                : postData.image
-               ? `<img src="${postData.image}" loading="lazy" decoding="async" class="post-image clickable-image">`
+                hideImages
+                ? `<div class="image-warning">タップで表示</div>`
                 : ""
             }
+        </div>
+    `
+    : ""
+}
 
             <div class="post-actions">
                 <button class="like-button">
@@ -976,13 +1015,19 @@ if (postData.images && postData.images.length > 0) {
         });
     }
 
-    post.querySelectorAll(".clickable-image").forEach(image => {
-        image.addEventListener("click", event => {
-            event.stopPropagation();
-            if (modalImage) modalImage.src = image.src;
-            if (imageModal) imageModal.style.display = "flex";
-        });
+post.querySelectorAll(".clickable-image").forEach(image => {
+    image.addEventListener("click", event => {
+        event.stopPropagation();
+
+        if (modalImage) {
+            modalImage.src = image.src;
+        }
+
+        if (imageModal) {
+            imageModal.style.display = "flex";
+        }
     });
+});
 
     container.appendChild(post);
 }
