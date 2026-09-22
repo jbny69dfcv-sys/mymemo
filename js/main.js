@@ -1,64 +1,3 @@
-window.addEventListener("error", event => {
-
-    const box = document.createElement("div");
-
-    box.style.cssText = `
-        position:fixed;
-        top:10px;
-        left:10px;
-        right:10px;
-        z-index:999999;
-        padding:15px;
-        background:#fff0f0;
-        border:3px solid #ff5555;
-        border-radius:12px;
-        color:#aa0000;
-        font-size:14px;
-        line-height:1.5;
-        white-space:pre-wrap;
-        word-break:break-all;
-    `;
-
-    box.textContent =
-        "⚠️ JavaScriptエラー\n\n" +
-        "内容: " + event.message + "\n" +
-        "場所: " + event.filename + "\n" +
-        "行: " + event.lineno;
-
-    document.body.appendChild(box);
-
-});
-
-
-window.addEventListener("unhandledrejection", event => {
-
-    const box = document.createElement("div");
-
-    box.style.cssText = `
-        position:fixed;
-        top:10px;
-        left:10px;
-        right:10px;
-        z-index:999999;
-        padding:15px;
-        background:#fff0f0;
-        border:3px solid #ff5555;
-        border-radius:12px;
-        color:#aa0000;
-        font-size:14px;
-        line-height:1.5;
-        white-space:pre-wrap;
-        word-break:break-all;
-    `;
-
-    box.textContent =
-        "⚠️ 非同期エラー\n\n" +
-        String(event.reason);
-
-    document.body.appendChild(box);
-
-});
-
 let searchHistoryData =
     JSON.parse(
         localStorage.getItem(
@@ -859,12 +798,7 @@ function addPostToTimeline(postData, container) {
         (postData.text || "").includes(word)
     );
 
-const post = document.createElement("div");
-post.className = "post";
-
-if (postData.id !== undefined) {
-    post.dataset.postId = postData.id;
-}
+    const post = document.createElement("div");
     post.className = "post";
 
     const profile = (profiles && profiles[postData.account]) ? profiles[postData.account] : {};
@@ -1095,36 +1029,68 @@ post.querySelectorAll(".clickable-image").forEach(image => {
     });
 });
 
-container.appendChild(post);
-return post;
+    container.appendChild(post);
 }
 
+let timelineSortedPosts = [];
+let timelineShownCount = 0;
 
+const TIMELINE_BATCH_SIZE = 30;
 
-// ============================================
-// プロフィール投稿一覧
-// ============================================
+function renderTimeline(reset = true) {
+    if (!timeline) return;
 
-let profileSortedPosts = [];
-let profileShownCount = 0;
+    // 最初から表示し直す場合
+    if (reset) {
+        timeline.innerHTML = "";
 
-const PROFILE_BATCH_SIZE = 30;
+        timelineSortedPosts = [...posts].sort(
+            (a, b) => b.time - a.time
+        );
 
-let profileLoading = false;
+        timelineShownCount = 0;
+    }
 
-// 古いプロフィール読み込みを無効にするための番号
-let profileRenderToken = 0;
+    const nextPosts = timelineSortedPosts.slice(
+        timelineShownCount,
+        timelineShownCount + TIMELINE_BATCH_SIZE
+    );
 
+    for (const post of nextPosts) {
+        addPostToTimeline(post, timeline);
+    }
 
-// ============================================
-// プロフィールのスクロール
-// ============================================
+    timelineShownCount += nextPosts.length;
+}
 
 window.addEventListener("scroll", () => {
 
-    if (!profilePage) return;
+    if (!timeline) return;
 
-    if (profilePage.style.display === "none") {
+    const scrollPosition =
+        window.innerHeight + window.scrollY;
+
+    const pageHeight =
+        document.documentElement.scrollHeight;
+
+    // ページ下部から300px以内に来たら追加
+    if (scrollPosition >= pageHeight - 300) {
+
+        if (
+            timelineShownCount <
+            timelineSortedPosts.length
+        ) {
+            renderTimeline(false);
+        }
+    }
+
+});
+
+window.addEventListener("scroll", () => {
+
+    // プロフィール画面じゃなければ何もしない
+    if (!profilePage ||
+        profilePage.style.display === "none") {
         return;
     }
 
@@ -1134,393 +1100,147 @@ window.addEventListener("scroll", () => {
     const pageHeight =
         document.documentElement.scrollHeight;
 
-    // 下から300px以内
+
+    // ページ下部300px以内
     if (scrollPosition >= pageHeight - 300) {
 
         if (
-            !profileLoading &&
-            profileShownCount < profileSortedPosts.length
+            profileShownCount <
+            profileSortedPosts.length
         ) {
             renderProfilePosts(false);
         }
-
     }
 
 });
 
+let profileSortedPosts = [];
+let profileShownCount = 0;
 
-// ============================================
-// プロフィール投稿を表示
-// ============================================
+const PROFILE_BATCH_SIZE = 30;
 
 function renderProfilePosts(reset = true) {
+    console.log("profileMode =", profileMode);
 
-    console.log(
-        "renderProfilePosts:",
-        profileMode,
-        currentAccount,
-        "reset:",
-        reset
-    );
+    const targetIndex = accounts.indexOf(currentAccount);
+    const rooms = document.querySelectorAll(".single-profile");
+    const currentRoom = rooms[targetIndex];
 
-    const targetIndex =
-        accounts.indexOf(currentAccount);
-
-    const rooms =
-        document.querySelectorAll(".single-profile");
-
-    const currentRoom =
-        rooms[targetIndex];
-
-    if (!currentRoom) {
-        console.warn(
-            "現在のプロフィール部屋が見つかりません",
-            currentAccount,
-            targetIndex
-        );
-        return;
-    }
+    if (!currentRoom) return;
 
     const profTimeline =
         currentRoom.querySelector(".timeline") ||
         currentRoom.querySelector("#profileTimeline");
 
-    if (!profTimeline) {
-        console.warn(
-            "プロフィールの投稿一覧が見つかりません"
-        );
-        return;
-    }
+    if (!profTimeline) return;
 
 
-    // ========================================
-    // 初回表示・タブ切り替え
-    // ========================================
-
+    // 最初から表示し直す場合
     if (reset) {
 
-        // 新しい読み込みとして番号を進める
-        profileRenderToken++;
-
-        const myToken =
-            profileRenderToken;
-
-        // 今のアカウントとタブを保存
-        const myAccount =
-            currentAccount;
-
-        const myMode =
-            profileMode;
-
-        // 古い表示を消す
         profTimeline.innerHTML = "";
 
-        // 件数をリセット
-        profileShownCount = 0;
+        let targetPosts = [];
 
-        profileSortedPosts = [];
+        switch (profileMode) {
 
-        // 読み込み状態も必ずリセット
-        profileLoading = true;
+            case "posts":
+                targetPosts = posts.filter(
+                    post => post.account === currentAccount
+                );
+                break;
 
+            case "media":
+                targetPosts = posts.filter(post =>
+                    post.account === currentAccount &&
+                    (
+                        (post.images && post.images.length > 0) ||
+                        post.image
+                    )
+                );
+                break;
 
-        // ====================================
-        // IndexedDBから全投稿を取得
-        // ====================================
+            case "likes":
+                targetPosts = posts.filter(post =>
+                    post.likedBy &&
+                    post.likedBy.includes(currentAccount)
+                );
+                break;
 
-        if (!db) {
-            profileLoading = false;
-            return;
+            case "replies":
+                targetPosts = posts.filter(post =>
+                    post.comments &&
+                    post.comments.some(comment =>
+                        comment.account === currentAccount
+                    )
+                );
+                break;
+
+            default:
+                targetPosts = posts.filter(
+                    post => post.account === currentAccount
+                );
         }
 
-        const transaction =
-            db.transaction(
-                ["posts"],
-                "readonly"
-            );
 
-        const store =
-            transaction.objectStore("posts");
-
-        const request =
-            store.getAll();
-
-
-        request.onsuccess = () => {
-
-            // =================================
-            // 古い読み込みだったら無視
-            // =================================
+        profileSortedPosts = [...targetPosts].sort((a, b) => {
 
             if (
-                myToken !== profileRenderToken
+                (a.pinned || false) !==
+                (b.pinned || false)
             ) {
-                console.log(
-                    "古いプロフィール読み込みを無視:",
-                    myAccount,
-                    myMode
+                return (
+                    (b.pinned || false) -
+                    (a.pinned || false)
                 );
-                return;
             }
 
+            return b.time - a.time;
+        });
 
-            // =================================
-            // 途中でアカウントが変わっていたら無視
-            // =================================
-
-            if (
-                myAccount !== currentAccount ||
-                myMode !== profileMode
-            ) {
-                console.log(
-                    "プロフィール切り替え後の古い結果を無視:",
-                    myAccount,
-                    "→",
-                    currentAccount
-                );
-                return;
-            }
+        profileShownCount = 0;
 
 
-            const allPosts =
-                request.result || [];
+        // 投稿がない場合
+        if (profileSortedPosts.length === 0) {
 
-            console.log(
-                "プロフィール用に取得した投稿数:",
-                allPosts.length
-            );
-
-
-            let targetPosts = [];
-
-
-            // ====================================
-            // 投稿
-            // ====================================
-
-            if (profileMode === "posts") {
-
-                targetPosts =
-                    allPosts.filter(post =>
-                        post.account === currentAccount
-                    );
-
-            }
-
-
-            // ====================================
-            // 返信
-            // ====================================
-
-            else if (profileMode === "replies") {
-
-                targetPosts =
-                    allPosts.filter(post =>
-                        post.comments &&
-                        post.comments.some(
-                            comment =>
-                                comment.account === currentAccount
-                        )
-                    );
-
-            }
-
-
-            // ====================================
-            // メディア
-            // ====================================
-
-            else if (profileMode === "media") {
-
-                targetPosts =
-                    allPosts.filter(post =>
-                        post.account === currentAccount &&
-                        (
-                            (
-                                post.images &&
-                                post.images.length > 0
-                            ) ||
-                            post.image
-                        )
-                    );
-
-            }
-
-
-            // ====================================
-            // スキ
-            // ====================================
-
-            else if (profileMode === "likes") {
-
-                targetPosts =
-                    allPosts.filter(post =>
-                        post.likedBy &&
-                        post.likedBy.includes(
-                            currentAccount
-                        )
-                    );
-
-            }
-
-
-            // ====================================
-            // 新しい順
-            // ====================================
-
-            profileSortedPosts =
-                [...targetPosts].sort(
-                    (a, b) => {
-
-                        // ピン留めを先にする
-                        if (
-                            (a.pinned || false) !==
-                            (b.pinned || false)
-                        ) {
-                            return (
-                                (b.pinned || false) -
-                                (a.pinned || false)
-                            );
-                        }
-
-                        return b.time - a.time;
+            profTimeline.innerHTML = `
+                <div
+                    class="no-posts"
+                    style="
+                        text-align:center;
+                        padding:20px;
+                        color:#aaa;
+                    "
+                >
+                    ${
+                        profileMode === "likes"
+                        ? "スキした投稿はありません"
+                        : "投稿はありません"
                     }
-                );
+                </div>
+            `;
 
-
-            console.log(
-                "プロフィール対象投稿:",
-                profileSortedPosts.length
-            );
-
-
-            // ====================================
-            // 0件
-            // ====================================
-
-            if (
-                profileSortedPosts.length === 0
-            ) {
-
-                profTimeline.innerHTML = `
-                    <div
-                        class="no-posts"
-                        style="
-                            text-align:center;
-                            padding:20px;
-                            color:#aaa;
-                        "
-                    >
-                        ${
-                            profileMode === "likes"
-                                ? "スキした投稿はありません"
-                                : profileMode === "replies"
-                                    ? "返信した投稿はありません"
-                                    : profileMode === "media"
-                                        ? "メディアはありません"
-                                        : "投稿はありません"
-                        }
-                    </div>
-                `;
-
-                profileLoading = false;
-
-                return;
-            }
-
-
-            // ====================================
-            // 最初の30件を表示
-            // ====================================
-
-            profileLoading = false;
-
-            renderProfilePosts(false);
-        };
-
-        request.onerror = event => {
-
-            console.error(
-                "プロフィール投稿の取得に失敗:",
-                event.target.error
-            );
-
-            profileLoading = false;
-        };
-
-        return;
+            return;
+        }
     }
 
 
-    // ========================================
-    // 次の30件
-    // ========================================
-
-    if (profileLoading) {
-        return;
-    }
-
-    if (
-        profileShownCount >=
-        profileSortedPosts.length
-    ) {
-        return;
-    }
-
-
-    profileLoading = true;
-
-
+    // 今回追加する投稿
     const nextPosts =
         profileSortedPosts.slice(
             profileShownCount,
-            profileShownCount +
-                PROFILE_BATCH_SIZE
+            profileShownCount + PROFILE_BATCH_SIZE
         );
 
 
-for (const post of nextPosts) {
-
-    try {
-
-        addPostToTimeline(
-            post,
-            profTimeline
-        );
-
-    } catch (error) {
-
-        console.error(
-            "❌ プロフィールで投稿表示中にエラーが発生しました",
-            post
-        );
-
-        console.error(
-            "投稿ID:",
-            post.id
-        );
-
-        console.error(
-            "エラー内容:",
-            error
-        );
+    // 投稿を追加
+    for (const post of nextPosts) {
+        addPostToTimeline(post, profTimeline);
     }
 
-}
 
-
-    profileShownCount +=
-        nextPosts.length;
-
-
-    profileLoading = false;
-
-    console.log(
-        "プロフィール表示:",
-        profileShownCount,
-        "/",
-        profileSortedPosts.length
-    );
+    profileShownCount += nextPosts.length;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1724,110 +1444,69 @@ if (modalPostButton) {
         "click",
         () => {
             const text = modalPostInput ? modalPostInput.value : "";
-
             if (text.trim() === "") return;
 
-            // =========================
-            // 投稿の編集
-            // =========================
             if (editingPost) {
                 editingPost.text = text;
-
-                const files = postImageUpload
-                    ? [...postImageUpload.files]
-                    : [];
+                const files = postImageUpload ? [...postImageUpload.files] : [];
 
                 const finalizeEdit = () => {
-                    savePostToDB(editingPost, (savedPost) => {
+                    const transaction = db.transaction(["posts"], "readwrite");
+                    const store = transaction.objectStore("posts");
+                    const request = store.put(editingPost);
 
-                        const index = posts.findIndex(
-                            p => p.id === savedPost.id
-                        );
-
-                        if (index !== -1) {
-                            posts[index] = savedPost;
-                        }
-
-                        loadInitialPosts();
-
-                        if (modalPostInput) {
-                            modalPostInput.value = "";
-                        }
-
-                        if (postImageUpload) {
-                            postImageUpload.value = "";
-                        }
-
-                        if (postImagePreview) {
-                            postImagePreview.src = "";
-                            postImagePreview.style.display = "none";
-                        }
-
-                        const prevCont =
-                            document.querySelector(".preview-container");
-
-                        if (prevCont) {
-                            prevCont.style.display = "none";
-                        }
-
+                    request.onsuccess = () => {
+                        loadPosts();
+                        if (modalPostInput) modalPostInput.value = "";
+                        if (postImageUpload) postImageUpload.value = "";
+                        if (postImagePreview) postImagePreview.src = "";
+                        const prevCont = document.querySelector(".preview-container");
+                        if (prevCont) prevCont.style.display = "none";
                         editingPost = null;
-
-                        if (modalPostButton) {
-                            modalPostButton.textContent = "投稿";
-                        }
-
-                        if (postModal) {
-                            postModal.style.display = "none";
-                        }
-                    });
+                        modalPostButton.textContent = "投稿";
+                        if (postModal) postModal.style.display = "none";
+                    };
                 };
 
-                if (files.length > 0) {
+if (files.length > 0) {
 
-                    editingPost.images = [];
+    editingPost.images = [];
 
-                    let loaded = 0;
+    let loaded = 0;
 
-                    files.forEach((file, index) => {
+    files.forEach((file, index) => {
 
-                        const reader = new FileReader();
+        const reader = new FileReader();
 
-                        reader.onload = () => {
+        reader.onload = () => {
 
-                            editingPost.images[index] =
-                                reader.result;
+            editingPost.images[index] = reader.result;
 
-                            loaded++;
+            loaded++;
 
-                            if (loaded === files.length) {
-
-                                delete editingPost.image;
-
-                                finalizeEdit();
-                            }
-                        };
-
-                        reader.readAsDataURL(file);
-                    });
-
-                } else {
-
-                    finalizeEdit();
-                }
-
-                return;
+            if (loaded === files.length) {
+                delete editingPost.image;
+                finalizeEdit();
             }
 
-            // =========================
-            // 新規投稿
-            // =========================
+        };
 
-            const files = postImageUpload
-                ? [...postImageUpload.files]
-                : [];
+        reader.readAsDataURL(file);
+
+    });
+
+} else {
+
+    finalizeEdit();
+
+}
+
+return;
+            }
+
+            const files = postImageUpload ? [...postImageUpload.files] : [];
 
             if (files.length > 0) {
-
                 const newPost = {
                     account: currentAccount,
                     text: text,
@@ -1839,69 +1518,26 @@ if (modalPostButton) {
                 };
 
                 let loaded = 0;
-
                 files.forEach((file, index) => {
-
                     const reader = new FileReader();
-
                     reader.onload = () => {
-
-                        newPost.images[index] =
-                            reader.result;
-
+                        newPost.images[index] = reader.result;
                         loaded++;
 
                         if (loaded === files.length) {
+                            posts.push(newPost);
+                            savePostToDB(newPost);
 
-                            savePostToDB(
-                                newPost,
-                                (savedPost) => {
-
-                                    posts.unshift(savedPost);
-
-                                    const newPostElement =
-                                        addPostToTimeline(
-                                            savedPost,
-                                            timeline
-                                        );
-
-                                    if (newPostElement && timeline) {
-                                        timeline.insertBefore(
-                                            newPostElement,
-                                            timeline.firstChild
-                                        );
-                                    }
-
-                                    if (modalPostInput) {
-                                        modalPostInput.value = "";
-                                    }
-
-                                    if (postImageUpload) {
-                                        postImageUpload.value = "";
-                                    }
-
-                                    const prevCont =
-                                        document.querySelector(
-                                            ".preview-container"
-                                        );
-
-                                    if (prevCont) {
-                                        prevCont.style.display = "none";
-                                    }
-
-                                    if (postModal) {
-                                        postModal.style.display = "none";
-                                    }
-                                }
-                            );
+                            if (modalPostInput) modalPostInput.value = "";
+                            if (postImageUpload) postImageUpload.value = "";
+                            const prevCont = document.querySelector(".preview-container");
+                            if (prevCont) prevCont.style.display = "none";
+                            if (postModal) postModal.style.display = "none";
                         }
                     };
-
                     reader.readAsDataURL(file);
                 });
-
             } else {
-
                 const newPost = {
                     account: currentAccount,
                     text: text,
@@ -1912,34 +1548,12 @@ if (modalPostButton) {
                     pinned: false
                 };
 
-                savePostToDB(
-                    newPost,
-                    (savedPost) => {
+                posts.push(newPost);
+                savePostToDB(newPost);
 
-                        posts.unshift(savedPost);
-
-                        const newPostElement =
-                            addPostToTimeline(
-                                savedPost,
-                                timeline
-                            );
-
-                        if (newPostElement && timeline) {
-                            timeline.insertBefore(
-                                newPostElement,
-                                timeline.firstChild
-                            );
-                        }
-
-                        if (modalPostInput) {
-                            modalPostInput.value = "";
-                        }
-
-                        if (postModal) {
-                            postModal.style.display = "none";
-                        }
-                    }
-                );
+                renderTimeline();
+                if (modalPostInput) modalPostInput.value = "";
+                if (postModal) postModal.style.display = "none";
             }
         }
     );
@@ -2090,239 +1704,44 @@ indexedDBRequest.onupgradeneeded = event => {
 };
 
 indexedDBRequest.onsuccess = event => {
-    console.log("=== IndexedDB接続成功 ===");
 
     db = event.target.result;
 
-    console.log("db =", db);
-    console.log("postsストア =", db.objectStoreNames.contains("posts"));
-    console.log("profilesストア =", db.objectStoreNames.contains("profiles"));
-
     loadProfiles(() => {
-        console.log("=== loadProfiles完了 ===");
 
-        loadInitialPosts();
-
-        console.log("=== loadInitialPosts呼び出し完了 ===");
+        loadPosts();
 
         renderAccounts();
+
         showProfile(false);
+
     });
+
 };
-function savePostToDB(post, onSuccess) {
 
-    if (!db) {
-        console.error("IndexedDBがまだ準備できていません");
-        return;
-    }
-
-    const transaction =
-        db.transaction(["posts"], "readwrite");
-
-    const store =
-        transaction.objectStore("posts");
-
-    let request;
-
-    // すでにIDがある投稿 → 更新
-    if (post.id !== undefined && post.id !== null) {
-
-        request = store.put(post);
-
-    } else {
-
-        // 新規投稿 → 新しいIDを発行
-        request = store.add(post);
-
-    }
-
-    request.onsuccess = event => {
-
-        // 新規投稿なら発行されたIDを保存
-        if (
-            post.id === undefined ||
-            post.id === null
-        ) {
-            post.id = event.target.result;
-        }
-
-        console.log(
-            "投稿をIndexedDBに保存しました:",
-            post.id
-        );
-
-        if (typeof onSuccess === "function") {
-            onSuccess(post);
-        }
-    };
-
-    request.onerror = event => {
-
-        console.error(
-            "投稿の保存に失敗しました:",
-            event.target.error
-        );
-
-    };
-}
-
-const TIMELINE_BATCH_SIZE = 30;
-
-let lastLoadedPostId = Infinity;
-let timelineLoading = false;
-let timelineAllLoaded = false;
-
-function loadInitialPosts() {
-
-    console.log("=== loadInitialPosts開始 ===");
-
-    if (!db) {
-        console.error(
-            "loadInitialPosts: dbがありません"
-        );
-        return;
-    }
-
-    posts = [];
-
-    lastLoadedPostId = Infinity;
-
-    timelineLoading = false;
-
-    timelineAllLoaded = false;
-
-    if (timeline) {
-        timeline.innerHTML = "";
-    }
-
-    // 最初の30件だけ取得する
-    loadMorePosts();
-}
-
-function loadMorePosts() {
-
+function savePostToDB(post) {
     if (!db) return;
-    if (timelineLoading) return;
-    if (timelineAllLoaded) return;
-
-    timelineLoading = true;
-
-    const transaction =
-        db.transaction(["posts"], "readonly");
-
-    const store =
-        transaction.objectStore("posts");
-
-    const request =
-        lastLoadedPostId === Infinity
-            ? store.openCursor(null, "prev")
-            : store.openCursor(
-                IDBKeyRange.upperBound(
-                    lastLoadedPostId,
-                    true
-                ),
-                "prev"
-            );
-
-    const newPosts = [];
-
-    request.onsuccess = event => {
-
-        const cursor = event.target.result;
-
-if (!cursor) {
-
-    if (newPosts.length > 0) {
-        finishLoadingPosts(newPosts);
-    }
-
-    timelineAllLoaded = true;
-    timelineLoading = false;
-
-    return;
-}
-
-        newPosts.push(cursor.value);
-
-        lastLoadedPostId = cursor.key;
-
-        if (
-            newPosts.length >=
-            TIMELINE_BATCH_SIZE
-        ) {
-
-            finishLoadingPosts(newPosts);
-
-            return;
-        }
-
-        cursor.continue();
-    };
-
-    request.onerror = () => {
-
-        timelineLoading = false;
-
-        console.error(
-            "投稿の読み込みに失敗しました"
-        );
-
+    const transaction = db.transaction(["posts"], "readwrite");
+    const store = transaction.objectStore("posts");
+    const storeRequest = store.put(post);
+    storeRequest.onsuccess = () => {
+        loadPosts();
     };
 }
 
-function finishLoadingPosts(newPosts) {
+function loadPosts() {
+    if (!db) return;
 
-    posts.push(...newPosts);
+    const transaction = db.transaction(["posts"], "readonly");
+    const store = transaction.objectStore("posts");
+    const storeRequest = store.getAll();
 
-    for (const post of newPosts) {
-
-        try {
-
-            addPostToTimeline(
-                post,
-                timeline
-            );
-
-        } catch (error) {
-
-            console.error(
-                "投稿表示エラー:",
-                post,
-                error
-            );
-
-            // 画面上にエラーを表示
-            const errorBox =
-                document.createElement("div");
-
-            errorBox.style.cssText = `
-                margin:20px;
-                padding:15px;
-                background:#fff0f0;
-                border:2px solid #ff8888;
-                border-radius:10px;
-                color:#c00;
-                white-space:pre-wrap;
-                word-break:break-all;
-                font-size:13px;
-            `;
-
-            errorBox.textContent =
-                "投稿の表示に失敗しました\n\n" +
-                "投稿ID: " + post.id + "\n" +
-                "アカウント: " + post.account + "\n" +
-                "エラー: " + error.message;
-
-            timeline.appendChild(errorBox);
-
-            // エラーが出た投稿以降も続けて表示する
-            continue;
-        }
-    }
-
-    timelineLoading = false;
+storeRequest.onsuccess = () => {
+    posts = storeRequest.result;
+    renderTimeline();
+    renderProfilePosts();
+};
 }
-
 
 if (deleteAccountButton) {
     deleteAccountButton.addEventListener(
@@ -2638,7 +2057,12 @@ if (searchInput) {
         }
     );
 
-
+    searchInput.addEventListener(
+        "input",
+        () => {
+            searchPosts(searchInput.value);
+        }
+    );
 }
 
 function setAppHeight() {
