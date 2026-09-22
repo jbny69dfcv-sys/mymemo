@@ -1885,6 +1885,32 @@ function finishLoadingPosts(newPosts) {
 
     timelineLoading = false;
 }
+
+// =========================
+// 一番下から上にスクロールしたら次の投稿を読み込む
+// =========================
+
+let lastScrollY = window.scrollY;
+
+window.addEventListener("scroll", () => {
+    const currentScrollY = window.scrollY;
+
+    // 下方向ではなく「上方向」にスクロールしたか
+    const scrollingUp = currentScrollY < lastScrollY;
+
+    // 現在、一番下付近にいるか
+    const nearBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 150;
+
+    if (scrollingUp && nearBottom) {
+        loadMorePosts();
+    }
+
+    lastScrollY = currentScrollY;
+});
+
+
 if (deleteAccountButton) {
     deleteAccountButton.addEventListener(
         "click",
