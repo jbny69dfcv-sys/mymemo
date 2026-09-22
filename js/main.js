@@ -1418,14 +1418,34 @@ function renderProfilePosts(reset = true) {
         );
 
 
-    for (const post of nextPosts) {
+for (const post of nextPosts) {
+
+    try {
 
         addPostToTimeline(
             post,
             profTimeline
         );
 
+    } catch (error) {
+
+        console.error(
+            "❌ プロフィールで投稿表示中にエラーが発生しました",
+            post
+        );
+
+        console.error(
+            "投稿ID:",
+            post.id
+        );
+
+        console.error(
+            "エラー内容:",
+            error
+        );
     }
+
+}
 
 
     profileShownCount +=
@@ -2195,10 +2215,30 @@ function finishLoadingPosts(newPosts) {
 
     for (const post of newPosts) {
 
-        addPostToTimeline(
-            post,
-            timeline
-        );
+        try {
+
+            addPostToTimeline(
+                post,
+                timeline
+            );
+
+        } catch (error) {
+
+            console.error(
+                "❌ この投稿の表示中にエラーが発生しました",
+                post
+            );
+
+            console.error(
+                "投稿ID:",
+                post.id
+            );
+
+            console.error(
+                "エラー内容:",
+                error
+            );
+        }
 
     }
 
