@@ -1430,36 +1430,37 @@ for (const post of nextPosts) {
     } catch (error) {
 
         console.error(
-            "❌ プロフィールで投稿表示中にエラーが発生しました",
-            post
-        );
-
-        console.error(
-            "投稿ID:",
-            post.id
-        );
-
-        console.error(
-            "エラー内容:",
+            "プロフィール投稿表示エラー:",
+            post,
             error
         );
+
+        const errorBox =
+            document.createElement("div");
+
+        errorBox.style.cssText = `
+            margin:20px;
+            padding:15px;
+            background:#fff0f0;
+            border:2px solid #ff8888;
+            border-radius:10px;
+            color:#c00;
+            white-space:pre-wrap;
+            word-break:break-all;
+            font-size:13px;
+        `;
+
+        errorBox.textContent =
+            "プロフィール投稿の表示に失敗しました\n\n" +
+            "投稿ID: " + post.id + "\n" +
+            "アカウント: " + post.account + "\n" +
+            "エラー: " + error.message;
+
+        profTimeline.appendChild(errorBox);
+
+        continue;
     }
 
-}
-
-
-    profileShownCount +=
-        nextPosts.length;
-
-
-    profileLoading = false;
-
-    console.log(
-        "プロフィール表示:",
-        profileShownCount,
-        "/",
-        profileSortedPosts.length
-    );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -2225,21 +2226,38 @@ function finishLoadingPosts(newPosts) {
         } catch (error) {
 
             console.error(
-                "❌ この投稿の表示中にエラーが発生しました",
-                post
-            );
-
-            console.error(
-                "投稿ID:",
-                post.id
-            );
-
-            console.error(
-                "エラー内容:",
+                "投稿表示エラー:",
+                post,
                 error
             );
-        }
 
+            // 画面上にエラーを表示
+            const errorBox =
+                document.createElement("div");
+
+            errorBox.style.cssText = `
+                margin:20px;
+                padding:15px;
+                background:#fff0f0;
+                border:2px solid #ff8888;
+                border-radius:10px;
+                color:#c00;
+                white-space:pre-wrap;
+                word-break:break-all;
+                font-size:13px;
+            `;
+
+            errorBox.textContent =
+                "投稿の表示に失敗しました\n\n" +
+                "投稿ID: " + post.id + "\n" +
+                "アカウント: " + post.account + "\n" +
+                "エラー: " + error.message;
+
+            timeline.appendChild(errorBox);
+
+            // エラーが出た投稿以降も続けて表示する
+            continue;
+        }
     }
 
     timelineLoading = false;
