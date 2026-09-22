@@ -1937,6 +1937,47 @@ let timelineLoading = false;
 let timelineAllLoaded = false;
 
 function loadInitialPosts() {
+
+    if (!db) return;
+
+    console.log("=== 投稿読み込み開始 ===");
+
+    const checkTransaction =
+        db.transaction(["posts"], "readonly");
+
+    const checkStore =
+        checkTransaction.objectStore("posts");
+
+    const checkRequest =
+        checkStore.getAll();
+
+    checkRequest.onsuccess = () => {
+
+        console.log(
+            "IndexedDBに保存されている投稿数:",
+            checkRequest.result.length
+        );
+
+        console.log(
+            "IndexedDBの投稿:",
+            checkRequest.result
+        );
+    };
+
+    posts = [];
+
+    lastLoadedPostId = Infinity;
+    timelineLoading = false;
+    timelineAllLoaded = false;
+
+    if (timeline) {
+        timeline.innerHTML = "";
+    }
+
+    loadMorePosts();
+}
+
+function loadInitialPosts() {
     if (!db) return;
 
     posts = [];
