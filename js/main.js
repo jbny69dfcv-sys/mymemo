@@ -1,3 +1,64 @@
+window.addEventListener("error", event => {
+
+    const box = document.createElement("div");
+
+    box.style.cssText = `
+        position:fixed;
+        top:10px;
+        left:10px;
+        right:10px;
+        z-index:999999;
+        padding:15px;
+        background:#fff0f0;
+        border:3px solid #ff5555;
+        border-radius:12px;
+        color:#aa0000;
+        font-size:14px;
+        line-height:1.5;
+        white-space:pre-wrap;
+        word-break:break-all;
+    `;
+
+    box.textContent =
+        "⚠️ JavaScriptエラー\n\n" +
+        "内容: " + event.message + "\n" +
+        "場所: " + event.filename + "\n" +
+        "行: " + event.lineno;
+
+    document.body.appendChild(box);
+
+});
+
+
+window.addEventListener("unhandledrejection", event => {
+
+    const box = document.createElement("div");
+
+    box.style.cssText = `
+        position:fixed;
+        top:10px;
+        left:10px;
+        right:10px;
+        z-index:999999;
+        padding:15px;
+        background:#fff0f0;
+        border:3px solid #ff5555;
+        border-radius:12px;
+        color:#aa0000;
+        font-size:14px;
+        line-height:1.5;
+        white-space:pre-wrap;
+        word-break:break-all;
+    `;
+
+    box.textContent =
+        "⚠️ 非同期エラー\n\n" +
+        String(event.reason);
+
+    document.body.appendChild(box);
+
+});
+
 let searchHistoryData =
     JSON.parse(
         localStorage.getItem(
@@ -1430,37 +1491,36 @@ for (const post of nextPosts) {
     } catch (error) {
 
         console.error(
-            "プロフィール投稿表示エラー:",
-            post,
-            error
+            "❌ プロフィールで投稿表示中にエラーが発生しました",
+            post
         );
 
-        const errorBox =
-            document.createElement("div");
+        console.error(
+            "投稿ID:",
+            post.id
+        );
 
-        errorBox.style.cssText = `
-            margin:20px;
-            padding:15px;
-            background:#fff0f0;
-            border:2px solid #ff8888;
-            border-radius:10px;
-            color:#c00;
-            white-space:pre-wrap;
-            word-break:break-all;
-            font-size:13px;
-        `;
-
-        errorBox.textContent =
-            "プロフィール投稿の表示に失敗しました\n\n" +
-            "投稿ID: " + post.id + "\n" +
-            "アカウント: " + post.account + "\n" +
-            "エラー: " + error.message;
-
-        profTimeline.appendChild(errorBox);
-
-        continue;
+        console.error(
+            "エラー内容:",
+            error
+        );
     }
 
+}
+
+
+    profileShownCount +=
+        nextPosts.length;
+
+
+    profileLoading = false;
+
+    console.log(
+        "プロフィール表示:",
+        profileShownCount,
+        "/",
+        profileSortedPosts.length
+    );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
