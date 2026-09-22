@@ -799,6 +799,9 @@ function addPostToTimeline(postData, container) {
     );
 
     const post = document.createElement("div");
+    if (postData.id !== undefined) {
+    post.dataset.postId = postData.id;
+}
     post.className = "post";
 
     const profile = (profiles && profiles[postData.account]) ? profiles[postData.account] : {};
@@ -1029,7 +1032,8 @@ post.querySelectorAll(".clickable-image").forEach(image => {
     });
 });
 
-    container.appendChild(post);
+container.appendChild(post);
+return post;
 }
 
 
@@ -1392,69 +1396,110 @@ if (modalPostButton) {
         "click",
         () => {
             const text = modalPostInput ? modalPostInput.value : "";
+
             if (text.trim() === "") return;
 
+            // =========================
+            // 投稿の編集
+            // =========================
             if (editingPost) {
                 editingPost.text = text;
-                const files = postImageUpload ? [...postImageUpload.files] : [];
+
+                const files = postImageUpload
+                    ? [...postImageUpload.files]
+                    : [];
 
                 const finalizeEdit = () => {
-                    const transaction = db.transaction(["posts"], "readwrite");
-                    const store = transaction.objectStore("posts");
-                    const request = store.put(editingPost);
+                    savePostToDB(editingPost, (savedPost) => {
 
-                    request.onsuccess = () => {
-                        loadPosts();
-                        if (modalPostInput) modalPostInput.value = "";
-                        if (postImageUpload) postImageUpload.value = "";
-                        if (postImagePreview) postImagePreview.src = "";
-                        const prevCont = document.querySelector(".preview-container");
-                        if (prevCont) prevCont.style.display = "none";
+                        const index = posts.findIndex(
+                            p => p.id === savedPost.id
+                        );
+
+                        if (index !== -1) {
+                            posts[index] = savedPost;
+                        }
+
+                        loadInitialPosts();
+
+                        if (modalPostInput) {
+                            modalPostInput.value = "";
+                        }
+
+                        if (postImageUpload) {
+                            postImageUpload.value = "";
+                        }
+
+                        if (postImagePreview) {
+                            postImagePreview.src = "";
+                            postImagePreview.style.display = "none";
+                        }
+
+                        const prevCont =
+                            document.querySelector(".preview-container");
+
+                        if (prevCont) {
+                            prevCont.style.display = "none";
+                        }
+
                         editingPost = null;
-                        modalPostButton.textContent = "投稿";
-                        if (postModal) postModal.style.display = "none";
-                    };
+
+                        if (modalPostButton) {
+                            modalPostButton.textContent = "投稿";
+                        }
+
+                        if (postModal) {
+                            postModal.style.display = "none";
+                        }
+                    });
                 };
 
-if (files.length > 0) {
+                if (files.length > 0) {
 
-    editingPost.images = [];
+                    editingPost.images = [];
 
-    let loaded = 0;
+                    let loaded = 0;
 
-    files.forEach((file, index) => {
+                    files.forEach((file, index) => {
 
-        const reader = new FileReader();
+                        const reader = new FileReader();
 
-        reader.onload = () => {
+                        reader.onload = () => {
 
-            editingPost.images[index] = reader.result;
+                            editingPost.images[index] =
+                                reader.result;
 
-            loaded++;
+                            loaded++;
 
-            if (loaded === files.length) {
-                delete editingPost.image;
-                finalizeEdit();
+                            if (loaded === files.length) {
+
+                                delete editingPost.image;
+
+                                finalizeEdit();
+                            }
+                        };
+
+                        reader.readAsDataURL(file);
+                    });
+
+                } else {
+
+                    finalizeEdit();
+                }
+
+                return;
             }
 
-        };
+            // =========================
+            // 新規投稿
+            // =========================
 
-        reader.readAsDataURL(file);
-
-    });
-
-} else {
-
-    finalizeEdit();
-
-}
-
-return;
-            }
-
-            const files = postImageUpload ? [...postImageUpload.files] : [];
+            const files = postImageUpload
+                ? [...postImageUpload.files]
+                : [];
 
             if (files.length > 0) {
+
                 const newPost = {
                     account: currentAccount,
                     text: text,
@@ -1466,26 +1511,69 @@ return;
                 };
 
                 let loaded = 0;
+
                 files.forEach((file, index) => {
+
                     const reader = new FileReader();
+
                     reader.onload = () => {
-                        newPost.images[index] = reader.result;
+
+                        newPost.images[index] =
+                            reader.result;
+
                         loaded++;
 
                         if (loaded === files.length) {
-                            posts.push(newPost);
-                            savePostToDB(newPost);
 
-                            if (modalPostInput) modalPostInput.value = "";
-                            if (postImageUpload) postImageUpload.value = "";
-                            const prevCont = document.querySelector(".preview-container");
-                            if (prevCont) prevCont.style.display = "none";
-                            if (postModal) postModal.style.display = "none";
+                            savePostToDB(
+                                newPost,
+                                (savedPost) => {
+
+                                    posts.unshift(savedPost);
+
+                                    const newPostElement =
+                                        addPostToTimeline(
+                                            savedPost,
+                                            timeline
+                                        );
+
+                                    if (newPostElement && timeline) {
+                                        timeline.insertBefore(
+                                            newPostElement,
+                                            timeline.firstChild
+                                        );
+                                    }
+
+                                    if (modalPostInput) {
+                                        modalPostInput.value = "";
+                                    }
+
+                                    if (postImageUpload) {
+                                        postImageUpload.value = "";
+                                    }
+
+                                    const prevCont =
+                                        document.querySelector(
+                                            ".preview-container"
+                                        );
+
+                                    if (prevCont) {
+                                        prevCont.style.display = "none";
+                                    }
+
+                                    if (postModal) {
+                                        postModal.style.display = "none";
+                                    }
+                                }
+                            );
                         }
                     };
+
                     reader.readAsDataURL(file);
                 });
+
             } else {
+
                 const newPost = {
                     account: currentAccount,
                     text: text,
@@ -1496,12 +1584,34 @@ return;
                     pinned: false
                 };
 
-                posts.push(newPost);
-                savePostToDB(newPost);
+                savePostToDB(
+                    newPost,
+                    (savedPost) => {
 
-                renderTimeline();
-                if (modalPostInput) modalPostInput.value = "";
-                if (postModal) postModal.style.display = "none";
+                        posts.unshift(savedPost);
+
+                        const newPostElement =
+                            addPostToTimeline(
+                                savedPost,
+                                timeline
+                            );
+
+                        if (newPostElement && timeline) {
+                            timeline.insertBefore(
+                                newPostElement,
+                                timeline.firstChild
+                            );
+                        }
+
+                        if (modalPostInput) {
+                            modalPostInput.value = "";
+                        }
+
+                        if (postModal) {
+                            postModal.style.display = "none";
+                        }
+                    }
+                );
             }
         }
     );
@@ -1666,8 +1776,7 @@ indexedDBRequest.onsuccess = event => {
     });
 
 };
-
-function savePostToDB(post) {
+function savePostToDB(post, onSuccess) {
     if (!db) {
         console.error("IndexedDBがまだ準備できていません");
         return;
@@ -1676,32 +1785,26 @@ function savePostToDB(post) {
     const transaction = db.transaction(["posts"], "readwrite");
     const store = transaction.objectStore("posts");
 
-    const request = store.put(post);
+    const storeRequest = store.put(post);
 
-    request.onsuccess = event => {
-        console.log("投稿を保存しました:", post);
-
-        // 新規投稿でIDが付いていなかった場合、
-        // IndexedDBが発行したIDを投稿データにも入れる
+    storeRequest.onsuccess = event => {
+        // 新規投稿ならIndexedDBが発行したIDを入れる
         if (!post.id) {
             post.id = event.target.result;
         }
+
+        console.log("投稿を保存しました", post.id);
+
+        if (typeof onSuccess === "function") {
+            onSuccess(post);
+        }
     };
 
-    request.onerror = event => {
-        console.error("投稿の保存に失敗しました:", event.target.error);
-    };
-
-    transaction.oncomplete = () => {
-        console.log("IndexedDBへの保存完了");
-    };
-
-    transaction.onerror = event => {
-        console.error("IndexedDBのトランザクションに失敗:", event.target.error);
-    };
-
-    transaction.onabort = event => {
-        console.error("IndexedDBの保存が中断されました:", event.target.error);
+    storeRequest.onerror = event => {
+        console.error(
+            "投稿の保存に失敗しました:",
+            event.target.error
+        );
     };
 }
 
