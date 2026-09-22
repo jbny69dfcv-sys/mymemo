@@ -712,42 +712,51 @@ function renderAccounts() {
         `;
 
 const handleAccountClick = (e) => {
+
     e.preventDefault();
 
-if (account === currentAccount) {
-
-    profileMode = "posts";
-
-    showProfile();
-
-} else {
-
-        const targetIndex = accounts.indexOf(account);
-        currentAccount = account;
-
-        localStorage.setItem("currentAccount", currentAccount);
-        localStorage.setItem("currentAccountIndex", targetIndex);
+    if (account === currentAccount) {
 
         profileMode = "posts";
+        showProfile();
 
-renderAccounts();
+        return;
+    }
 
+    const targetIndex = accounts.indexOf(account);
 
-const container = document.getElementById("profileContainer");
-if (container) {
-    container.style.transition =
-        "transform 0.3s cubic-bezier(0.35,0,0.25,1)";
-    container.style.transform =
-        `translateX(-${targetIndex * 100}%)`;
-}
+    currentAccount = account;
 
-const oldDisplay =
-    profilePage.style.display;
+    localStorage.setItem(
+        "currentAccount",
+        currentAccount
+    );
 
-showProfile(false);
+    localStorage.setItem(
+        "currentAccountIndex",
+        targetIndex
+    );
 
-profilePage.style.display =
-    oldDisplay;
+    // アカウントを切り替えたら「投稿」タブに戻す
+    profileMode = "posts";
+
+    // アカウント一覧の選択状態を更新
+    renderAccounts();
+
+    // 新しいアカウントのプロフィールを描画
+    showProfile(false);
+
+    // プロフィール画面を新しいアカウントへ移動
+    const container =
+        document.getElementById("profileContainer");
+
+    if (container) {
+
+        container.style.transition =
+            "transform 0.3s cubic-bezier(0.35, 0, 0.25, 1)";
+
+        container.style.transform =
+            `translateX(-${targetIndex * 100}%)`;
     }
 };
 
