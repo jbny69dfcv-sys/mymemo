@@ -2092,53 +2092,30 @@ let timelineLoading = false;
 let timelineAllLoaded = false;
 
 function loadInitialPosts() {
+
     console.log("=== loadInitialPosts開始 ===");
 
     if (!db) {
-        console.error("loadInitialPosts: dbがありません");
+        console.error(
+            "loadInitialPosts: dbがありません"
+        );
         return;
     }
 
-    console.log("dbは存在します");
+    posts = [];
 
-    const checkTransaction =
-        db.transaction(["posts"], "readonly");
+    lastLoadedPostId = Infinity;
 
-    const checkStore =
-        checkTransaction.objectStore("posts");
+    timelineLoading = false;
 
-    const checkRequest =
-        checkStore.getAll();
+    timelineAllLoaded = false;
 
-    checkRequest.onsuccess = () => {
-        console.log(
-            "IndexedDBに保存されている投稿数:",
-            checkRequest.result.length
-        );
+    if (timeline) {
+        timeline.innerHTML = "";
+    }
 
-        console.log(
-            "IndexedDBの投稿:",
-            checkRequest.result
-        );
-
-        posts = [];
-        lastLoadedPostId = Infinity;
-        timelineLoading = false;
-        timelineAllLoaded = false;
-
-        if (timeline) {
-            timeline.innerHTML = "";
-        }
-
-        loadMorePosts();
-    };
-
-    checkRequest.onerror = event => {
-        console.error(
-            "IndexedDBから投稿を取得できませんでした:",
-            event.target.error
-        );
-    };
+    // 最初の30件だけ取得する
+    loadMorePosts();
 }
 
 function loadMorePosts() {
