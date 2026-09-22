@@ -2022,7 +2022,13 @@ function loadMorePosts() {
 
         const cursor = event.target.result;
 
+        // 投稿がもうない
         if (!cursor) {
+
+            // 30件未満でも、ここまで集めた投稿を表示する
+            if (newPosts.length > 0) {
+                finishLoadingPosts(newPosts);
+            }
 
             timelineAllLoaded = true;
             timelineLoading = false;
@@ -2030,10 +2036,12 @@ function loadMorePosts() {
             return;
         }
 
+        // 投稿を一旦ためる
         newPosts.push(cursor.value);
 
         lastLoadedPostId = cursor.key;
 
+        // 30件たまったら表示
         if (
             newPosts.length >=
             TIMELINE_BATCH_SIZE
@@ -2044,6 +2052,7 @@ function loadMorePosts() {
             return;
         }
 
+        // 次の投稿へ
         cursor.continue();
     };
 
