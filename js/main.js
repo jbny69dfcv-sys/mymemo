@@ -467,7 +467,7 @@ if (removePostImageButton) {
 
             if (editingPost) {
                 editingPost.text = modalPostInput ? modalPostInput.value : "";
-               const files = postImageUpload ? [...postImageUpload.files] : [];
+                const files = postImageUpload ? [...postImageUpload.files] : [];
 
                 const finalizeEdit = () => {
                     const postIndex = posts.findIndex(p => p.id === editingPost.id);
@@ -1452,7 +1452,7 @@ if (files.length > 0) {
 return;
             }
 
-           const files = postImageUpload ? [...postImageUpload.files] : [];
+            const files = postImageUpload ? [...postImageUpload.files] : [];
 
             if (files.length > 0) {
                 const newPost = {
@@ -1668,12 +1668,40 @@ indexedDBRequest.onsuccess = event => {
 };
 
 function savePostToDB(post) {
-    if (!db) return;
+    if (!db) {
+        console.error("IndexedDBがまだ準備できていません");
+        return;
+    }
+
     const transaction = db.transaction(["posts"], "readwrite");
     const store = transaction.objectStore("posts");
-    const storeRequest = store.put(post);
-    storeRequest.onsuccess = () => {
-        loadPosts();
+
+    const request = store.put(post);
+
+    request.onsuccess = event => {
+        console.log("投稿を保存しました:", post);
+
+        // 新規投稿でIDが付いていなかった場合、
+        // IndexedDBが発行したIDを投稿データにも入れる
+        if (!post.id) {
+            post.id = event.target.result;
+        }
+    };
+
+    request.onerror = event => {
+        console.error("投稿の保存に失敗しました:", event.target.error);
+    };
+
+    transaction.oncomplete = () => {
+        console.log("IndexedDBへの保存完了");
+    };
+
+    transaction.onerror = event => {
+        console.error("IndexedDBのトランザクションに失敗:", event.target.error);
+    };
+
+    transaction.onabort = event => {
+        console.error("IndexedDBの保存が中断されました:", event.target.error);
     };
 }
 
