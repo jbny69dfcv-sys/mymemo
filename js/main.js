@@ -1080,11 +1080,6 @@ window.addEventListener("scroll", () => {
 
 let profileSortedPosts = [];
 let profileShownCount = 0;
-
-const PROFILE_BATCH_SIZE = 30;
-
-let profileSortedPosts = [];
-let profileShownCount = 0;
 const PROFILE_BATCH_SIZE = 30;
 let profileLoading = false;
 
