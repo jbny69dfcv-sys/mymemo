@@ -1874,34 +1874,59 @@ indexedDBRequest.onsuccess = event => {
 
 };
 function savePostToDB(post, onSuccess) {
+
     if (!db) {
         console.error("IndexedDBがまだ準備できていません");
         return;
     }
 
-    const transaction = db.transaction(["posts"], "readwrite");
-    const store = transaction.objectStore("posts");
+    const transaction =
+        db.transaction(["posts"], "readwrite");
 
-    const storeRequest = store.put(post);
+    const store =
+        transaction.objectStore("posts");
 
-    storeRequest.onsuccess = event => {
-        // 新規投稿ならIndexedDBが発行したIDを入れる
-        if (!post.id) {
+    let request;
+
+    // すでにIDがある投稿 → 更新
+    if (post.id !== undefined && post.id !== null) {
+
+        request = store.put(post);
+
+    } else {
+
+        // 新規投稿 → 新しいIDを発行
+        request = store.add(post);
+
+    }
+
+    request.onsuccess = event => {
+
+        // 新規投稿なら発行されたIDを保存
+        if (
+            post.id === undefined ||
+            post.id === null
+        ) {
             post.id = event.target.result;
         }
 
-        console.log("投稿を保存しました", post.id);
+        console.log(
+            "投稿をIndexedDBに保存しました:",
+            post.id
+        );
 
         if (typeof onSuccess === "function") {
             onSuccess(post);
         }
     };
 
-    storeRequest.onerror = event => {
+    request.onerror = event => {
+
         console.error(
             "投稿の保存に失敗しました:",
             event.target.error
         );
+
     };
 }
 
