@@ -2057,12 +2057,7 @@ if (searchInput) {
         }
     );
 
-    searchInput.addEventListener(
-        "input",
-        () => {
-            searchPosts(searchInput.value);
-        }
-    );
+
 }
 
 function setAppHeight() {
