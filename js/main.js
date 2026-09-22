@@ -1890,24 +1890,23 @@ function finishLoadingPosts(newPosts) {
 // 一番下から上にスクロールしたら次の投稿を読み込む
 // =========================
 
-let lastScrollY = window.scrollY;
+// =========================
+// 下まで来たら次の投稿を読み込む
+// =========================
 
 window.addEventListener("scroll", () => {
-    const currentScrollY = window.scrollY;
 
-    // 下方向ではなく「上方向」にスクロールしたか
-    const scrollingUp = currentScrollY < lastScrollY;
+    const scrollPosition =
+        window.innerHeight + window.scrollY;
 
-    // 現在、一番下付近にいるか
-    const nearBottom =
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 150;
+    const pageHeight =
+        document.documentElement.scrollHeight;
 
-    if (scrollingUp && nearBottom) {
+    // 一番下の200px以内に入ったら次を読み込む
+    if (scrollPosition >= pageHeight - 200) {
         loadMorePosts();
     }
 
-    lastScrollY = currentScrollY;
 });
 
 
