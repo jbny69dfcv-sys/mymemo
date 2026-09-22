@@ -1859,19 +1859,24 @@ indexedDBRequest.onupgradeneeded = event => {
 };
 
 indexedDBRequest.onsuccess = event => {
+    console.log("=== IndexedDB接続成功 ===");
 
     db = event.target.result;
 
+    console.log("db =", db);
+    console.log("postsストア =", db.objectStoreNames.contains("posts"));
+    console.log("profilesストア =", db.objectStoreNames.contains("profiles"));
+
     loadProfiles(() => {
+        console.log("=== loadProfiles完了 ===");
 
         loadInitialPosts();
 
+        console.log("=== loadInitialPosts呼び出し完了 ===");
+
         renderAccounts();
-
         showProfile(false);
-
     });
-
 };
 function savePostToDB(post, onSuccess) {
 
@@ -1937,10 +1942,14 @@ let timelineLoading = false;
 let timelineAllLoaded = false;
 
 function loadInitialPosts() {
+    console.log("=== loadInitialPosts開始 ===");
 
-    if (!db) return;
+    if (!db) {
+        console.error("loadInitialPosts: dbがありません");
+        return;
+    }
 
-    console.log("=== 投稿読み込み開始 ===");
+    console.log("dbは存在します");
 
     const checkTransaction =
         db.transaction(["posts"], "readonly");
@@ -1952,7 +1961,6 @@ function loadInitialPosts() {
         checkStore.getAll();
 
     checkRequest.onsuccess = () => {
-
         console.log(
             "IndexedDBに保存されている投稿数:",
             checkRequest.result.length
@@ -1962,60 +1970,63 @@ function loadInitialPosts() {
             "IndexedDBの投稿:",
             checkRequest.result
         );
+
+        posts = [];
+        lastLoadedPostId = Infinity;
+        timelineLoading = false;
+        timelineAllLoaded = false;
+
+        if (timeline) {
+            timeline.innerHTML = "";
+        }
+
+        loadMorePosts();
     };
 
-    posts = [];
-
-    lastLoadedPostId = Infinity;
-    timelineLoading = false;
-    timelineAllLoaded = false;
-
-    if (timeline) {
-        timeline.innerHTML = "";
-    }
-
-    loadMorePosts();
-}
-
-function loadInitialPosts() {
-    if (!db) return;
-
-    posts = [];
-
-    lastLoadedPostId = Infinity;
-    timelineLoading = false;
-    timelineAllLoaded = false;
-
-    if (timeline) {
-        timeline.innerHTML = "";
-    }
-
-    loadMorePosts();
+    checkRequest.onerror = event => {
+        console.error(
+            "IndexedDBから投稿を取得できませんでした:",
+            event.target.error
+        );
+    };
 }
 
 function loadMorePosts() {
+
     if (!db) return;
     if (timelineLoading) return;
     if (timelineAllLoaded) return;
 
     timelineLoading = true;
 
-    const transaction = db.transaction(["posts"], "readonly");
-    const store = transaction.objectStore("posts");
+    const transaction =
+        db.transaction(["posts"], "readonly");
 
-    const request = store.openCursor(
-        IDBKeyRange.upperBound(lastLoadedPostId, true),
-        "prev"
-    );
+    const store =
+        transaction.objectStore("posts");
+
+    const request =
+        lastLoadedPostId === Infinity
+            ? store.openCursor(null, "prev")
+            : store.openCursor(
+                IDBKeyRange.upperBound(
+                    lastLoadedPostId,
+                    true
+                ),
+                "prev"
+            );
 
     const newPosts = [];
 
     request.onsuccess = event => {
+
         const cursor = event.target.result;
 
         if (!cursor) {
+
             timelineAllLoaded = true;
             timelineLoading = false;
+
             return;
         }
 
@@ -2023,8 +2034,13 @@ function loadMorePosts() {
 
         lastLoadedPostId = cursor.key;
 
-        if (newPosts.length >= TIMELINE_BATCH_SIZE) {
+        if (
+            newPosts.length >=
+            TIMELINE_BATCH_SIZE
+        ) {
+
             finishLoadingPosts(newPosts);
+
             return;
         }
 
@@ -2032,43 +2048,31 @@ function loadMorePosts() {
     };
 
     request.onerror = () => {
+
         timelineLoading = false;
-        console.error("投稿の読み込みに失敗しました");
+
+        console.error(
+            "投稿の読み込みに失敗しました"
+        );
+
     };
 }
 
 function finishLoadingPosts(newPosts) {
+
     posts.push(...newPosts);
 
     for (const post of newPosts) {
-        addPostToTimeline(post, timeline);
+
+        addPostToTimeline(
+            post,
+            timeline
+        );
+
     }
 
     timelineLoading = false;
 }
-
-// =========================
-// 一番下から上にスクロールしたら次の投稿を読み込む
-// =========================
-
-// =========================
-// 下まで来たら次の投稿を読み込む
-// =========================
-
-window.addEventListener("scroll", () => {
-
-    const scrollPosition =
-        window.innerHeight + window.scrollY;
-
-    const pageHeight =
-        document.documentElement.scrollHeight;
-
-    // 一番下の200px以内に入ったら次を読み込む
-    if (scrollPosition >= pageHeight - 200) {
-        loadMorePosts();
-    }
-
-});
 
 
 if (deleteAccountButton) {
