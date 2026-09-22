@@ -1032,40 +1032,12 @@ post.querySelectorAll(".clickable-image").forEach(image => {
     container.appendChild(post);
 }
 
-let timelineSortedPosts = [];
-let timelineShownCount = 0;
-
-const TIMELINE_BATCH_SIZE = 30;
-
-function renderTimeline(reset = true) {
-    if (!timeline) return;
-
-    // 最初から表示し直す場合
-    if (reset) {
-        timeline.innerHTML = "";
-
-        timelineSortedPosts = [...posts].sort(
-            (a, b) => b.time - a.time
-        );
-
-        timelineShownCount = 0;
-    }
-
-    const nextPosts = timelineSortedPosts.slice(
-        timelineShownCount,
-        timelineShownCount + TIMELINE_BATCH_SIZE
-    );
-
-    for (const post of nextPosts) {
-        addPostToTimeline(post, timeline);
-    }
-
-    timelineShownCount += nextPosts.length;
-}
-
 window.addEventListener("scroll", () => {
 
     if (!timeline) return;
+
+    // タイムラインが表示されていない場合は何もしない
+    if (timeline.style.display === "none") return;
 
     const scrollPosition =
         window.innerHeight + window.scrollY;
@@ -1073,15 +1045,9 @@ window.addEventListener("scroll", () => {
     const pageHeight =
         document.documentElement.scrollHeight;
 
-    // ページ下部から300px以内に来たら追加
+    // ページ下部300px以内に来たら次の30件を読み込む
     if (scrollPosition >= pageHeight - 300) {
-
-        if (
-            timelineShownCount <
-            timelineSortedPosts.length
-        ) {
-            renderTimeline(false);
-        }
+        loadMorePosts();
     }
 
 });
@@ -1709,7 +1675,7 @@ indexedDBRequest.onsuccess = event => {
 
     loadProfiles(() => {
 
-        loadPosts();
+        loadInitialPosts();
 
         renderAccounts();
 
@@ -1729,20 +1695,81 @@ function savePostToDB(post) {
     };
 }
 
-function loadPosts() {
+const TIMELINE_BATCH_SIZE = 30;
+
+let lastLoadedPostId = Infinity;
+let timelineLoading = false;
+let timelineAllLoaded = false;
+
+function loadInitialPosts() {
     if (!db) return;
+
+    posts = [];
+
+    lastLoadedPostId = Infinity;
+    timelineLoading = false;
+    timelineAllLoaded = false;
+
+    if (timeline) {
+        timeline.innerHTML = "";
+    }
+
+    loadMorePosts();
+}
+
+function loadMorePosts() {
+    if (!db) return;
+    if (timelineLoading) return;
+    if (timelineAllLoaded) return;
+
+    timelineLoading = true;
 
     const transaction = db.transaction(["posts"], "readonly");
     const store = transaction.objectStore("posts");
-    const storeRequest = store.getAll();
 
-storeRequest.onsuccess = () => {
-    posts = storeRequest.result;
-    renderTimeline();
-    renderProfilePosts();
-};
+    const request = store.openCursor(
+        IDBKeyRange.upperBound(lastLoadedPostId, true),
+        "prev"
+    );
+
+    const newPosts = [];
+
+    request.onsuccess = event => {
+        const cursor = event.target.result;
+
+        if (!cursor) {
+            timelineAllLoaded = true;
+            timelineLoading = false;
+            return;
+        }
+
+        newPosts.push(cursor.value);
+
+        lastLoadedPostId = cursor.key;
+
+        if (newPosts.length >= TIMELINE_BATCH_SIZE) {
+            finishLoadingPosts(newPosts);
+            return;
+        }
+
+        cursor.continue();
+    };
+
+    request.onerror = () => {
+        timelineLoading = false;
+        console.error("投稿の読み込みに失敗しました");
+    };
 }
 
+function finishLoadingPosts(newPosts) {
+    posts.push(...newPosts);
+
+    for (const post of newPosts) {
+        addPostToTimeline(post, timeline);
+    }
+
+    timelineLoading = false;
+}
 if (deleteAccountButton) {
     deleteAccountButton.addEventListener(
         "click",
