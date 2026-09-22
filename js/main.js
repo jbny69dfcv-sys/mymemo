@@ -467,7 +467,7 @@ if (removePostImageButton) {
 
             if (editingPost) {
                 editingPost.text = modalPostInput ? modalPostInput.value : "";
-                const files = postImageUpload ? [...postImageUpload.files] : [];
+               const files = postImageUpload ? [...postImageUpload.files] : [];
 
                 const finalizeEdit = () => {
                     const postIndex = posts.findIndex(p => p.id === editingPost.id);
@@ -1032,25 +1032,7 @@ post.querySelectorAll(".clickable-image").forEach(image => {
     container.appendChild(post);
 }
 
-window.addEventListener("scroll", () => {
 
-    if (!timeline) return;
-
-    // タイムラインが表示されていない場合は何もしない
-    if (timeline.style.display === "none") return;
-
-    const scrollPosition =
-        window.innerHeight + window.scrollY;
-
-    const pageHeight =
-        document.documentElement.scrollHeight;
-
-    // ページ下部300px以内に来たら次の30件を読み込む
-    if (scrollPosition >= pageHeight - 300) {
-        loadMorePosts();
-    }
-
-});
 
 window.addEventListener("scroll", () => {
 
@@ -1470,7 +1452,7 @@ if (files.length > 0) {
 return;
             }
 
-            const files = postImageUpload ? [...postImageUpload.files] : [];
+           const files = postImageUpload ? [...postImageUpload.files] : [];
 
             if (files.length > 0) {
                 const newPost = {
