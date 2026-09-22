@@ -798,8 +798,10 @@ function addPostToTimeline(postData, container) {
         (postData.text || "").includes(word)
     );
 
-    const post = document.createElement("div");
-    if (postData.id !== undefined) {
+const post = document.createElement("div");
+post.className = "post";
+
+if (postData.id !== undefined) {
     post.dataset.postId = postData.id;
 }
     post.className = "post";
