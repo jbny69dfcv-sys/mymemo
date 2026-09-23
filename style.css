@@ -1371,3 +1371,30 @@ top: -0px;
     pointer-events: none;
     white-space: nowrap;
 }
+
+.timeline-loading {
+    display: none;
+    width: 100%;
+    padding: 40px 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid #ddd;
+    border-top-color: #888;
+    border-radius: 50%;
+    animation: timelineSpin 0.8s linear infinite;
+}
+
+@keyframes timelineSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

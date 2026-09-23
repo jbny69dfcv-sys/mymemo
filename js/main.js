@@ -1764,6 +1764,13 @@ function loadMorePosts() {
     if (timelineLoading) return;
     if (timelineAllLoaded) return;
 
+    const loading =
+        document.getElementById("timelineLoading");
+
+    if (loading) {
+        loading.style.display = "flex";
+    }
+
     timelineLoading = true;
 
     const transaction =
@@ -1788,36 +1795,52 @@ function loadMorePosts() {
     request.onsuccess = event => {
         const cursor = event.target.result;
 
-        if (!cursor) {
-            if (newPosts.length > 0) {
-                posts.push(...newPosts);
+if (!cursor) {
+    if (newPosts.length > 0) {
+        posts.push(...newPosts);
 
-                for (const post of newPosts) {
-                    addPostToTimeline(post, timeline);
-                }
-            }
-
-            timelineAllLoaded = true;
-            timelineLoading = false;
-            return;
+        for (const post of newPosts) {
+            addPostToTimeline(post, timeline);
         }
+    }
+
+    timelineAllLoaded = true;
+    timelineLoading = false;
+
+    const loading =
+        document.getElementById("timelineLoading");
+
+    if (loading) {
+        loading.style.display = "none";
+    }
+
+    return;
+}
 
         newPosts.push(cursor.value);
         lastLoadedPostId = cursor.key;
 
-        if (
-            newPosts.length >=
-            INITIAL_POST_BATCH_SIZE
-        ) {
-            posts.push(...newPosts);
+if (
+    newPosts.length >=
+    INITIAL_POST_BATCH_SIZE
+) {
+    posts.push(...newPosts);
 
-            for (const post of newPosts) {
-                addPostToTimeline(post, timeline);
-            }
+    for (const post of newPosts) {
+        addPostToTimeline(post, timeline);
+    }
 
-            timelineLoading = false;
-            return;
-        }
+    timelineLoading = false;
+
+    const loading =
+        document.getElementById("timelineLoading");
+
+    if (loading) {
+        loading.style.display = "none";
+    }
+
+    return;
+}
 
         cursor.continue();
     };
@@ -2300,6 +2323,13 @@ function loadProfiles(callback) {
     };
 
 }
+
+
+<div id="timeline">
+    <div id="timelineLoading" class="timeline-loading">
+        <div class="loading-spinner"></div>
+    </div>
+</div>
 
 window.addEventListener("resize", setAppHeight);
 setAppHeight();
