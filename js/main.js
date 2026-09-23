@@ -1754,6 +1754,15 @@ function loadPosts() {
 
     if (timeline) {
         timeline.innerHTML = "";
+
+        const loading = document.createElement("div");
+        loading.id = "timelineLoading";
+        loading.className = "timeline-loading";
+        loading.innerHTML = `
+            <div class="loading-spinner"></div>
+        `;
+
+        timeline.appendChild(loading);
     }
 
     loadMorePosts();
@@ -1845,14 +1854,21 @@ if (
         cursor.continue();
     };
 
-    request.onerror = event => {
-        console.error(
-            "投稿の読み込みに失敗しました:",
-            event.target.error
-        );
+request.onerror = event => {
+    console.error(
+        "投稿の読み込みに失敗しました:",
+        event.target.error
+    );
 
-        timelineLoading = false;
-    };
+    timelineLoading = false;
+
+    const loading =
+        document.getElementById("timelineLoading");
+
+    if (loading) {
+        loading.style.display = "none";
+    }
+};
 }
 
 if (deleteAccountButton) {
@@ -2324,12 +2340,6 @@ function loadProfiles(callback) {
 
 }
 
-
-<div id="timeline">
-    <div id="timelineLoading" class="timeline-loading">
-        <div class="loading-spinner"></div>
-    </div>
-</div>
 
 window.addEventListener("resize", setAppHeight);
 setAppHeight();
