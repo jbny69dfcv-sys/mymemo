@@ -1720,13 +1720,27 @@ indexedDBRequest.onsuccess = event => {
 };
 
 function savePostToDB(post) {
+
     if (!db) return;
-    const transaction = db.transaction(["posts"], "readwrite");
-    const store = transaction.objectStore("posts");
-    const storeRequest = store.put(post);
-    storeRequest.onsuccess = () => {
-        loadPosts();
+
+    const transaction =
+        db.transaction(["posts"], "readwrite");
+
+    const store =
+        transaction.objectStore("posts");
+
+    const storeRequest =
+        store.put(post);
+
+    storeRequest.onerror = event => {
+
+        console.error(
+            "投稿の保存に失敗しました:",
+            event.target.error
+        );
+
     };
+
 }
 
 function loadPosts() {
