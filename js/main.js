@@ -1064,8 +1064,8 @@ function renderTimeline(reset = true) {
 }
 
 window.addEventListener("scroll", () => {
-
     if (!timeline) return;
+    if (timeline.style.display === "none") return;
 
     const scrollPosition =
         window.innerHeight + window.scrollY;
@@ -1073,17 +1073,9 @@ window.addEventListener("scroll", () => {
     const pageHeight =
         document.documentElement.scrollHeight;
 
-    // ページ下部から300px以内に来たら追加
     if (scrollPosition >= pageHeight - 300) {
-
-        if (
-            timelineShownCount <
-            timelineSortedPosts.length
-        ) {
-            renderTimeline(false);
-        }
+        loadMorePosts();
     }
-
 });
 
 window.addEventListener("scroll", () => {
@@ -1746,18 +1738,98 @@ function savePostToDB(post) {
 
 }
 
+const INITIAL_POST_BATCH_SIZE = 30;
+
+let timelineLoading = false;
+let timelineAllLoaded = false;
+let lastLoadedPostId = Infinity;
+
 function loadPosts() {
     if (!db) return;
 
-    const transaction = db.transaction(["posts"], "readonly");
-    const store = transaction.objectStore("posts");
-    const storeRequest = store.getAll();
+    posts = [];
+    timelineLoading = false;
+    timelineAllLoaded = false;
+    lastLoadedPostId = Infinity;
 
-storeRequest.onsuccess = () => {
-    posts = storeRequest.result;
-    renderTimeline();
-    renderProfilePosts();
-};
+    if (timeline) {
+        timeline.innerHTML = "";
+    }
+
+    loadMorePosts();
+}
+
+function loadMorePosts() {
+    if (!db) return;
+    if (timelineLoading) return;
+    if (timelineAllLoaded) return;
+
+    timelineLoading = true;
+
+    const transaction =
+        db.transaction(["posts"], "readonly");
+
+    const store =
+        transaction.objectStore("posts");
+
+    const request =
+        lastLoadedPostId === Infinity
+            ? store.openCursor(null, "prev")
+            : store.openCursor(
+                IDBKeyRange.upperBound(
+                    lastLoadedPostId,
+                    true
+                ),
+                "prev"
+            );
+
+    const newPosts = [];
+
+    request.onsuccess = event => {
+        const cursor = event.target.result;
+
+        if (!cursor) {
+            if (newPosts.length > 0) {
+                posts.push(...newPosts);
+
+                for (const post of newPosts) {
+                    addPostToTimeline(post, timeline);
+                }
+            }
+
+            timelineAllLoaded = true;
+            timelineLoading = false;
+            return;
+        }
+
+        newPosts.push(cursor.value);
+        lastLoadedPostId = cursor.key;
+
+        if (
+            newPosts.length >=
+            INITIAL_POST_BATCH_SIZE
+        ) {
+            posts.push(...newPosts);
+
+            for (const post of newPosts) {
+                addPostToTimeline(post, timeline);
+            }
+
+            timelineLoading = false;
+            return;
+        }
+
+        cursor.continue();
+    };
+
+    request.onerror = event => {
+        console.error(
+            "投稿の読み込みに失敗しました:",
+            event.target.error
+        );
+
+        timelineLoading = false;
+    };
 }
 
 if (deleteAccountButton) {
