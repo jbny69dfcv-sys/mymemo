@@ -1524,16 +1524,19 @@ return;
                         newPost.images[index] = reader.result;
                         loaded++;
 
-                        if (loaded === files.length) {
-                            posts.push(newPost);
-                            savePostToDB(newPost);
+if (loaded === files.length) {
+    posts.push(newPost);
+    savePostToDB(newPost);
 
-                            if (modalPostInput) modalPostInput.value = "";
-                            if (postImageUpload) postImageUpload.value = "";
-                            const prevCont = document.querySelector(".preview-container");
-                            if (prevCont) prevCont.style.display = "none";
-                            if (postModal) postModal.style.display = "none";
-                        }
+    renderTimeline();
+    renderProfilePosts();
+
+    if (modalPostInput) modalPostInput.value = "";
+    if (postImageUpload) postImageUpload.value = "";
+    const prevCont = document.querySelector(".preview-container");
+    if (prevCont) prevCont.style.display = "none";
+    if (postModal) postModal.style.display = "none";
+}
                     };
                     reader.readAsDataURL(file);
                 });
