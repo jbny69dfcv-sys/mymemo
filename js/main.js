@@ -1078,45 +1078,33 @@ window.addEventListener("scroll", () => {
     }
 });
 
-window.addEventListener("scroll", () => {
-
-    // プロフィール画面じゃなければ何もしない
-    if (!profilePage ||
-        profilePage.style.display === "none") {
-        return;
-    }
-
-    const scrollPosition =
-        window.innerHeight + window.scrollY;
-
-    const pageHeight =
-        document.documentElement.scrollHeight;
-
-
-    // ページ下部300px以内
-    if (scrollPosition >= pageHeight - 300) {
-
-        if (
-            profileShownCount <
-            profileSortedPosts.length
-        ) {
-            renderProfilePosts(false);
-        }
-    }
-
-});
-
 let profileSortedPosts = [];
 let profileShownCount = 0;
 
 const PROFILE_BATCH_SIZE = 30;
 
-function renderProfilePosts(reset = true) {
-    console.log("profileMode =", profileMode);
+let profileLoading = false;
+let profileAllLoaded = false;
+let profileLastPostId = Infinity;
 
-    const targetIndex = accounts.indexOf(currentAccount);
-    const rooms = document.querySelectorAll(".single-profile");
-    const currentRoom = rooms[targetIndex];
+
+// ========================================
+// プロフィール投稿読み込み
+// ========================================
+
+function renderProfilePosts(reset = true) {
+
+    if (!db) return;
+    if (profileLoading) return;
+
+    const targetIndex =
+        accounts.indexOf(currentAccount);
+
+    const rooms =
+        document.querySelectorAll(".single-profile");
+
+    const currentRoom =
+        rooms[targetIndex];
 
     if (!currentRoom) return;
 
@@ -1127,113 +1115,343 @@ function renderProfilePosts(reset = true) {
     if (!profTimeline) return;
 
 
-    // 最初から表示し直す場合
+    // ========================================
+    // プロフィールを最初から読み直す
+    // ========================================
+
     if (reset) {
+
+        profileShownCount = 0;
+        profileAllLoaded = false;
+        profileLastPostId = Infinity;
+
+        profileSortedPosts = [];
 
         profTimeline.innerHTML = "";
 
-        let targetPosts = [];
+        loadMoreProfilePosts(
+            profTimeline
+        );
 
-        switch (profileMode) {
-
-            case "posts":
-                targetPosts = posts.filter(
-                    post => post.account === currentAccount
-                );
-                break;
-
-            case "media":
-                targetPosts = posts.filter(post =>
-                    post.account === currentAccount &&
-                    (
-                        (post.images && post.images.length > 0) ||
-                        post.image
-                    )
-                );
-                break;
-
-            case "likes":
-                targetPosts = posts.filter(post =>
-                    post.likedBy &&
-                    post.likedBy.includes(currentAccount)
-                );
-                break;
-
-            case "replies":
-                targetPosts = posts.filter(post =>
-                    post.comments &&
-                    post.comments.some(comment =>
-                        comment.account === currentAccount
-                    )
-                );
-                break;
-
-            default:
-                targetPosts = posts.filter(
-                    post => post.account === currentAccount
-                );
-        }
+        return;
+    }
 
 
-        profileSortedPosts = [...targetPosts].sort((a, b) => {
+    // ========================================
+    // 次の30件
+    // ========================================
+
+    if (!profileAllLoaded) {
+        loadMoreProfilePosts(
+            profTimeline
+        );
+    }
+}
+
+
+// ========================================
+// プロフィールの次の30件をDBから読み込む
+// ========================================
+
+function loadMoreProfilePosts(profTimeline) {
+
+    if (!db) return;
+    if (profileLoading) return;
+    if (profileAllLoaded) return;
+
+
+    profileLoading = true;
+
+
+    const transaction =
+        db.transaction(
+            ["posts"],
+            "readonly"
+        );
+
+    const store =
+        transaction.objectStore("posts");
+
+
+    // ========================================
+    // DBを新しい投稿から順番に見る
+    // ========================================
+
+    const request =
+        profileLastPostId === Infinity
+
+            ? store.openCursor(
+                null,
+                "prev"
+            )
+
+            : store.openCursor(
+                IDBKeyRange.upperBound(
+                    profileLastPostId,
+                    true
+                ),
+                "prev"
+            );
+
+
+    const matchedPosts = [];
+
+
+    request.onsuccess = event => {
+
+        const cursor =
+            event.target.result;
+
+
+        // ====================================
+        // もう投稿がない
+        // ====================================
+
+        if (!cursor) {
 
             if (
-                (a.pinned || false) !==
-                (b.pinned || false)
+                matchedPosts.length > 0
             ) {
-                return (
-                    (b.pinned || false) -
-                    (a.pinned || false)
+
+                addProfilePosts(
+                    matchedPosts,
+                    profTimeline
                 );
             }
 
-            return b.time - a.time;
-        });
 
-        profileShownCount = 0;
-
-
-        // 投稿がない場合
-        if (profileSortedPosts.length === 0) {
-
-            profTimeline.innerHTML = `
-                <div
-                    class="no-posts"
-                    style="
-                        text-align:center;
-                        padding:20px;
-                        color:#aaa;
-                    "
-                >
-                    ${
-                        profileMode === "likes"
-                        ? "スキした投稿はありません"
-                        : "投稿はありません"
-                    }
-                </div>
-            `;
+            profileAllLoaded = true;
+            profileLoading = false;
 
             return;
         }
-    }
 
 
-    // 今回追加する投稿
-    const nextPosts =
-        profileSortedPosts.slice(
-            profileShownCount,
-            profileShownCount + PROFILE_BATCH_SIZE
+        const post =
+            cursor.value;
+
+
+        // 次回はこの投稿より古いところから
+        profileLastPostId =
+            cursor.key;
+
+
+        // ====================================
+        // この投稿をプロフィールに表示するか
+        // ====================================
+
+        let shouldAdd = false;
+
+
+        switch (profileMode) {
+
+            // ------------------------------
+            // 投稿
+            // ------------------------------
+
+            case "posts":
+
+                shouldAdd =
+                    post.account ===
+                    currentAccount;
+
+                break;
+
+
+            // ------------------------------
+            // メディア
+            // ------------------------------
+
+            case "media":
+
+                shouldAdd =
+                    post.account ===
+                    currentAccount &&
+                    (
+                        (
+                            post.images &&
+                            post.images.length > 0
+                        ) ||
+                        post.image
+                    );
+
+                break;
+
+
+            // ------------------------------
+            // スキ
+            // ------------------------------
+
+            case "likes":
+
+                shouldAdd =
+                    post.likedBy &&
+                    post.likedBy.includes(
+                        currentAccount
+                    );
+
+                break;
+
+
+            // ------------------------------
+            // 返信
+            // ------------------------------
+
+            case "replies":
+
+                shouldAdd =
+                    post.comments &&
+                    post.comments.some(
+                        comment =>
+                            comment.account ===
+                            currentAccount
+                    );
+
+                break;
+
+
+            // ------------------------------
+            // その他
+            // ------------------------------
+
+            default:
+
+                shouldAdd =
+                    post.account ===
+                    currentAccount;
+        }
+
+
+        // 条件に合う投稿だけ追加
+        if (shouldAdd) {
+
+            matchedPosts.push(post);
+        }
+
+
+        // ====================================
+        // 30件集まった
+        // ====================================
+
+        if (
+            matchedPosts.length >=
+            PROFILE_BATCH_SIZE
+        ) {
+
+            addProfilePosts(
+                matchedPosts,
+                profTimeline
+            );
+
+            profileLoading = false;
+
+            return;
+        }
+
+
+        // 次の投稿を見る
+        cursor.continue();
+    };
+
+
+    request.onerror = event => {
+
+        console.error(
+            "プロフィール投稿の読み込みに失敗しました:",
+            event.target.error
         );
 
+        profileLoading = false;
+    };
+}
 
-    // 投稿を追加
-    for (const post of nextPosts) {
-        addPostToTimeline(post, profTimeline);
+
+// ========================================
+// プロフィールに投稿を追加
+// ========================================
+
+function addProfilePosts(
+    newPosts,
+    profTimeline
+) {
+
+    // 念のため時間順に並べる
+    newPosts.sort(
+        (a, b) => b.time - a.time
+    );
+
+
+    for (const post of newPosts) {
+
+        profileSortedPosts.push(post);
+
+        addPostToTimeline(
+            post,
+            profTimeline
+        );
     }
 
 
-    profileShownCount += nextPosts.length;
+    profileShownCount +=
+        newPosts.length;
+
+
+    // ====================================
+    // 今回の取得で30件未満だった場合
+    // DBの最後まで到達した可能性あり
+    // ====================================
+
+    if (
+        newPosts.length <
+        PROFILE_BATCH_SIZE
+    ) {
+
+        profileAllLoaded = true;
+    }
 }
+
+
+// ========================================
+// プロフィール画面のスクロール
+// ========================================
+
+window.addEventListener("scroll", () => {
+
+    // プロフィール画面以外では何もしない
+    if (
+        !profilePage ||
+        profilePage.style.display === "none"
+    ) {
+        return;
+    }
+
+
+    const scrollPosition =
+        window.innerHeight +
+        window.scrollY;
+
+
+    const pageHeight =
+        document.documentElement
+            .scrollHeight;
+
+
+    // ページ下部300px以内
+    if (
+        scrollPosition >=
+        pageHeight - 300
+    ) {
+
+        if (
+            !profileLoading &&
+            !profileAllLoaded
+        ) {
+
+            renderProfilePosts(false);
+        }
+    }
+
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     initializeProfileRooms(); 
