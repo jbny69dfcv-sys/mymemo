@@ -1144,6 +1144,17 @@ function renderProfilePosts(reset = true) {
 
         profTimeline.innerHTML = "";
 
+        // 初回読み込み中だけグルグルを表示
+        const loading =
+            document.createElement("div");
+
+        loading.className = "profile-loading";
+        loading.innerHTML = `
+            <div class="loading-spinner"></div>
+        `;
+
+        profTimeline.appendChild(loading);
+
         loadMoreProfilePosts(
             profTimeline
         );
@@ -1154,6 +1165,7 @@ function renderProfilePosts(reset = true) {
 
     // ========================================
     // 次の30件
+    // ※スクロール時はグルグルを出さない
     // ========================================
 
     if (!profileAllLoaded) {
@@ -1175,14 +1187,21 @@ function loadMoreProfilePosts(profTimeline) {
     if (profileAllLoaded) return;
 
 
-    profileLoading = true;
+profileLoading = true;
+
+const loading =
+    profTimeline.querySelector(".profile-loading");
+
+if (loading) {
+    loading.style.display = "flex";
+}
 
 
-    const transaction =
-        db.transaction(
-            ["posts"],
-            "readonly"
-        );
+const transaction =
+    db.transaction(
+        ["posts"],
+        "readonly"
+    );
 
     const store =
         transaction.objectStore("posts");
@@ -1222,24 +1241,30 @@ function loadMoreProfilePosts(profTimeline) {
         // もう投稿がない
         // ====================================
 
-        if (!cursor) {
+if (!cursor) {
 
-            if (
-                matchedPosts.length > 0
-            ) {
+    if (
+        matchedPosts.length > 0
+    ) {
 
-                addProfilePosts(
-                    matchedPosts,
-                    profTimeline
-                );
-            }
+        addProfilePosts(
+            matchedPosts,
+            profTimeline
+        );
+    }
 
+    profileAllLoaded = true;
+    profileLoading = false;
 
-            profileAllLoaded = true;
-            profileLoading = false;
+    const loading =
+        profTimeline.querySelector(".profile-loading");
 
-            return;
-        }
+    if (loading) {
+        loading.remove();
+    }
+
+    return;
+}
 
 
         const post =
@@ -1348,20 +1373,27 @@ function loadMoreProfilePosts(profTimeline) {
         // 30件集まった
         // ====================================
 
-        if (
-            matchedPosts.length >=
-            PROFILE_BATCH_SIZE
-        ) {
+if (
+    matchedPosts.length >=
+    PROFILE_BATCH_SIZE
+) {
 
-            addProfilePosts(
-                matchedPosts,
-                profTimeline
-            );
+    addProfilePosts(
+        matchedPosts,
+        profTimeline
+    );
 
-            profileLoading = false;
+    profileLoading = false;
 
-            return;
-        }
+    const loading =
+        profTimeline.querySelector(".profile-loading");
+
+    if (loading) {
+        loading.remove();
+    }
+
+    return;
+}
 
 
         // 次の投稿を見る
@@ -1369,15 +1401,22 @@ function loadMoreProfilePosts(profTimeline) {
     };
 
 
-    request.onerror = event => {
+request.onerror = event => {
 
-        console.error(
-            "プロフィール投稿の読み込みに失敗しました:",
-            event.target.error
-        );
+    console.error(
+        "プロフィール投稿の読み込みに失敗しました:",
+        event.target.error
+    );
 
-        profileLoading = false;
-    };
+    profileLoading = false;
+
+    const loading =
+        profTimeline.querySelector(".profile-loading");
+
+    if (loading) {
+        loading.remove();
+    }
+};
 }
 
 
