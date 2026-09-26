@@ -1485,17 +1485,74 @@ console.log(currentAccount);
 console.log(profiles);
 console.log(profiles[currentAccount]);
 
+function updateProfilePostCount() {
+    if (!db) return;
+
+    const targetIndex =
+        accounts.indexOf(currentAccount);
+
+    const rooms =
+        document.querySelectorAll(".single-profile");
+
+    const room =
+        rooms[targetIndex];
+
+    if (!room) return;
+
+    const postCount =
+        room.querySelector("#postCount");
+
+    if (!postCount) return;
+
+    const transaction =
+        db.transaction(["posts"], "readonly");
+
+    const store =
+        transaction.objectStore("posts");
+
+    let count = 0;
+
+    const request =
+        store.openCursor();
+
+    request.onsuccess = event => {
+        const cursor =
+            event.target.result;
+
+        if (!cursor) {
+            postCount.textContent =
+                "投稿数 " + count;
+
+            return;
+        }
+
+        if (
+            cursor.value.account ===
+            currentAccount
+        ) {
+            count++;
+        }
+
+        cursor.continue();
+    };
+
+    request.onerror = event => {
+        console.error(
+            "投稿数の取得に失敗しました:",
+            event.target.error
+        );
+    };
+}
+
 function showProfile(open = true) {
 
 
     console.log("showProfile開始");
-    const profile = profiles[currentAccount] || {};
-    console.log(profile);
-    const userPosts = posts.filter(
-        post => post.account === currentAccount
-    );
+const profile = profiles[currentAccount] || {};
+console.log(profile);
 
-    const container =
+const container =
+    document.getElementById("profileContainer");
         document.getElementById("profileContainer");
 
     if (!container) return;
@@ -1558,15 +1615,12 @@ console.log("rooms", rooms.length);
             "@" + (profile.id || "userid");
     }
 
-    if (profileBio) {
-        profileBio.textContent =
-            profile.bio || "プロフィール未設定";
-    }
+if (profileBio) {
+    profileBio.textContent =
+        profile.bio || "プロフィール未設定";
+}
 
-    if (postCount) {
-        postCount.textContent =
-            "投稿数 " + userPosts.length;
-    }
+updateProfilePostCount();
 
 updateProfileTabs(room);
 renderProfilePosts();
