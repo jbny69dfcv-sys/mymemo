@@ -1011,16 +1011,22 @@ if (postData.images && postData.images.length > 0) {
             event.stopPropagation();
             if (!confirm("この投稿を削除しますか？")) return;
 
-            const index = posts.indexOf(postData);
-            if (index !== -1) {
-                posts.splice(index, 1);
-                const transaction = db.transaction(["posts"], "readwrite");
-                const store = transaction.objectStore("posts");
-                store.delete(postData.id);
+const index = posts.indexOf(postData);
 
-                renderTimeline();
-                renderProfilePosts();
-            }
+if (index !== -1) {
+    posts.splice(index, 1);
+}
+
+const transaction =
+    db.transaction(["posts"], "readwrite");
+
+const store =
+    transaction.objectStore("posts");
+
+store.delete(postData.id);
+
+renderTimeline();
+renderProfilePosts();
         });
     }
 
