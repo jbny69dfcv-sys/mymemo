@@ -1175,23 +1175,16 @@ function loadMoreProfilePosts(profTimeline) {
     if (profileLoading) return;
     if (profileAllLoaded) return;
 
+    profileLoading = true;
 
-profileLoading = true;
-
-
-const transaction =
-    db.transaction(
-        ["posts"],
-        "readonly"
-    );
+    const transaction =
+        db.transaction(
+            ["posts"],
+            "readonly"
+        );
 
     const store =
         transaction.objectStore("posts");
-
-
-    // ========================================
-    // DBを新しい投稿から順番に見る
-    // ========================================
 
     const request =
         profileLastPostId === Infinity
@@ -1209,83 +1202,55 @@ const transaction =
                 "prev"
             );
 
-
     const matchedPosts = [];
-
 
     request.onsuccess = event => {
 
         const cursor =
             event.target.result;
 
+        if (!cursor) {
 
-        // ====================================
-        // もう投稿がない
-        // ====================================
+            if (
+                matchedPosts.length > 0
+            ) {
 
-if (!cursor) {
+                addProfilePosts(
+                    matchedPosts,
+                    profTimeline
+                );
+            }
 
-    if (
-        matchedPosts.length > 0
-    ) {
+            profileAllLoaded = true;
+            profileLoading = false;
 
-        addProfilePosts(
-            matchedPosts,
-            profTimeline
-        );
-    }
+            const loading =
+                profTimeline.querySelector(".timeline-loading");
 
-    profileAllLoaded = true;
-    profileLoading = false;
+            if (loading) {
+                loading.remove();
+            }
 
-    const loading =
-        profTimeline.querySelector(".profile-loading");
-
-    if (loading) {
-        loading.remove();
-    }
-
-    return;
-}
-
+            return;
+        }
 
         const post =
             cursor.value;
 
-
-        // 次回はこの投稿より古いところから
         profileLastPostId =
             cursor.key;
 
-
-        // ====================================
-        // この投稿をプロフィールに表示するか
-        // ====================================
-
         let shouldAdd = false;
-
 
         switch (profileMode) {
 
-            // ------------------------------
-            // 投稿
-            // ------------------------------
-
             case "posts":
-
                 shouldAdd =
                     post.account ===
                     currentAccount;
-
                 break;
 
-
-            // ------------------------------
-            // メディア
-            // ------------------------------
-
             case "media":
-
                 shouldAdd =
                     post.account ===
                     currentAccount &&
@@ -1296,31 +1261,17 @@ if (!cursor) {
                         ) ||
                         post.image
                     );
-
                 break;
 
-
-            // ------------------------------
-            // スキ
-            // ------------------------------
-
             case "likes":
-
                 shouldAdd =
                     post.likedBy &&
                     post.likedBy.includes(
                         currentAccount
                     );
-
                 break;
 
-
-            // ------------------------------
-            // 返信
-            // ------------------------------
-
             case "replies":
-
                 shouldAdd =
                     post.comments &&
                     post.comments.some(
@@ -1328,77 +1279,59 @@ if (!cursor) {
                             comment.account ===
                             currentAccount
                     );
-
                 break;
 
-
-            // ------------------------------
-            // その他
-            // ------------------------------
-
             default:
-
                 shouldAdd =
                     post.account ===
                     currentAccount;
         }
 
-
-        // 条件に合う投稿だけ追加
         if (shouldAdd) {
-
             matchedPosts.push(post);
         }
 
+        if (
+            matchedPosts.length >=
+            PROFILE_BATCH_SIZE
+        ) {
 
-        // ====================================
-        // 30件集まった
-        // ====================================
+            addProfilePosts(
+                matchedPosts,
+                profTimeline
+            );
 
-if (
-    matchedPosts.length >=
-    PROFILE_BATCH_SIZE
-) {
+            profileLoading = false;
 
-    addProfilePosts(
-        matchedPosts,
-        profTimeline
-    );
+            const loading =
+                profTimeline.querySelector(".timeline-loading");
 
-    profileLoading = false;
+            if (loading) {
+                loading.remove();
+            }
 
-    const loading =
-        profTimeline.querySelector(".profile-loading");
+            return;
+        }
 
-    if (loading) {
-        loading.remove();
-    }
-
-    return;
-}
-
-
-        // 次の投稿を見る
         cursor.continue();
     };
 
+    request.onerror = event => {
 
-request.onerror = event => {
+        console.error(
+            "プロフィール投稿の読み込みに失敗しました:",
+            event.target.error
+        );
 
-    console.error(
-        "プロフィール投稿の読み込みに失敗しました:",
-        event.target.error
-    );
+        profileLoading = false;
 
-    profileLoading = false;
+        const loading =
+            profTimeline.querySelector(".timeline-loading");
 
-    const loading =
-        profTimeline.querySelector(".profile-loading");
-
-    if (loading) {
-        loading.remove();
-    }
-};
+        if (loading) {
+            loading.remove();
+        }
+    };
 }
 
 
