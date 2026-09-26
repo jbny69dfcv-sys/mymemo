@@ -2602,6 +2602,48 @@ function searchPosts(keyword) {
     };
 }
 
+if (searchInput) {
+    searchInput.addEventListener(
+        "keydown",
+        event => {
+            if (event.key !== "Enter") return;
+
+            event.preventDefault();
+
+            const keyword =
+                searchInput.value.trim();
+
+            if (keyword === "") return;
+
+            if (!Array.isArray(searchHistoryData)) {
+                searchHistoryData = [];
+            }
+
+            searchHistoryData =
+                searchHistoryData.filter(
+                    item => item !== keyword
+                );
+
+            searchHistoryData.unshift(keyword);
+
+            if (searchHistoryData.length > 10) {
+                searchHistoryData.pop();
+            }
+
+            localStorage.setItem(
+                "searchHistory",
+                JSON.stringify(
+                    searchHistoryData
+                )
+            );
+
+            searchPosts(keyword);
+
+            searchInput.blur();
+        }
+    );
+}
+
 function setAppHeight() {
     document.documentElement.style.setProperty(
         "--app-height",
