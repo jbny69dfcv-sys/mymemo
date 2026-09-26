@@ -618,6 +618,8 @@ let accounts =
     ];
 
 let detailFrom = "timeline";
+let savedScrollPosition = 0;
+
 let currentAccount =
     localStorage.getItem(
         "currentAccount"
@@ -916,15 +918,22 @@ ${
     const likeButton = post.querySelector(".like-button");
     const commentButton = post.querySelector(".comment-button");
 
-    if (commentButton) {
-        commentButton.addEventListener("click", (event) => {
-            detailFrom = container.id === "profileTimeline"
-    ? "profile"
-    : "timeline";
-            event.stopPropagation();
-            openPostDetail(postData);
-        });
-    }
+if (commentButton) {
+    commentButton.addEventListener("click", (event) => {
+
+        // 詳細ページを開く前のスクロール位置を保存
+        savedScrollPosition = window.scrollY;
+
+        detailFrom =
+            container.id === "profileTimeline"
+                ? "profile"
+                : "timeline";
+
+        event.stopPropagation();
+
+        openPostDetail(postData);
+    });
+}
 
     if (likeButton) {
         likeButton.addEventListener("click", (event) => {
@@ -2182,8 +2191,8 @@ if (backFromDetailButton) {
         }
 
         if (floatingButtons) {
-    floatingButtons.style.display = "flex";
-}
+            floatingButtons.style.display = "flex";
+        }
 
         if (detailFrom === "profile") {
 
@@ -2209,6 +2218,11 @@ if (backFromDetailButton) {
             }
 
         }
+
+        // 詳細ページを開く前の位置へ戻す
+        requestAnimationFrame(() => {
+            window.scrollTo(0, savedScrollPosition);
+        });
 
     });
 }
