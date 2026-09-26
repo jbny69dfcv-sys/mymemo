@@ -1996,7 +1996,6 @@ indexedDBRequest.onsuccess = event => {
 };
 
 function savePostToDB(post) {
-
     if (!db) return;
 
     const transaction =
@@ -2008,15 +2007,26 @@ function savePostToDB(post) {
     const storeRequest =
         store.put(post);
 
-    storeRequest.onerror = event => {
+    storeRequest.onsuccess = event => {
+        // 新規投稿でIDがまだない場合、
+        // IndexedDBが発行したIDを投稿データにも入れる
+        if (post.id == null) {
+            post.id = event.target.result;
+        }
 
+        console.log(
+            "投稿を保存しました:",
+            "ID =", post.id,
+            post
+        );
+    };
+
+    storeRequest.onerror = event => {
         console.error(
             "投稿の保存に失敗しました:",
             event.target.error
         );
-
     };
-
 }
 
 const INITIAL_POST_BATCH_SIZE = 30;
