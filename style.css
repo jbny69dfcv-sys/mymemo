@@ -1398,3 +1398,11 @@ top: -0px;
         transform: rotate(360deg);
     }
 }
+
+.search-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 200px;
+}

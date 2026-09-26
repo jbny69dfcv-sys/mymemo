@@ -2397,80 +2397,209 @@ function renderSearchHistory() {
 // 💡 日付検索機能を組み込んだ最新の searchPosts
 function searchPosts(keyword) {
     if (!searchResults) return;
-    searchResults.innerHTML = "";
 
-    if (keyword.trim() === "") {
+    const cleanWord = keyword.trim();
+
+    // 空欄なら検索履歴を表示
+    if (cleanWord === "") {
+        searchResults.innerHTML = "";
         renderSearchHistory();
         return;
     }
 
-    let result = [];
-    const cleanWord = keyword.trim();
+    // ========================================
+    // 検索中のぐるぐる
+    // ========================================
 
-    // 💡 カッコ「()」で囲まれているかチェックする（全角の（）にも対応）
-    const isDateSearch = (cleanWord.startsWith("(") && cleanWord.endsWith(")")) || 
-                         (cleanWord.startsWith("（") && cleanWord.endsWith("）"));
+    searchResults.innerHTML = `
+        <div class="search-loading">
+            <div class="loading-spinner"></div>
+        </div>
+    `;
 
-    if (isDateSearch) {
-        const dateString = cleanWord.slice(1, -1).trim(); 
-        
-        result = posts.filter(post => {
-            if (!post.time) return false;
-            
-            const postDate = new Date(post.time);
-            const year = postDate.getFullYear();
-            const month = String(postDate.getMonth() + 1).padStart(2, "0");
-            const day = String(postDate.getDate()).padStart(2, "0");
+    // ========================================
+    // 日付部分と文字部分を分離
+    // 例：
+    // (2026/08)イラスト
+    // （2026/08/15）イラスト
+    // ========================================
 
-            const ymd = `${year}/${month}/${day}`; // 例: "2026/06/24"
-            const ym = `${year}/${month}`;         // 例: "2026/06"
+    let dateString = "";
+    let textKeyword = cleanWord;
 
-            return ymd.startsWith(dateString) || ym === dateString;
-        });
-    } else {
-        result = posts.filter(post =>
-            post.text && post.text.toLowerCase().includes(cleanWord.toLowerCase())
+    const dateMatch =
+        cleanWord.match(
+            /^[\(（]\s*([0-9]{4}\/[0-9]{1,2}(?:\/[0-9]{1,2})?)\s*[\)）](.*)$/
         );
+
+    if (dateMatch) {
+        dateString = dateMatch[1];
+        textKeyword = dateMatch[2].trim();
     }
 
-    if (result.length === 0) {
-        searchResults.innerHTML = `<div style="text-align:center; padding:20px; color:#aaa;">該当する投稿はありません</div>`;
-        return;
-    }
+    // ========================================
+    // IndexedDBの全投稿を検索
+    // ========================================
 
-    result.forEach(post => {
-        addPostToTimeline(post, searchResults);
-    });
-}
+    const transaction =
+        db.transaction(["posts"], "readonly");
 
-if (searchInput) {
-    searchInput.addEventListener(
-        "keydown",
-        event => {
-            if (event.key !== "Enter") return;
+    const store =
+        transaction.objectStore("posts");
 
-            const keyword = searchInput.value.trim();
-            if (keyword === "") return;
+    const request =
+        store.openCursor(null, "prev");
 
-            if (!Array.isArray(searchHistoryData)) {
-                searchHistoryData = [];
+    const result = [];
+
+    request.onsuccess = event => {
+        const cursor = event.target.result;
+
+        // 全投稿の検索終了
+        if (!cursor) {
+
+            searchResults.innerHTML = "";
+
+            if (result.length === 0) {
+                searchResults.innerHTML = `
+                    <div style="
+                        text-align:center;
+                        padding:20px;
+                        color:#aaa;
+                    ">
+                        該当する投稿はありません
+                    </div>
+                `;
+                return;
             }
 
-            searchHistoryData = searchHistoryData.filter(item => item !== keyword);
-            searchHistoryData.unshift(keyword);
+            // 検索結果を表示
+            result.forEach(post => {
+                addPostToTimeline(
+                    post,
+                    searchResults
+                );
+            });
 
-            if (searchHistoryData.length > 10) {
-                searchHistoryData.pop();
-            }
-
-            localStorage.setItem("searchHistory", JSON.stringify(searchHistoryData));
-            renderSearchHistory();
-            searchPosts(keyword);
-            
-            searchInput.blur();
+            return;
         }
-    );
 
+        const post = cursor.value;
+
+        // ====================================
+        // 日付条件
+        // ====================================
+
+        let dateMatchResult = true;
+
+        if (dateString !== "") {
+
+            if (!post.time) {
+                dateMatchResult = false;
+            } else {
+
+                const postDate =
+                    new Date(post.time);
+
+                const year =
+                    postDate.getFullYear();
+
+                const month =
+                    String(
+                        postDate.getMonth() + 1
+                    ).padStart(2, "0");
+
+                const day =
+                    String(
+                        postDate.getDate()
+                    ).padStart(2, "0");
+
+                const ymd =
+                    `${year}/${month}/${day}`;
+
+                const ym =
+                    `${year}/${month}`;
+
+                // (2026/08)
+                if (
+                    dateString.match(
+                        /^\d{4}\/\d{1,2}$/
+                    )
+                ) {
+
+                    dateMatchResult =
+                        ym ===
+                        dateString
+                            .replace(
+                                /\/(\d)$/,
+                                "/0$1"
+                            );
+
+                // (2026/08/15)
+                } else {
+
+                    dateMatchResult =
+                        ymd ===
+                        dateString
+                            .replace(
+                                /\/(\d)(?=\/|$)/g,
+                                "/0$1"
+                            );
+                }
+            }
+        }
+
+        // ====================================
+        // 文字条件
+        // ====================================
+
+        let textMatchResult = true;
+
+        if (textKeyword !== "") {
+
+            const postText =
+                post.text || "";
+
+            textMatchResult =
+                postText
+                    .toLowerCase()
+                    .includes(
+                        textKeyword.toLowerCase()
+                    );
+        }
+
+        // ====================================
+        // 日付 AND 文字
+        // ====================================
+
+        if (
+            dateMatchResult &&
+            textMatchResult
+        ) {
+            result.push(post);
+        }
+
+        // 次の投稿
+        cursor.continue();
+    };
+
+    request.onerror = event => {
+
+        console.error(
+            "検索に失敗しました:",
+            event.target.error
+        );
+
+        searchResults.innerHTML = `
+            <div style="
+                text-align:center;
+                padding:20px;
+                color:#aaa;
+            ">
+                検索中にエラーが発生しました
+            </div>
+        `;
+    };
 }
 
 function setAppHeight() {
