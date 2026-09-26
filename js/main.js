@@ -2006,14 +2006,17 @@ function loadPosts() {
     if (timeline) {
         timeline.innerHTML = "";
 
-        const loading = document.createElement("div");
-        loading.id = "timelineLoading";
-        loading.className = "timeline-loading";
-        loading.innerHTML = `
-            <div class="loading-spinner"></div>
-        `;
+const loading =
+    document.createElement("div");
 
-        timeline.appendChild(loading);
+loading.className = "timeline-loading";
+loading.style.display = "flex";
+
+loading.innerHTML = `
+    <div class="loading-spinner"></div>
+`;
+
+profTimeline.appendChild(loading);;
     }
 
     loadMorePosts();
