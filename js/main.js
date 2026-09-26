@@ -1178,13 +1178,6 @@ function loadMoreProfilePosts(profTimeline) {
 
 profileLoading = true;
 
-const loading =
-    profTimeline.querySelector(".timeline-loading");
-
-if (loading) {
-    loading.remove();
-}
-
 
 const transaction =
     db.transaction(
