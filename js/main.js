@@ -1129,25 +1129,20 @@ function renderProfilePosts(reset = true) {
 
     if (!profTimeline) return;
 
+
+    // ========================================
+    // プロフィールを最初から読み直す
+    // ========================================
+
     if (reset) {
 
         profileShownCount = 0;
         profileAllLoaded = false;
         profileLastPostId = Infinity;
+
         profileSortedPosts = [];
 
         profTimeline.innerHTML = "";
-
-        // 初回読み込み中だけグルグルを表示
-        const loading =
-            document.createElement("div");
-
-        loading.className = "timeline-loading";
-        loading.innerHTML = `
-            <div class="loading-spinner"></div>
-        `;
-
-        profTimeline.appendChild(loading);
 
         loadMoreProfilePosts(
             profTimeline
@@ -1156,7 +1151,11 @@ function renderProfilePosts(reset = true) {
         return;
     }
 
-    // スクロール時はグルグルを出さない
+
+    // ========================================
+    // 次の30件
+    // ========================================
+
     if (!profileAllLoaded) {
         loadMoreProfilePosts(
             profTimeline
@@ -1175,7 +1174,9 @@ function loadMoreProfilePosts(profTimeline) {
     if (profileLoading) return;
     if (profileAllLoaded) return;
 
+
     profileLoading = true;
+
 
     const transaction =
         db.transaction(
@@ -1185,6 +1186,11 @@ function loadMoreProfilePosts(profTimeline) {
 
     const store =
         transaction.objectStore("posts");
+
+
+    // ========================================
+    // DBを新しい投稿から順番に見る
+    // ========================================
 
     const request =
         profileLastPostId === Infinity
@@ -1202,12 +1208,19 @@ function loadMoreProfilePosts(profTimeline) {
                 "prev"
             );
 
+
     const matchedPosts = [];
+
 
     request.onsuccess = event => {
 
         const cursor =
             event.target.result;
+
+
+        // ====================================
+        // もう投稿がない
+        // ====================================
 
         if (!cursor) {
 
@@ -1221,36 +1234,51 @@ function loadMoreProfilePosts(profTimeline) {
                 );
             }
 
+
             profileAllLoaded = true;
             profileLoading = false;
-
-            const loading =
-                profTimeline.querySelector(".timeline-loading");
-
-            if (loading) {
-                loading.remove();
-            }
 
             return;
         }
 
+
         const post =
             cursor.value;
 
+
+        // 次回はこの投稿より古いところから
         profileLastPostId =
             cursor.key;
 
+
+        // ====================================
+        // この投稿をプロフィールに表示するか
+        // ====================================
+
         let shouldAdd = false;
+
 
         switch (profileMode) {
 
+            // ------------------------------
+            // 投稿
+            // ------------------------------
+
             case "posts":
+
                 shouldAdd =
                     post.account ===
                     currentAccount;
+
                 break;
 
+
+            // ------------------------------
+            // メディア
+            // ------------------------------
+
             case "media":
+
                 shouldAdd =
                     post.account ===
                     currentAccount &&
@@ -1261,17 +1289,31 @@ function loadMoreProfilePosts(profTimeline) {
                         ) ||
                         post.image
                     );
+
                 break;
 
+
+            // ------------------------------
+            // スキ
+            // ------------------------------
+
             case "likes":
+
                 shouldAdd =
                     post.likedBy &&
                     post.likedBy.includes(
                         currentAccount
                     );
+
                 break;
 
+
+            // ------------------------------
+            // 返信
+            // ------------------------------
+
             case "replies":
+
                 shouldAdd =
                     post.comments &&
                     post.comments.some(
@@ -1279,17 +1321,32 @@ function loadMoreProfilePosts(profTimeline) {
                             comment.account ===
                             currentAccount
                     );
+
                 break;
 
+
+            // ------------------------------
+            // その他
+            // ------------------------------
+
             default:
+
                 shouldAdd =
                     post.account ===
                     currentAccount;
         }
 
+
+        // 条件に合う投稿だけ追加
         if (shouldAdd) {
+
             matchedPosts.push(post);
         }
+
+
+        // ====================================
+        // 30件集まった
+        // ====================================
 
         if (
             matchedPosts.length >=
@@ -1303,18 +1360,14 @@ function loadMoreProfilePosts(profTimeline) {
 
             profileLoading = false;
 
-            const loading =
-                profTimeline.querySelector(".timeline-loading");
-
-            if (loading) {
-                loading.remove();
-            }
-
             return;
         }
 
+
+        // 次の投稿を見る
         cursor.continue();
     };
+
 
     request.onerror = event => {
 
@@ -1324,13 +1377,6 @@ function loadMoreProfilePosts(profTimeline) {
         );
 
         profileLoading = false;
-
-        const loading =
-            profTimeline.querySelector(".timeline-loading");
-
-        if (loading) {
-            loading.remove();
-        }
     };
 }
 
@@ -2006,17 +2052,14 @@ function loadPosts() {
     if (timeline) {
         timeline.innerHTML = "";
 
-const loading =
-    document.createElement("div");
+        const loading = document.createElement("div");
+        loading.id = "timelineLoading";
+        loading.className = "timeline-loading";
+        loading.innerHTML = `
+            <div class="loading-spinner"></div>
+        `;
 
-loading.className = "timeline-loading";
-loading.style.display = "flex";
-
-loading.innerHTML = `
-    <div class="loading-spinner"></div>
-`;
-
-profTimeline.appendChild(loading);;
+        timeline.appendChild(loading);
     }
 
     loadMorePosts();
