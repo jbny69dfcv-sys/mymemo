@@ -1129,17 +1129,11 @@ function renderProfilePosts(reset = true) {
 
     if (!profTimeline) return;
 
-
-    // ========================================
-    // プロフィールを最初から読み直す
-    // ========================================
-
     if (reset) {
 
         profileShownCount = 0;
         profileAllLoaded = false;
         profileLastPostId = Infinity;
-
         profileSortedPosts = [];
 
         profTimeline.innerHTML = "";
@@ -1148,7 +1142,7 @@ function renderProfilePosts(reset = true) {
         const loading =
             document.createElement("div");
 
-        loading.className = "profile-loading";
+        loading.className = "timeline-loading";
         loading.innerHTML = `
             <div class="loading-spinner"></div>
         `;
@@ -1162,12 +1156,7 @@ function renderProfilePosts(reset = true) {
         return;
     }
 
-
-    // ========================================
-    // 次の30件
-    // ※スクロール時はグルグルを出さない
-    // ========================================
-
+    // スクロール時はグルグルを出さない
     if (!profileAllLoaded) {
         loadMoreProfilePosts(
             profTimeline
@@ -1190,10 +1179,10 @@ function loadMoreProfilePosts(profTimeline) {
 profileLoading = true;
 
 const loading =
-    profTimeline.querySelector(".profile-loading");
+    profTimeline.querySelector(".timeline-loading");
 
 if (loading) {
-    loading.style.display = "flex";
+    loading.remove();
 }
 
 
